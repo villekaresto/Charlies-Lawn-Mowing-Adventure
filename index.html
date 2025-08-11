@@ -247,13 +247,36 @@
         .level-name {
             background: linear-gradient(135deg, rgba(255, 215, 0, 0.9), rgba(255, 140, 0, 0.9));
             color: #333;
-            padding: 6px 12px;
-            border-radius: 15px;
+            padding: 8px 15px;
+            border-radius: 20px;
             font-weight: 700;
-            font-size: 0.9em;
-            border: 2px solid rgba(255, 215, 0, 0.5);
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-            box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+            font-size: 1.1em;
+            border: 3px solid rgba(255, 215, 0, 0.8);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+            margin-bottom: 8px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        .level-description {
+            background: rgba(255, 248, 220, 0.95);
+            color: #444;
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-style: italic;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            line-height: 1.3;
+            text-align: center;
+        }
+
+        @keyframes glow {
+            from {
+                box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+            }
+            to {
+                box-shadow: 0 4px 25px rgba(255, 215, 0, 0.7);
+            }
         }
 
         .timer-container {
@@ -654,6 +677,7 @@
             
             <div class="level-name-container">
                 <div class="level-name" id="levelName">Charlie's Front Yard</div>
+                <div class="level-description" id="levelDescription">Welcome to Charlie's humble abode! Watch out for the pink flamingo and that rusty old truck he refuses to move. 🦩🚛</div>
             </div>
             
             <div class="timer-container">
@@ -777,18 +801,78 @@
     <script>
         // === Game Data ===
         const levelData = [
-            { name: "Charlie's Front Yard", color: "#7CFC00", commentary: "Easy does it! Just getting warmed up!" },
-            { name: "The Neighbor's Maze", color: "#32CD32", commentary: "Watch out for those garden gnomes!" },
-            { name: "Budweiser Memorial Lawn", color: "#228B22", commentary: "This one's dedicated to cold ones!" },
-            { name: "The Dandelion Disaster", color: "#ADFF2F", commentary: "Those weeds won't mow themselves!" },
-            { name: "Backyard BBQ Cleanup", color: "#9AFF9A", commentary: "Grill's hot, grass needs cutting!" },
-            { name: "The Golf Course Challenge", color: "#98FB98", commentary: "Fairway conditions expected!" },
-            { name: "Sprinkler System Chaos", color: "#90EE90", commentary: "Hope you brought your rain boots!" },
-            { name: "The Crabgrass Nightmare", color: "#8FBC8F", commentary: "This stuff grows faster than you can cut!" },
-            { name: "Championship Clippings", color: "#7CFC00", commentary: "Almost there, keep that mower humming!" },
-            { name: "The Final Frontier Lawn", color: "#6B8E23", commentary: "One small step for Charlie, one giant leap for lawn care!" },
-            { name: "Overtime Overgrowth", color: "#556B2F", commentary: "Bonus round! Time to prove your worth!" },
-            { name: "Charlie's Dream Lawn", color: "#FFD700", commentary: "The lawn of legends! Make Charlie proud!" }
+            { 
+                name: "Charlie's Front Yard", 
+                color: "#7CFC00", 
+                commentary: "Easy does it! Just getting warmed up!",
+                description: "Welcome to Charlie's humble abode! Watch out for the pink flamingo and that rusty old truck he refuses to move. The sprinkler system hasn't worked since '92, but hey, at least the grass is green! Time to show this lawn who's boss. 🦩🚛"
+            },
+            { 
+                name: "The Neighbor's Maze", 
+                color: "#32CD32", 
+                commentary: "Watch out for those garden gnomes!",
+                description: "Mrs. Henderson went a little overboard with the garden decorations. Navigate through her army of gnomes, dodge the birdbath she claims is 'artistic,' and whatever you do, DON'T hit her prize-winning roses! She's watching from the window... 👀🌹"
+            },
+            { 
+                name: "Budweiser Memorial Lawn", 
+                color: "#228B22", 
+                commentary: "This one's dedicated to cold ones!",
+                description: "This sacred ground is where Charlie hosts his legendary BBQ parties. Mind the permanent grill marks, avoid the horseshoe pit, and respect the cooler shrine. Legend says if you mow this lawn perfectly, a cold Budweiser appears in your hand! 🍺⚡"
+            },
+            { 
+                name: "The Dandelion Disaster", 
+                color: "#ADFF2F", 
+                commentary: "Those weeds won't mow themselves!",
+                description: "What happens when you skip lawn care for three weeks? THIS NIGHTMARE! Battle through the dandelion army while avoiding Charlie's abandoned tools scattered everywhere. Pro tip: The dandelions fight back, so bring your A-game! 🌼⚔️"
+            },
+            { 
+                name: "Backyard BBQ Cleanup", 
+                color: "#9AFF9A", 
+                commentary: "Grill's hot, grass needs cutting!",
+                description: "The aftermath of Charlie's epic Saturday cookout. Navigate around passed-out lawn chairs, dodge the still-hot grill, and mind the horseshoe tournament remnants. That pool noodle? Nobody knows why it's there either... 🏊‍♂️🔥"
+            },
+            { 
+                name: "The Golf Course Challenge", 
+                color: "#98FB98", 
+                commentary: "Fairway conditions expected!",
+                description: "Charlie's attempt at creating a 'professional' putting green in his backyard. Avoid the sand bunkers (aka cat litter boxes), navigate the water hazards (sprinkler puddles), and respect the 'clubhouse' (tool shed with a beer fridge). ⛳🏌️"
+            },
+            { 
+                name: "Sprinkler System Chaos", 
+                color: "#90EE90", 
+                commentary: "Hope you brought your rain boots!",
+                description: "Charlie tried to fix the sprinklers himself... BIG MISTAKE! Now they spray randomly in all directions. Slip 'n slide through this aquatic obstacle course while avoiding the geysers of doom. Waterproof mascara recommended! 💦😅"
+            },
+            { 
+                name: "The Crabgrass Nightmare", 
+                color: "#8FBC8F", 
+                commentary: "This stuff grows faster than you can cut!",
+                description: "The crabgrass has achieved sentience and declared war on lawn mowers everywhere! These mutant weeds regenerate faster than you can say 'weed whacker.' It's you vs. the botanical apocalypse. May the mulch be with you! 🦀🌱"
+            },
+            { 
+                name: "Championship Clippings", 
+                color: "#7CFC00", 
+                commentary: "Almost there, keep that mower humming!",
+                description: "The pressure is ON! This is where champions are made and lawn care legends are born. Navigate through Charlie's obstacle course of excellence while the neighborhood watches. No pressure, but your lawn care legacy depends on this! 🏆👑"
+            },
+            { 
+                name: "The Final Frontier Lawn", 
+                color: "#6B8E23", 
+                commentary: "One small step for Charlie, one giant leap for lawn care!",
+                description: "Houston, we have a grass problem! This otherworldly lawn defies the laws of physics and common sense. Alien crop circles, mysterious garden formations, and Charlie's UFO-shaped shed await. Truth is out there... in the yard! 🛸👽"
+            },
+            { 
+                name: "Overtime Overgrowth", 
+                color: "#556B2F", 
+                commentary: "Bonus round! Time to prove your worth!",
+                description: "The grass grew three feet overnight! Navigate this jungle of overgrowth while avoiding the 'Lost City of Atlantis' (Charlie's flooded basement entrance). Rumor has it there's buried treasure... or just Charlie's lost car keys. 🗝️🌿"
+            },
+            { 
+                name: "Charlie's Dream Lawn", 
+                color: "#FFD700", 
+                commentary: "The lawn of legends! Make Charlie proud!",
+                description: "The Holy Grail of grass! This perfect lawn exists only in Charlie's dreams and lawn care magazines. Every blade is sacred, every obstacle is a test of worthiness. Complete this, and you'll achieve lawn care nirvana! Enlightenment guaranteed! ✨🧘"
+            }
         ];
 
         function getLevelData(level) {
@@ -1030,13 +1114,26 @@
             for (let i = 0; i < obstacles.length; i++) {
                 const obstacle = obstacles[i];
                 if (obstacle.active && rectIntersect(mower, obstacle)) {
-                    mower.speed = Math.max(60, mower.speed * 0.7);
-                    updateCommentary("Ouch! Watch out for those obstacles!");
+                    // Stop the mower completely when hitting obstacle
+                    mower.velX = 0;
+                    mower.velY = 0;
                     
-                    obstacle.active = false;
-                    setTimeout(function() { 
-                        obstacle.active = true; 
-                    }, 2000);
+                    // Push mower back slightly
+                    const pushBackDistance = 5;
+                    if (mower.x + mower.width/2 < obstacle.x + obstacle.width/2) {
+                        mower.x = Math.max(0, obstacle.x - mower.width - pushBackDistance);
+                    } else {
+                        mower.x = Math.min(canvas.width - mower.width, obstacle.x + obstacle.width + pushBackDistance);
+                    }
+                    
+                    if (mower.y + mower.height/2 < obstacle.y + obstacle.height/2) {
+                        mower.y = Math.max(0, obstacle.y - mower.height - pushBackDistance);
+                    } else {
+                        mower.y = Math.min(canvas.height - mower.height, obstacle.y + obstacle.height + pushBackDistance);
+                    }
+                    
+                    updateCommentary("Whoa there! Go around the " + obstacle.type + "!");
+                    break;
                 }
             }
         }
@@ -1112,8 +1209,12 @@
             document.getElementById("playerNameDisplay").textContent = playerName;
             
             const levelNameEl = document.getElementById("levelName");
+            const levelDescEl = document.getElementById("levelDescription");
             if (levelNameEl) {
                 levelNameEl.textContent = levelInfo.name;
+            }
+            if (levelDescEl) {
+                levelDescEl.textContent = levelInfo.description;
             }
         }
 
@@ -1133,6 +1234,12 @@
                 if (o.type === 'tree' && o.offsetX) {
                     ctx.translate(o.offsetX, 0);
                 }
+                
+                // Draw obstacle shadow for depth
+                ctx.fillStyle = "rgba(0,0,0,0.3)";
+                ctx.fillRect(o.x + 2, o.y + 2, o.width, o.height);
+                
+                // Draw obstacle
                 ctx.font = "20px Arial";
                 ctx.fillText(o.icon, o.x, o.y);
                 ctx.restore();
@@ -1142,23 +1249,90 @@
             for (let i = 0; i < powerUps.length; i++) {
                 const p = powerUps[i];
                 if (p.active) {
+                    // Add sparkle effect to power-ups
+                    ctx.save();
+                    ctx.translate(p.x + 12, p.y + 12);
+                    ctx.rotate(Date.now() / 1000);
                     ctx.font = "16px Arial";
-                    ctx.fillText(p.icon, p.x, p.y);
+                    ctx.fillText(p.icon, -8, 8);
+                    ctx.restore();
                 }
             }
             
-            // Draw mower
-            ctx.fillStyle = mower.boosted ? "#FF6B35" : "#4CAF50";
-            if (mower.invincible) {
-                ctx.fillStyle = "#FFD700";
-            }
-            ctx.fillRect(mower.x, mower.y, mower.width, mower.height);
-            
-            ctx.fillStyle = "#333";
-            ctx.fillRect(mower.x + 2, mower.y + 2, 4, 4);
-            ctx.fillRect(mower.x + 10, mower.y + 2, 4, 4);
+            // Draw realistic mower with Charlie
+            drawCharlieMower();
             
             drawWeatherOverlay();
+        }
+
+        function drawCharlieMower() {
+            // Mower body (red)
+            ctx.fillStyle = "#CC0000";
+            ctx.fillRect(mower.x - 2, mower.y - 2, mower.width + 4, mower.height + 4);
+            
+            // Mower deck (darker red)
+            ctx.fillStyle = "#990000";
+            ctx.fillRect(mower.x, mower.y, mower.width, mower.height);
+            
+            // Mower handle
+            ctx.strokeStyle = "#666";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(mower.x + mower.width/2, mower.y);
+            ctx.lineTo(mower.x + mower.width/2, mower.y - 8);
+            ctx.stroke();
+            
+            // Charlie behind mower (simple stick figure)
+            const charlieX = mower.x + mower.width/2;
+            const charlieY = mower.y - 15;
+            
+            // Charlie's head
+            ctx.fillStyle = "#FFDBAC";
+            ctx.beginPath();
+            ctx.arc(charlieX, charlieY, 4, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Charlie's hat
+            ctx.fillStyle = "#0066CC";
+            ctx.fillRect(charlieX - 5, charlieY - 8, 10, 4);
+            
+            // Charlie's body
+            ctx.strokeStyle = "#4169E1";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(charlieX, charlieY + 4);
+            ctx.lineTo(charlieX, charlieY + 12);
+            ctx.stroke();
+            
+            // Charlie's arms (holding mower)
+            ctx.beginPath();
+            ctx.moveTo(charlieX - 3, charlieY + 6);
+            ctx.lineTo(charlieX + 3, charlieY + 6);
+            ctx.stroke();
+            
+            // Mower wheels
+            ctx.fillStyle = "#333";
+            ctx.beginPath();
+            ctx.arc(mower.x + 3, mower.y + mower.height, 3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(mower.x + mower.width - 3, mower.y + mower.height, 3, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Boost/invincibility effects
+            if (mower.boosted) {
+                ctx.strokeStyle = "#FF6B35";
+                ctx.lineWidth = 3;
+                ctx.strokeRect(mower.x - 5, mower.y - 20, mower.width + 10, mower.height + 25);
+            }
+            
+            if (mower.invincible) {
+                ctx.strokeStyle = "#FFD700";
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.strokeRect(mower.x - 3, mower.y - 18, mower.width + 6, mower.height + 23);
+                ctx.setLineDash([]);
+            }
         }
 
         function drawGrass() {
@@ -1346,6 +1520,7 @@
         }
 
         function spawnRandomStuff() {
+            // Power-ups
             if (Math.random() < 0.6) {
                 spawnPowerUp("budweiser", randInt(100, canvas.width - 100), randInt(100, canvas.height - 100));
             }
@@ -1356,21 +1531,64 @@
                 spawnPowerUp("leafblower", randInt(100, canvas.width - 100), randInt(100, canvas.height - 100));
             }
             
+            // Charlie's house (always present)
+            obstacles.push({
+                type: 'house',
+                icon: '🏠',
+                active: true,
+                x: canvas.width - 60,
+                y: 20,
+                width: 40,
+                height: 40
+            });
+            
+            // More obstacles per level (5+ guaranteed)
             const obstacleTypes = [
-                { type: 'rock', icon: '🪨', active: true },
-                { type: 'tree', icon: '🌳', active: true },
-                { type: 'sprinkler', icon: '💦', active: true }
+                { type: 'rock', icon: '🪨' },
+                { type: 'tree', icon: '🌳' },
+                { type: 'sprinkler', icon: '💦' },
+                { type: 'gnome', icon: '🧙‍♂️' },
+                { type: 'flamingo', icon: '🦩' },
+                { type: 'grill', icon: '🔥' },
+                { type: 'chair', icon: '🪑' },
+                { type: 'bucket', icon: '🪣' },
+                { type: 'bike', icon: '🚲' },
+                { type: 'barrel', icon: '🛢️' },
+                { type: 'shed', icon: '🏚️' },
+                { type: 'fountain', icon: '⛲' }
             ];
             
-            for (let i = 0; i < Math.min(currentLevel, 4); i++) {
-                if (Math.random() < 0.7) {
-                    const obstacleType = randChoice(obstacleTypes);
+            // Minimum 5 obstacles + 1-3 more based on level
+            const numObstacles = 5 + Math.min(currentLevel, 3);
+            
+            for (let i = 0; i < numObstacles; i++) {
+                const obstacleType = randChoice(obstacleTypes);
+                let attempts = 0;
+                let validPosition = false;
+                let x, y;
+                
+                // Try to find a valid position (not overlapping with mower start or house)
+                while (!validPosition && attempts < 20) {
+                    x = randInt(80, canvas.width - 80);
+                    y = randInt(80, canvas.height - 80);
+                    
+                    // Check if position conflicts with mower start area or house
+                    const conflictsWithStart = (x < 100 && y < 100);
+                    const conflictsWithHouse = (x > canvas.width - 100 && y < 60);
+                    
+                    if (!conflictsWithStart && !conflictsWithHouse) {
+                        validPosition = true;
+                    }
+                    attempts++;
+                }
+                
+                if (validPosition) {
                     obstacles.push({
                         type: obstacleType.type,
                         icon: obstacleType.icon,
-                        active: obstacleType.active,
-                        x: randInt(150, canvas.width - 50),
-                        y: randInt(100, canvas.height - 50),
+                        active: true,
+                        x: x,
+                        y: y,
                         width: 24,
                         height: 24,
                         sway: 0,
@@ -1389,12 +1607,23 @@
             
             const levelTime = totalTime - levelStartTime;
             const timeBonus = Math.max(0, (levelTimeLimit - levelTime) * 50);
-            score += timeBonus;
+            const roundedTimeBonus = Math.round(timeBonus);
+            score += roundedTimeBonus;
+            
+            // Round total score to nearest 10
+            score = Math.round(score / 10) * 10;
+            
+            const levelInfo = getLevelData(currentLevel);
             
             document.getElementById("levelComplete").style.display = "block";
             document.getElementById("levelScore").textContent = score;
             document.getElementById("completionTime").textContent = formatTime(levelTime);
-            document.getElementById("timeBonus").textContent = Math.floor(timeBonus);
+            document.getElementById("timeBonus").textContent = roundedTimeBonus;
+            
+            // Update the level complete message
+            const levelCompleteTitle = document.querySelector("#levelComplete h2");
+            levelCompleteTitle.innerHTML = 'You completed <span style="color: #FFD700; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">' + levelInfo.name + '</span>! 🎉';
+            levelCompleteTitle.style.fontSize = "1.3em";
         }
 
         function nextLevel() {
