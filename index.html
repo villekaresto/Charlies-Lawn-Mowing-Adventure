@@ -1,0 +1,1454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Charlie's Lawn Service - Championship Edition</title>
+    <meta name="description" content="Help Charlie mow lawns in this fun mobile-friendly game! 12 challenging levels with power-ups and obstacles.">
+    <style>
+        html, body {
+            height: 100%;
+        }
+
+        * {
+            touch-action: manipulation;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #1a2332 0%, #2d5016 20%, #4a7c4a 60%, #87CEEB 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 100vh;
+            color: #2d5016;
+            overflow-x: hidden;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        button {
+            font-family: inherit;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .screen {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 25px;
+            border-radius: 25px;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            max-width: 95vw;
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+        }
+
+        .game-container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(15px);
+            padding: 15px;
+            border-radius: 20px;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.25),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            max-width: 95vw;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            margin: 10px auto;
+            overflow: hidden;
+        }
+
+        h1 {
+            margin: 0 0 10px 0;
+            font-size: 1.8em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #2d5016, #4a7c4a, #87CEEB);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        h1::after {
+            content: '🏡 Waning Way Neighborhood';
+            display: block;
+            font-size: 0.4em;
+            color: #666;
+            margin-top: 3px;
+            font-weight: 400;
+        }
+
+        h2 {
+            margin: 0 0 25px 0;
+            font-size: 1.4em;
+            color: #FF6B35;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .name-input-container {
+            margin: 40px 0;
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(240, 248, 255, 0.9));
+            border-radius: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .name-input-container label {
+            display: block;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            font-weight: 600;
+            color: #2d5016;
+        }
+
+        .name-input-container input {
+            padding: 15px 20px;
+            font-size: 1.2em;
+            border: 2px solid #4CAF50;
+            border-radius: 15px;
+            margin: 15px;
+            width: 250px;
+            text-align: center;
+            font-family: inherit;
+            font-weight: 500;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .name-input-container input:focus {
+            outline: none;
+            border-color: #FF6B35;
+            box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.2);
+            transform: scale(1.02);
+        }
+
+        #startGameBtn {
+            background: linear-gradient(135deg, #FF6B35, #F7931E);
+            color: white;
+            border: none;
+            padding: 15px 35px;
+            border-radius: 15px;
+            font-size: 1.2em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        #startGameBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+        }
+
+        .social-section {
+            margin: 20px 0;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .social-btn {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(76, 175, 80, 0.3);
+        }
+
+        .social-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .leaderboard-preview, .leaderboard-screen {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(240, 248, 255, 0.95));
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            margin: 25px 0;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .leaderboard-preview h3 {
+            margin-top: 0;
+            color: #FFD700;
+            font-size: 1.4em;
+            font-weight: 700;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        #leaderboardPreview, #fullLeaderboard {
+            text-align: left;
+            max-height: 250px;
+            overflow-y: auto;
+            font-size: 0.95em;
+            color: #333;
+            padding-right: 10px;
+        }
+
+        .hud {
+            display: flex;
+            justify-content: space-around;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .timer-container {
+            display: flex;
+            justify-content: space-around;
+            padding: 6px;
+            background: rgba(240, 255, 240, 0.9);
+            border-radius: 8px;
+            border: 2px solid rgba(76, 175, 80, 0.4);
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 0.85em;
+        }
+
+        .weather {
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        .progress-container {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            color: white;
+            padding: 4px;
+            text-align: center;
+            font-weight: 700;
+            transition: width 0.3s ease;
+            font-size: 0.8em;
+        }
+
+        .charlie-commentary {
+            padding: 6px;
+            background: rgba(255, 248, 220, 0.9);
+            border-radius: 8px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            font-style: italic;
+            margin-bottom: 8px;
+            font-size: 0.85em;
+        }
+
+        #gameCanvas {
+            background: #7CFC00;
+            border: 3px solid #4CAF50;
+            border-radius: 8px;
+            margin: 0 auto 8px auto;
+            display: block;
+            max-width: 100%;
+            height: auto;
+            touch-action: none;
+        }
+
+        .instructions {
+            font-size: 0.8em;
+            margin-bottom: 8px;
+            background: rgba(240, 248, 255, 0.9);
+            border-radius: 8px;
+            padding: 6px;
+            border: 2px solid rgba(173, 216, 230, 0.3);
+        }
+
+        .power-ups {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .power-up-slot {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+            padding: 4px 8px;
+            font-size: 1em;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .power-up-slot span {
+            font-size: 0.8em;
+            margin-top: 2px;
+        }
+
+        .game-controls {
+            margin-bottom: 8px;
+        }
+
+        .start-level-btn {
+            background: linear-gradient(135deg, #4CAF50, #388E3C);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .start-level-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+        }
+
+        .share-btn {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 12px;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .share-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(3, 45px);
+            grid-template-rows: repeat(2, 45px);
+            gap: 5px;
+            justify-content: center;
+            margin-bottom: 8px;
+            touch-action: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .control-btn {
+            background: linear-gradient(135deg, #f0f0f0, #dcdcdc);
+            border: 2px solid #ccc;
+            border-radius: 6px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+            touch-action: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+        }
+
+        .control-btn:active {
+            background: linear-gradient(135deg, #4CAF50, #388E3C);
+            color: white;
+            transform: scale(0.95);
+        }
+
+        .control-btn:hover {
+            background: linear-gradient(135deg, #e0e0e0, #c0c0c0);
+        }
+
+        .control-btn.up {
+            grid-column: 2;
+        }
+
+        .control-btn.left {
+            grid-column: 1;
+            grid-row: 2;
+        }
+
+        .control-btn.right {
+            grid-column: 3;
+            grid-row: 2;
+        }
+
+        .control-btn.down {
+            grid-column: 2;
+            grid-row: 2;
+        }
+
+        .mobile-gestures {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .gesture-hint {
+            font-size: 0.75em;
+            color: #555;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 6px;
+            padding: 4px 8px;
+        }
+
+        .audio-controls {
+            margin-top: 8px;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .audio-controls button {
+            background: none;
+            border: none;
+            font-size: 1.3em;
+            cursor: pointer;
+            touch-action: none;
+            user-select: none;
+        }
+
+        .level-complete, .game-over, .final-results, .leaderboard-screen, .challenge-modal {
+            display: none;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 25px;
+            border-radius: 25px;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            max-width: 95vw;
+            margin: auto;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+        }
+
+        .next-btn {
+            background: linear-gradient(135deg, #FF6B35, #F7931E);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: 700;
+            cursor: pointer;
+            margin: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .next-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+        }
+
+        .charlie-quote {
+            font-style: italic;
+            margin-top: 15px;
+            color: #555;
+        }
+
+        .level-times {
+            margin-top: 20px;
+            font-size: 0.95em;
+            color: #444;
+            text-align: left;
+        }
+
+        .leaderboard-filter {
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .filter-btn {
+            background: linear-gradient(135deg, #4CAF50, #388E3C);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 0.9em;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #FF6B35, #F7931E);
+        }
+
+        .challenge-modal .modal-content {
+            background: rgba(255, 255, 255, 0.98);
+            padding: 20px;
+            border-radius: 20px;
+            max-width: 400px;
+            margin: auto;
+            text-align: center;
+        }
+
+        .challenge-modal textarea {
+            width: 100%;
+            height: 120px;
+            resize: none;
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 10px;
+            border: 2px solid #ccc;
+            font-family: inherit;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @media (max-width: 768px) {
+            .hud, .timer-container {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            #gameCanvas {
+                width: 100%;
+                height: auto;
+            }
+
+            .mobile-gestures {
+                display: block;
+                margin-bottom: 15px;
+            }
+
+            .controls {
+                grid-template-columns: repeat(3, 60px);
+                grid-template-rows: repeat(2, 60px);
+            }
+
+            .control-btn {
+                font-size: 1.5em;
+            }
+
+            .name-input-container input {
+                width: 80%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.6em;
+            }
+
+            h2 {
+                font-size: 1.1em;
+            }
+
+            .hud, .timer-container {
+                font-size: 0.9em;
+            }
+
+            .progress-bar {
+                font-size: 0.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Name Entry Screen -->
+    <div id="nameEntry" class="screen">
+        <h1>🚜 Charlie's Lawn Service</h1>
+        <h2>Championship Edition</h2>
+        <div class="name-input-container">
+            <label for="playerName">Enter Your Name:</label>
+            <input type="text" id="playerName" placeholder="Your Name" maxlength="15">
+            <button id="startGameBtn" type="button" onclick="startGame()">Start Mowing!</button>
+        </div>
+        <div class="leaderboard-preview">
+            <h3>🏆 Waning Way Champions</h3>
+            <div id="leaderboardPreview">
+                <div>1. Charlie Pro - 15,420 pts</div>
+                <div>2. Grass Master - 12,850 pts</div>
+                <div>3. Mowing Legend - 11,200 pts</div>
+            </div>
+        </div>
+        <div class="social-section">
+            <button class="social-btn" type="button" onclick="challengeFriend()">🎯 Challenge a Friend</button>
+            <button class="social-btn" type="button" onclick="shareGame()">📱 Share Game</button>
+        </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="gameScreen" class="screen" style="display: none;">
+        <div class="game-container">
+            <h1>🚜 Charlie's Lawn Service</h1>
+            
+            <div class="hud">
+                <div>Player: <span id="playerNameDisplay"></span></div>
+                <div>Level: <span id="level">1</span>/12</div>
+                <div>Score: <span id="score">0</span></div>
+            </div>
+            
+            <div class="timer-container">
+                <div class="timer">Total: <span id="timer">0:00</span></div>
+                <div class="level-time">Level: <span id="levelTimer">0:00</span></div>
+                <div class="weather" id="weather">☀️ Perfect</div>
+            </div>
+            
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar" style="width: 0%;">0% Mowed</div>
+            </div>
+            
+            <div class="charlie-commentary" id="charlieCommentary">
+                "Welcome to the championship! Time to show your mowing skills!" - Charlie
+            </div>
+            
+            <canvas id="gameCanvas" width="400" height="300"></canvas>
+            
+            <div class="instructions" id="instructions">
+                Use WASD or Arrow Keys to move your mower. Mow all the grass to complete the level!
+            </div>
+            
+            <div class="power-ups" id="powerUpsDisplay">
+                <div class="power-up-slot" id="budweiser">🍺<span>0</span></div>
+                <div class="power-up-slot" id="golfcart">🚗<span>0</span></div>
+                <div class="power-up-slot" id="leafblower">🍃<span>0</span></div>
+            </div>
+            
+            <div class="game-controls">
+                <button id="startLevelBtn" class="start-level-btn" type="button" onclick="startLevel()">Start Level 1</button>
+                <button id="shareScreenshotBtn" class="share-btn" type="button" onclick="shareScreenshot()" style="display: none;">📸 Share Victory</button>
+            </div>
+            
+            <div class="controls">
+                <button class="control-btn up" id="upBtn" type="button">▲</button>
+                <button class="control-btn left" id="leftBtn" type="button">◄</button>
+                <button class="control-btn right" id="rightBtn" type="button">►</button>
+                <button class="control-btn down" id="downBtn" type="button">▼</button>
+            </div>
+            
+            <div class="mobile-gestures" id="gestureArea">
+                <div class="gesture-hint">💡 Swipe to move (mobile)</div>
+            </div>
+            
+            <div class="audio-controls">
+                <button type="button" onclick="toggleSound()" id="soundBtn">🔊</button>
+                <button type="button" onclick="toggleMusic()" id="musicBtn">🎵</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Level Complete -->
+    <div class="level-complete" id="levelComplete">
+        <h2 style="color: #4CAF50; margin-top: 0;">Level Complete! 🎉</h2>
+        <p>Time: <span id="completionTime">0:00</span></p>
+        <p>Score: <span id="levelScore">0</span></p>
+        <p>Time Bonus: <span id="timeBonus">0</span></p>
+        <div class="achievement-unlock" id="achievementUnlock"></div>
+        <button class="next-btn" type="button" onclick="nextLevel()">Next Level</button>
+        <button class="next-btn" type="button" onclick="shareScreenshot()">📸 Share</button>
+    </div>
+
+    <!-- Game Over -->
+    <div class="game-over" id="gameOver">
+        <h2 style="color: #ff4444; margin-top: 0;">Time's Up! ⏰</h2>
+        <p>You ran out of time on Level <span id="failedLevel">1</span></p>
+        <p>Final Score: <span id="finalScore">0</span></p>
+        <div class="charlie-quote">"Don't worry, even the best mowers need practice!" - Charlie</div>
+        <button class="next-btn" type="button" onclick="restartGame()">Try Again</button>
+        <button class="next-btn" type="button" onclick="showLeaderboard()">View Leaderboard</button>
+        <button class="next-btn" type="button" onclick="challengeFriend()">Challenge Friend</button>
+    </div>
+
+    <!-- Final Results -->
+    <div class="final-results" id="finalResults">
+        <h2 style="color: #FFD700; margin-top: 0;">🏆 Championship Complete! 🏆</h2>
+        <p><strong><span id="winnerName"></span></strong> - Master Mower!</p>
+        <p>Total Time: <span id="totalTime">0:00</span></p>
+        <p>Final Score: <span id="championScore">0</span></p>
+        <div class="charlie-quote">"You mow like a pro! Time for a Budweiser!" - Charlie</div>
+        <div class="level-times" id="levelTimes"></div>
+        <div class="social-share">
+            <button class="next-btn" type="button" onclick="shareChampionship()">🏆 Share Victory</button>
+            <button class="next-btn" type="button" onclick="challengeFriend()">Challenge Friend</button>
+        </div>
+        <button class="next-btn" type="button" onclick="showLeaderboard()">View Leaderboard</button>
+        <button class="next-btn" type="button" onclick="restartGame()">Play Again</button>
+    </div>
+
+    <!-- Leaderboard -->
+    <div class="leaderboard-screen" id="leaderboardScreen">
+        <h2>🏆 Waning Way Champions 🏆</h2>
+        <div class="leaderboard-filter">
+            <button type="button" onclick="filterLeaderboard('all')" class="filter-btn active">All Time</button>
+            <button type="button" onclick="filterLeaderboard('weekly')" class="filter-btn">This Week</button>
+            <button type="button" onclick="filterLeaderboard('friends')" class="filter-btn">Friends</button>
+        </div>
+        <div id="fullLeaderboard">
+            <div>1. Charlie Pro - 15,420 pts - 8:45</div>
+            <div>2. Grass Master - 12,850 pts - 9:12</div>
+            <div>3. Mowing Legend - 11,200 pts - 9:45</div>
+            <div>4. Lawn Warrior - 10,500 pts - 10:03</div>
+            <div>5. Blade Runner - 9,800 pts - 10:22</div>
+        </div>
+        <button class="next-btn" type="button" onclick="backToGame()">Back to Game</button>
+    </div>
+
+    <!-- Challenge Modal -->
+    <div class="challenge-modal" id="challengeModal" style="display: none;">
+        <div class="modal-content">
+            <h3>🎯 Challenge a Friend!</h3>
+            <p>Share this message with your friend:</p>
+            <textarea id="challengeMessage" readonly>Hey! I just completed Charlie's Lawn Mowing Championship with a score of [SCORE]! Think you can beat me? Try it here: [LINK]
+
+"Better bring your barefoot mowing skills!" - Charlie 🚜🍺</textarea>
+            <button type="button" onclick="copyChallengeMessage()" class="next-btn">📋 Copy Message</button>
+            <button type="button" onclick="closeChallengeModal()" class="next-btn">Close</button>
+        </div>
+    </div>
+
+    <script>
+        // === Core Game State ===
+        let gameRunning = false;
+        let currentLevel = 1;
+        let score = 0;
+        let totalTime = 0;
+        let levelStartTime = 0;
+        let playerName = "";
+        let levelTimeLimit = 60;
+        let gameLoopId = null;
+
+        let mower = {
+            x: 50,
+            y: 50,
+            width: 16,
+            height: 16,
+            speed: 120,
+            accel: 350,
+            velX: 0,
+            velY: 0,
+            boosted: false
+        };
+
+        let grassTiles = [];
+        let powerUps = [];
+        let obstacles = [];
+        let weather = { type: "sun", timer: 0 };
+
+        // === Canvas Setup ===
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = 400;
+            canvas.height = 300;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // === Utilities ===
+        function randInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function randChoice(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        function formatTime(t) {
+            const m = Math.floor(t / 60);
+            const s = Math.floor(t % 60);
+            return `${m}:${s < 10 ? "0" + s : s}`;
+        }
+
+        function rectIntersect(a, b) {
+            return !(a.x + a.width < b.x || a.x > b.x + b.width || a.y + a.height < b.y || a.y > b.y + b.height);
+        }
+
+        // === Input System ===
+        const keys = {};
+        document.addEventListener('keydown', e => {
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(e.code)) {
+                e.preventDefault();
+            }
+            keys[e.key] = true;
+            keys[e.code] = true;
+        });
+        document.addEventListener('keyup', e => {
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(e.code)) {
+                e.preventDefault();
+            }
+            keys[e.key] = false;
+            keys[e.code] = false;
+        });
+
+        // More targeted touch prevention
+        function preventTouchScroll(e) {
+            if (e.target.closest('.controls, .control-btn, #gameCanvas, .audio-controls')) {
+                e.preventDefault();
+            }
+        }
+
+        document.addEventListener('touchstart', preventTouchScroll, { passive: false });
+        document.addEventListener('touchmove', preventTouchScroll, { passive: false });
+        document.addEventListener('touchend', preventTouchScroll, { passive: false });
+
+        // Touch controls for mobile
+        let touchStartX = null, touchStartY = null;
+        canvas.addEventListener('touchstart', e => {
+            e.preventDefault();
+            const t = e.touches[0];
+            touchStartX = t.clientX;
+            touchStartY = t.clientY;
+        });
+
+        canvas.addEventListener('touchmove', e => {
+            e.preventDefault();
+            if (!touchStartX || !touchStartY) return;
+            const t = e.touches[0];
+            const dx = t.clientX - touchStartX;
+            const dy = t.clientY - touchStartY;
+            
+            keys['ArrowLeft'] = false;
+            keys['ArrowRight'] = false;
+            keys['ArrowUp'] = false;
+            keys['ArrowDown'] = false;
+            
+            if (Math.abs(dx) > Math.abs(dy)) {
+                if (dx > 20) keys['ArrowRight'] = true;
+                if (dx < -20) keys['ArrowLeft'] = true;
+            } else {
+                if (dy > 20) keys['ArrowDown'] = true;
+                if (dy < -20) keys['ArrowUp'] = true;
+            }
+        });
+
+        canvas.addEventListener('touchend', e => {
+            e.preventDefault();
+            keys['ArrowLeft'] = keys['ArrowRight'] = keys['ArrowUp'] = keys['ArrowDown'] = false;
+            touchStartX = touchStartY = null;
+        });
+
+        // Control button events
+        function setupControlButtons() {
+            const buttons = [
+                { id: 'upBtn', key: 'ArrowUp' },
+                { id: 'downBtn', key: 'ArrowDown' },
+                { id: 'leftBtn', key: 'ArrowLeft' },
+                { id: 'rightBtn', key: 'ArrowRight' }
+            ];
+            
+            buttons.forEach(({ id, key }) => {
+                const btn = document.getElementById(id);
+                
+                btn.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    keys[key] = true;
+                });
+                btn.addEventListener('mouseup', (e) => {
+                    e.preventDefault();
+                    keys[key] = false;
+                });
+                btn.addEventListener('mouseleave', (e) => {
+                    e.preventDefault();
+                    keys[key] = false;
+                });
+                
+                btn.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    keys[key] = true;
+                });
+                btn.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    keys[key] = false;
+                });
+                btn.addEventListener('touchcancel', (e) => {
+                    e.preventDefault();
+                    keys[key] = false;
+                });
+                
+                btn.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                });
+            });
+        }
+
+        setupControlButtons();
+
+        // === Game Loop ===
+        let lastTimestamp = 0;
+        function gameLoop(timestamp) {
+            if (!gameRunning) return;
+            const delta = Math.min((timestamp - lastTimestamp) / 1000, 0.1);
+            lastTimestamp = timestamp;
+            updateGame(delta);
+            renderGame();
+            gameLoopId = requestAnimationFrame(gameLoop);
+        }
+
+        function updateGame(delta) {
+            handleInput(delta);
+            updateMower(delta);
+            checkGrassCollision();
+            checkPowerUpPickup();
+            updatePowerUps(delta);
+            updateObstacles(delta);
+            updateWeather(delta);
+            totalTime += delta;
+            updateUI();
+            checkLevelComplete();
+            checkTimeLimit();
+        }
+
+        function handleInput(delta) {
+            let targetVelX = 0;
+            let targetVelY = 0;
+            
+            if (keys['ArrowUp'] || keys['KeyW'] || keys['w']) targetVelY = -mower.speed;
+            if (keys['ArrowDown'] || keys['KeyS'] || keys['s']) targetVelY = mower.speed;
+            if (keys['ArrowLeft'] || keys['KeyA'] || keys['a']) targetVelX = -mower.speed;
+            if (keys['ArrowRight'] || keys['KeyD'] || keys['d']) targetVelX = mower.speed;
+            
+            const accelFactor = Math.min(1, mower.accel * delta / mower.speed);
+            mower.velX += (targetVelX - mower.velX) * accelFactor;
+            mower.velY += (targetVelY - mower.velY) * accelFactor;
+        }
+
+        function updateMower(delta) {
+            mower.x += mower.velX * delta;
+            mower.y += mower.velY * delta;
+            
+            const maxX = canvas.width - mower.width;
+            const maxY = canvas.height - mower.height;
+            mower.x = Math.max(0, Math.min(maxX, mower.x));
+            mower.y = Math.max(0, Math.min(maxY, mower.y));
+        }
+
+        function checkGrassCollision() {
+            for (let tile of grassTiles) {
+                if (!tile.mowed && rectIntersect(mower, tile)) {
+                    tile.mowed = true;
+                    score += 10;
+                }
+            }
+        }
+
+        function checkLevelComplete() {
+            const totalGrass = grassTiles.length;
+            const mowedGrass = grassTiles.filter(tile => tile.mowed).length;
+            const progress = (mowedGrass / totalGrass) * 100;
+            
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = `${progress}%`;
+            progressBar.textContent = `${Math.floor(progress)}% Mowed`;
+            
+            if (mowedGrass === totalGrass) {
+                completeLevel();
+            }
+        }
+
+        function checkTimeLimit() {
+            const levelTime = totalTime - levelStartTime;
+            if (levelTime >= levelTimeLimit) {
+                gameOver();
+            }
+        }
+
+        function updatePowerUps(delta) {
+            for (let p of powerUps) {
+                if (p.active) {
+                    p.timer -= delta;
+                    if (p.timer <= 0) p.active = false;
+                }
+            }
+        }
+
+        function updateObstacles(delta) {
+            for (let o of obstacles) {
+                if (o.type === 'bbq') {
+                    o.x += o.dx * delta;
+                    if (o.x < -50 || o.x > canvas.width + 50) o.dx *= -1;
+                }
+                if (o.type === 'kid') {
+                    o.y += Math.sin(Date.now() / 200) * 0.5;
+                }
+            }
+        }
+
+        function updateWeather(delta) {
+            weather.timer -= delta;
+            if (weather.timer <= 0) {
+                weather.type = randChoice(["sun", "rain", "wind"]);
+                weather.timer = randInt(10, 20);
+                updateWeatherDisplay();
+            }
+        }
+
+        function updateWeatherDisplay() {
+            const weatherEl = document.getElementById('weather');
+            switch (weather.type) {
+                case 'sun': weatherEl.textContent = '☀️ Perfect'; break;
+                case 'rain': weatherEl.textContent = '🌧️ Rainy'; break;
+                case 'wind': weatherEl.textContent = '💨 Windy'; break;
+            }
+        }
+
+        function updateUI() {
+            document.getElementById("score").textContent = score;
+            document.getElementById("level").textContent = currentLevel;
+            document.getElementById("timer").textContent = formatTime(totalTime);
+            document.getElementById("levelTimer").textContent = formatTime(totalTime - levelStartTime);
+            document.getElementById("playerNameDisplay").textContent = playerName;
+        }
+
+        function renderGame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            drawGrass();
+            
+            ctx.fillStyle = mower.boosted ? "#FF6B35" : "#4CAF50";
+            ctx.fillRect(mower.x, mower.y, mower.width, mower.height);
+            
+            ctx.fillStyle = "#333";
+            ctx.fillRect(mower.x + 2, mower.y + 2, 4, 4);
+            ctx.fillRect(mower.x + 10, mower.y + 2, 4, 4);
+            
+            for (let p of powerUps) {
+                if (p.active) {
+                    ctx.font = "16px Arial";
+                    ctx.fillText(p.icon, p.x, p.y);
+                }
+            }
+            
+            for (let o of obstacles) {
+                ctx.font = "20px Arial";
+                ctx.fillText(o.icon, o.x, o.y);
+            }
+            
+            drawWeatherOverlay();
+        }
+
+        function drawGrass() {
+            const tileSize = 20;
+            for (let tile of grassTiles) {
+                ctx.fillStyle = tile.mowed ? "#90EE90" : "#228B22";
+                ctx.fillRect(tile.x, tile.y, tile.width, tile.height);
+                
+                if (!tile.mowed) {
+                    ctx.fillStyle = "#32CD32";
+                    ctx.fillRect(tile.x + 2, tile.y + 2, tile.width - 4, tile.height - 4);
+                }
+            }
+        }
+
+        function drawWeatherOverlay() {
+            if (weather.type === "rain") {
+                ctx.fillStyle = "rgba(0,0,255,0.1)";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                for (let i = 0; i < 20; i++) {
+                    const x = (Date.now() / 10 + i * 50) % canvas.width;
+                    const y = (Date.now() / 5 + i * 30) % canvas.height;
+                    ctx.fillStyle = "rgba(173,216,230,0.7)";
+                    ctx.fillRect(x, y, 2, 8);
+                }
+            } else if (weather.type === "wind") {
+                ctx.fillStyle = "rgba(200,200,200,0.1)";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        // === Power-ups ===
+        function spawnPowerUp(type, x, y) {
+            const icons = { budweiser: "🍺", golfcart: "🚗", leafblower: "🍃" };
+            powerUps.push({
+                type,
+                icon: icons[type],
+                x, y,
+                width: 24, height: 24,
+                active: true,
+                timer: 15
+            });
+        }
+
+        function checkPowerUpPickup() {
+            for (let p of powerUps) {
+                if (p.active && rectIntersect(mower, p)) {
+                    p.active = false;
+                    activatePowerUp(p.type);
+                }
+            }
+        }
+
+        function activatePowerUp(type) {
+            if (type === "budweiser") {
+                mower.speed *= 1.5;
+                mower.boosted = true;
+                score += 100;
+                setTimeout(() => { 
+                    mower.speed /= 1.5; 
+                    mower.boosted = false; 
+                }, 5000);
+                updateCommentary("Charlie approves! Speed boost activated! 🍺");
+            }
+            
+            if (type === "golfcart") {
+                score += 500;
+                updateCommentary("Found the golf cart! Bonus points! 🚗");
+            }
+            
+            if (type === "leafblower") {
+                obstacles = [];
+                score += 200;
+                updateCommentary("Leaf blower cleared the obstacles! 🍃");
+            }
+        }
+
+        function updateCommentary(text) {
+            const commentary = document.getElementById('charlieCommentary');
+            commentary.textContent = text;
+            setTimeout(() => {
+                commentary.textContent = getRandomCommentary();
+            }, 3000);
+        }
+
+        function getRandomCommentary() {
+            const comments = [
+                "Keep mowing! You're doing great!",
+                "Watch out for those obstacles!",
+                "Nice technique! Charlie would be proud!",
+                "Don't forget to grab those power-ups!",
+                "Time's ticking! Mow faster!",
+                "Looking good out there, champ!"
+            ];
+            return `"${randChoice(comments)}" - Charlie`;
+        }
+
+        // === Game Events ===
+        function startGame() {
+            try {
+                playerName = document.getElementById("playerName").value.trim() || "Mower Champ";
+                score = 0;
+                totalTime = 0;
+                currentLevel = 1;
+                
+                document.getElementById("nameEntry").style.display = "none";
+                document.getElementById("gameScreen").style.display = "block";
+                
+                setupLevel(currentLevel);
+                updateUI();
+                updateCommentary("Welcome to the championship! Click 'Start Level' to begin!");
+            } catch (error) {
+                console.error("Error starting game:", error);
+                alert("Error starting game. Please refresh and try again.");
+            }
+        }
+
+        function startLevel() {
+            if (gameRunning) return;
+            
+            gameRunning = true;
+            levelStartTime = totalTime;
+            
+            const btn = document.getElementById('startLevelBtn');
+            btn.textContent = 'Level in Progress...';
+            btn.disabled = true;
+            
+            spawnRandomStuff();
+            updateCommentary("Level started! Mow all the grass before time runs out!");
+            
+            lastTimestamp = performance.now();
+            gameLoopId = requestAnimationFrame(gameLoop);
+        }
+
+        function setupLevel(level) {
+            grassTiles = [];
+            powerUps = [];
+            obstacles = [];
+            
+            mower.x = 50;
+            mower.y = 50;
+            mower.velX = 0;
+            mower.velY = 0;
+            
+            const tileSize = 20;
+            const cols = Math.floor(canvas.width / tileSize);
+            const rows = Math.floor(canvas.height / tileSize);
+            
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    if (r < 3 && c < 3) continue;
+                    
+                    grassTiles.push({
+                        x: c * tileSize,
+                        y: r * tileSize,
+                        width: tileSize,
+                        height: tileSize,
+                        mowed: false
+                    });
+                }
+            }
+            
+            levelTimeLimit = Math.max(60, 90 - (level * 2));
+            
+            const btn = document.getElementById('startLevelBtn');
+            btn.textContent = `Start Level ${level}`;
+            btn.disabled = false;
+        }
+
+        function spawnRandomStuff() {
+            if (Math.random() < 0.4) {
+                spawnPowerUp("budweiser", randInt(100, canvas.width - 100), randInt(100, canvas.height - 100));
+            }
+            if (Math.random() < 0.3) {
+                spawnPowerUp("golfcart", randInt(100, canvas.width - 100), randInt(100, canvas.height - 100));
+            }
+            if (Math.random() < 0.2) {
+                spawnPowerUp("leafblower", randInt(100, canvas.width - 100), randInt(100, canvas.height - 100));
+            }
+            
+            for (let i = 0; i < currentLevel; i++) {
+                if (Math.random() < 0.5) {
+                    obstacles.push({
+                        type: 'bbq',
+                        icon: '🔥',
+                        x: randInt(150, canvas.width - 50),
+                        y: randInt(100, canvas.height - 50),
+                        width: 24,
+                        height: 24,
+                        dx: randInt(20, 50) * (Math.random() < 0.5 ? 1 : -1)
+                    });
+                }
+            }
+        }
+
+        function completeLevel() {
+            gameRunning = false;
+            if (gameLoopId) {
+                cancelAnimationFrame(gameLoopId);
+                gameLoopId = null;
+            }
+            
+            const levelTime = totalTime - levelStartTime;
+            const timeBonus = Math.max(0, (levelTimeLimit - levelTime) * 50);
+            score += timeBonus;
+            
+            document.getElementById("levelComplete").style.display = "block";
+            document.getElementById("levelScore").textContent = score;
+            document.getElementById("completionTime").textContent = formatTime(levelTime);
+            document.getElementById("timeBonus").textContent = Math.floor(timeBonus);
+        }
+
+        function nextLevel() {
+            document.getElementById("levelComplete").style.display = "none";
+            currentLevel++;
+            
+            if (currentLevel > 12) {
+                endGame();
+            } else {
+                setupLevel(currentLevel);
+                updateUI();
+            }
+        }
+
+        function gameOver() {
+            gameRunning = false;
+            if (gameLoopId) {
+                cancelAnimationFrame(gameLoopId);
+                gameLoopId = null;
+            }
+            
+            document.getElementById("gameOver").style.display = "block";
+            document.getElementById("failedLevel").textContent = currentLevel;
+            document.getElementById("finalScore").textContent = score;
+        }
+
+        function endGame() {
+            document.getElementById("finalResults").style.display = "block";
+            document.getElementById("winnerName").textContent = playerName;
+            document.getElementById("championScore").textContent = score;
+            document.getElementById("totalTime").textContent = formatTime(totalTime);
+            
+            const levelTimes = document.getElementById("levelTimes");
+            levelTimes.innerHTML = "<strong>Level Breakdown:</strong><br>" +
+                `Completed ${currentLevel - 1} levels in ${formatTime(totalTime)}`;
+        }
+
+        function restartGame() {
+            document.getElementById("gameOver").style.display = "none";
+            document.getElementById("finalResults").style.display = "none";
+            document.getElementById("levelComplete").style.display = "none";
+            
+            gameRunning = false;
+            if (gameLoopId) {
+                cancelAnimationFrame(gameLoopId);
+                gameLoopId = null;
+            }
+            
+            document.getElementById("gameScreen").style.display = "none";
+            document.getElementById("nameEntry").style.display = "block";
+        }
+
+        // === Social Features ===
+        function challengeFriend() {
+            const modal = document.getElementById("challengeModal");
+            const message = document.getElementById("challengeMessage");
+            const challengeText = `Hey! I just completed Charlie's Lawn Mowing Championship with a score of ${score}! Think you can beat me? Try it here: ${window.location.href}
+
+"Better bring your barefoot mowing skills!" - Charlie 🚜🍺`;
+            
+            message.value = challengeText;
+            modal.style.display = "block";
+        }
+
+        function closeChallengeModal() {
+            document.getElementById("challengeModal").style.display = "none";
+        }
+
+        function copyChallengeMessage() {
+            const message = document.getElementById("challengeMessage");
+            message.select();
+            document.execCommand('copy');
+            alert("Challenge message copied to clipboard!");
+        }
+
+        function shareGame() {
+            if (navigator.share) {
+                navigator.share({
+                    title: "Charlie's Lawn Service Championship",
+                    text: "Try this awesome lawn mowing game!",
+                    url: window.location.href
+                });
+            } else {
+                alert("Share this link: " + window.location.href);
+            }
+        }
+
+        function shareScreenshot() {
+            alert("Screenshot feature coming soon! Share your victory with friends!");
+        }
+
+        function shareChampionship() {
+            if (navigator.share) {
+                navigator.share({
+                    title: "I'm a Lawn Mowing Champion!",
+                    text: `I just completed Charlie's Lawn Service Championship with ${score} points!`,
+                    url: window.location.href
+                });
+            } else {
+                alert(`I just completed Charlie's Lawn Service Championship with ${score} points! ${window.location.href}`);
+            }
+        }
+
+        function showLeaderboard() {
+            document.getElementById("gameOver").style.display = "none";
+            document.getElementById("finalResults").style.display = "none";
+            document.getElementById("leaderboardScreen").style.display = "block";
+        }
+
+        function backToGame() {
+            document.getElementById("leaderboardScreen").style.display = "none";
+            document.getElementById("nameEntry").style.display = "block";
+        }
+
+        function filterLeaderboard(filter) {
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            console.log(`Filtering leaderboard by: ${filter}`);
+        }
+
+        // === Audio Controls ===
+        let soundEnabled = true;
+        let musicEnabled = true;
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const btn = document.getElementById("soundBtn");
+            btn.textContent = soundEnabled ? "🔊" : "🔇";
+        }
+
+        function toggleMusic() {
+            musicEnabled = !musicEnabled;
+            const btn = document.getElementById("musicBtn");
+            btn.textContent = musicEnabled ? "🎵" : "🔇";
+        }
+
+        // === Initialize ===
+        function init() {
+            setupLevel(1);
+            renderGame();
+            updateWeatherDisplay();
+            document.getElementById("playerName").focus();
+            updateCommentary(getRandomCommentary());
+        }
+
+        // Make all functions globally available
+        window.startGame = startGame;
+        window.startLevel = startLevel;
+        window.nextLevel = nextLevel;
+        window.restartGame = restartGame;
+        window.challengeFriend = challengeFriend;
+        window.closeChallengeModal = closeChallengeModal;
+        window.copyChallengeMessage = copyChallengeMessage;
+        window.shareGame = shareGame;
+        window.shareScreenshot = shareScreenshot;
+        window.shareChampionship = shareChampionship;
+        window.showLeaderboard = showLeaderboard;
+        window.backToGame = backToGame;
+        window.filterLeaderboard = filterLeaderboard;
+        window.toggleSound = toggleSound;
+        window.toggleMusic = toggleMusic;
+
+        window.addEventListener('load', init);
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
