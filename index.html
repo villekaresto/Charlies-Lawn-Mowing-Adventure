@@ -240,6 +240,22 @@
             font-size: 0.9em;
         }
 
+        .level-name-container {
+            margin-bottom: 8px;
+        }
+
+        .level-name {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.9), rgba(255, 140, 0, 0.9));
+            color: #333;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-weight: 700;
+            font-size: 0.9em;
+            border: 2px solid rgba(255, 215, 0, 0.5);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+        }
+
         .timer-container {
             display: flex;
             justify-content: space-around;
@@ -636,6 +652,10 @@
                 <div>Score: <span id="score">0</span></div>
             </div>
             
+            <div class="level-name-container">
+                <div class="level-name" id="levelName">Charlie's Front Yard</div>
+            </div>
+            
             <div class="timer-container">
                 <div class="timer">Total: <span id="timer">0:00</span></div>
                 <div class="level-time">Level: <span id="levelTimer">0:00</span></div>
@@ -755,6 +775,27 @@
     </div>
 
     <script>
+        // === Game Data ===
+        const levelData = [
+            { name: "Charlie's Front Yard", color: "#7CFC00", commentary: "Easy does it! Just getting warmed up!" },
+            { name: "The Neighbor's Maze", color: "#32CD32", commentary: "Watch out for those garden gnomes!" },
+            { name: "Budweiser Memorial Lawn", color: "#228B22", commentary: "This one's dedicated to cold ones!" },
+            { name: "The Dandelion Disaster", color: "#ADFF2F", commentary: "Those weeds won't mow themselves!" },
+            { name: "Backyard BBQ Cleanup", color: "#9AFF9A", commentary: "Grill's hot, grass needs cutting!" },
+            { name: "The Golf Course Challenge", color: "#98FB98", commentary: "Fairway conditions expected!" },
+            { name: "Sprinkler System Chaos", color: "#90EE90", commentary: "Hope you brought your rain boots!" },
+            { name: "The Crabgrass Nightmare", color: "#8FBC8F", commentary: "This stuff grows faster than you can cut!" },
+            { name: "Championship Clippings", color: "#7CFC00", commentary: "Almost there, keep that mower humming!" },
+            { name: "The Final Frontier Lawn", color: "#6B8E23", commentary: "One small step for Charlie, one giant leap for lawn care!" },
+            { name: "Overtime Overgrowth", color: "#556B2F", commentary: "Bonus round! Time to prove your worth!" },
+            { name: "Charlie's Dream Lawn", color: "#FFD700", commentary: "The lawn of legends! Make Charlie proud!" }
+        ];
+
+        function getLevelData(level) {
+            const index = Math.min(level - 1, levelData.length - 1);
+            return levelData[index];
+        }
+
         // === Core Game State ===
         let gameRunning = false;
         let currentLevel = 1;
@@ -774,7 +815,8 @@
             accel: 350,
             velX: 0,
             velY: 0,
-            boosted: false
+            boosted: false,
+            invincible: false
         };
 
         let grassTiles = [];
@@ -787,7 +829,6 @@
         const ctx = canvas.getContext('2d');
 
         function resizeCanvas() {
-            const rect = canvas.getBoundingClientRect();
             canvas.width = 400;
             canvas.height = 300;
         }
@@ -806,7 +847,7 @@
         function formatTime(t) {
             const m = Math.floor(t / 60);
             const s = Math.floor(t % 60);
-            return `${m}:${s < 10 ? "0" + s : s}`;
+            return m + ":" + (s < 10 ? "0" + s : s);
         }
 
         function rectIntersect(a, b) {
@@ -815,14 +856,14 @@
 
         // === Input System ===
         const keys = {};
-        document.addEventListener('keydown', e => {
+        document.addEventListener('keydown', function(e) {
             if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(e.code)) {
                 e.preventDefault();
             }
             keys[e.key] = true;
             keys[e.code] = true;
         });
-        document.addEventListener('keyup', e => {
+        document.addEventListener('keyup', function(e) {
             if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(e.code)) {
                 e.preventDefault();
             }
@@ -830,7 +871,7 @@
             keys[e.code] = false;
         });
 
-        // More targeted touch prevention
+        // Touch prevention
         function preventTouchScroll(e) {
             if (e.target.closest('.controls, .control-btn, #gameCanvas, .audio-controls')) {
                 e.preventDefault();
@@ -843,14 +884,14 @@
 
         // Touch controls for mobile
         let touchStartX = null, touchStartY = null;
-        canvas.addEventListener('touchstart', e => {
+        canvas.addEventListener('touchstart', function(e) {
             e.preventDefault();
             const t = e.touches[0];
             touchStartX = t.clientX;
             touchStartY = t.clientY;
         });
 
-        canvas.addEventListener('touchmove', e => {
+        canvas.addEventListener('touchmove', function(e) {
             e.preventDefault();
             if (!touchStartX || !touchStartY) return;
             const t = e.touches[0];
@@ -871,7 +912,7 @@
             }
         });
 
-        canvas.addEventListener('touchend', e => {
+        canvas.addEventListener('touchend', function(e) {
             e.preventDefault();
             keys['ArrowLeft'] = keys['ArrowRight'] = keys['ArrowUp'] = keys['ArrowDown'] = false;
             touchStartX = touchStartY = null;
@@ -886,36 +927,36 @@
                 { id: 'rightBtn', key: 'ArrowRight' }
             ];
             
-            buttons.forEach(({ id, key }) => {
-                const btn = document.getElementById(id);
+            buttons.forEach(function(button) {
+                const btn = document.getElementById(button.id);
                 
-                btn.addEventListener('mousedown', (e) => {
+                btn.addEventListener('mousedown', function(e) {
                     e.preventDefault();
-                    keys[key] = true;
+                    keys[button.key] = true;
                 });
-                btn.addEventListener('mouseup', (e) => {
+                btn.addEventListener('mouseup', function(e) {
                     e.preventDefault();
-                    keys[key] = false;
+                    keys[button.key] = false;
                 });
-                btn.addEventListener('mouseleave', (e) => {
+                btn.addEventListener('mouseleave', function(e) {
                     e.preventDefault();
-                    keys[key] = false;
-                });
-                
-                btn.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    keys[key] = true;
-                });
-                btn.addEventListener('touchend', (e) => {
-                    e.preventDefault();
-                    keys[key] = false;
-                });
-                btn.addEventListener('touchcancel', (e) => {
-                    e.preventDefault();
-                    keys[key] = false;
+                    keys[button.key] = false;
                 });
                 
-                btn.addEventListener('contextmenu', (e) => {
+                btn.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    keys[button.key] = true;
+                });
+                btn.addEventListener('touchend', function(e) {
+                    e.preventDefault();
+                    keys[button.key] = false;
+                });
+                btn.addEventListener('touchcancel', function(e) {
+                    e.preventDefault();
+                    keys[button.key] = false;
+                });
+                
+                btn.addEventListener('contextmenu', function(e) {
                     e.preventDefault();
                 });
             });
@@ -939,6 +980,7 @@
             updateMower(delta);
             checkGrassCollision();
             checkPowerUpPickup();
+            checkObstacleCollision();
             updatePowerUps(delta);
             updateObstacles(delta);
             updateWeather(delta);
@@ -973,7 +1015,8 @@
         }
 
         function checkGrassCollision() {
-            for (let tile of grassTiles) {
+            for (let i = 0; i < grassTiles.length; i++) {
+                const tile = grassTiles[i];
                 if (!tile.mowed && rectIntersect(mower, tile)) {
                     tile.mowed = true;
                     score += 10;
@@ -981,14 +1024,31 @@
             }
         }
 
+        function checkObstacleCollision() {
+            if (mower.invincible) return;
+            
+            for (let i = 0; i < obstacles.length; i++) {
+                const obstacle = obstacles[i];
+                if (obstacle.active && rectIntersect(mower, obstacle)) {
+                    mower.speed = Math.max(60, mower.speed * 0.7);
+                    updateCommentary("Ouch! Watch out for those obstacles!");
+                    
+                    obstacle.active = false;
+                    setTimeout(function() { 
+                        obstacle.active = true; 
+                    }, 2000);
+                }
+            }
+        }
+
         function checkLevelComplete() {
             const totalGrass = grassTiles.length;
-            const mowedGrass = grassTiles.filter(tile => tile.mowed).length;
+            const mowedGrass = grassTiles.filter(function(tile) { return tile.mowed; }).length;
             const progress = (mowedGrass / totalGrass) * 100;
             
             const progressBar = document.getElementById('progressBar');
-            progressBar.style.width = `${progress}%`;
-            progressBar.textContent = `${Math.floor(progress)}% Mowed`;
+            progressBar.style.width = progress + '%';
+            progressBar.textContent = Math.floor(progress) + '% Mowed';
             
             if (mowedGrass === totalGrass) {
                 completeLevel();
@@ -1003,7 +1063,8 @@
         }
 
         function updatePowerUps(delta) {
-            for (let p of powerUps) {
+            for (let i = 0; i < powerUps.length; i++) {
+                const p = powerUps[i];
                 if (p.active) {
                     p.timer -= delta;
                     if (p.timer <= 0) p.active = false;
@@ -1012,13 +1073,14 @@
         }
 
         function updateObstacles(delta) {
-            for (let o of obstacles) {
-                if (o.type === 'bbq') {
-                    o.x += o.dx * delta;
-                    if (o.x < -50 || o.x > canvas.width + 50) o.dx *= -1;
+            for (let i = 0; i < obstacles.length; i++) {
+                const o = obstacles[i];
+                if (o.type === 'tree') {
+                    o.sway = (o.sway || 0) + delta;
+                    o.offsetX = Math.sin(o.sway) * 2;
                 }
-                if (o.type === 'kid') {
-                    o.y += Math.sin(Date.now() / 200) * 0.5;
+                if (o.type === 'sprinkler') {
+                    o.rotation = (o.rotation || 0) + delta * 3;
                 }
             }
         }
@@ -1042,43 +1104,66 @@
         }
 
         function updateUI() {
+            const levelInfo = getLevelData(currentLevel);
             document.getElementById("score").textContent = score;
             document.getElementById("level").textContent = currentLevel;
             document.getElementById("timer").textContent = formatTime(totalTime);
             document.getElementById("levelTimer").textContent = formatTime(totalTime - levelStartTime);
             document.getElementById("playerNameDisplay").textContent = playerName;
+            
+            const levelNameEl = document.getElementById("levelName");
+            if (levelNameEl) {
+                levelNameEl.textContent = levelInfo.name;
+            }
         }
 
         function renderGame() {
+            const levelInfo = getLevelData(currentLevel);
+            
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            canvas.style.backgroundColor = levelInfo.color;
             
             drawGrass();
             
-            ctx.fillStyle = mower.boosted ? "#FF6B35" : "#4CAF50";
-            ctx.fillRect(mower.x, mower.y, mower.width, mower.height);
+            // Draw obstacles
+            for (let i = 0; i < obstacles.length; i++) {
+                const o = obstacles[i];
+                ctx.save();
+                if (o.type === 'tree' && o.offsetX) {
+                    ctx.translate(o.offsetX, 0);
+                }
+                ctx.font = "20px Arial";
+                ctx.fillText(o.icon, o.x, o.y);
+                ctx.restore();
+            }
             
-            ctx.fillStyle = "#333";
-            ctx.fillRect(mower.x + 2, mower.y + 2, 4, 4);
-            ctx.fillRect(mower.x + 10, mower.y + 2, 4, 4);
-            
-            for (let p of powerUps) {
+            // Draw power-ups
+            for (let i = 0; i < powerUps.length; i++) {
+                const p = powerUps[i];
                 if (p.active) {
                     ctx.font = "16px Arial";
                     ctx.fillText(p.icon, p.x, p.y);
                 }
             }
             
-            for (let o of obstacles) {
-                ctx.font = "20px Arial";
-                ctx.fillText(o.icon, o.x, o.y);
+            // Draw mower
+            ctx.fillStyle = mower.boosted ? "#FF6B35" : "#4CAF50";
+            if (mower.invincible) {
+                ctx.fillStyle = "#FFD700";
             }
+            ctx.fillRect(mower.x, mower.y, mower.width, mower.height);
+            
+            ctx.fillStyle = "#333";
+            ctx.fillRect(mower.x + 2, mower.y + 2, 4, 4);
+            ctx.fillRect(mower.x + 10, mower.y + 2, 4, 4);
             
             drawWeatherOverlay();
         }
 
         function drawGrass() {
-            const tileSize = 20;
-            for (let tile of grassTiles) {
+            for (let i = 0; i < grassTiles.length; i++) {
+                const tile = grassTiles[i];
                 ctx.fillStyle = tile.mowed ? "#90EE90" : "#228B22";
                 ctx.fillRect(tile.x, tile.y, tile.width, tile.height);
                 
@@ -1110,17 +1195,20 @@
         function spawnPowerUp(type, x, y) {
             const icons = { budweiser: "🍺", golfcart: "🚗", leafblower: "🍃" };
             powerUps.push({
-                type,
+                type: type,
                 icon: icons[type],
-                x, y,
-                width: 24, height: 24,
+                x: x, 
+                y: y,
+                width: 24, 
+                height: 24,
                 active: true,
                 timer: 15
             });
         }
 
         function checkPowerUpPickup() {
-            for (let p of powerUps) {
+            for (let i = 0; i < powerUps.length; i++) {
+                const p = powerUps[i];
                 if (p.active && rectIntersect(mower, p)) {
                     p.active = false;
                     activatePowerUp(p.type);
@@ -1130,11 +1218,11 @@
 
         function activatePowerUp(type) {
             if (type === "budweiser") {
-                mower.speed *= 1.5;
+                mower.speed = Math.min(200, mower.speed * 1.5);
                 mower.boosted = true;
                 score += 100;
-                setTimeout(() => { 
-                    mower.speed /= 1.5; 
+                setTimeout(function() { 
+                    mower.speed = Math.max(120, mower.speed / 1.5); 
                     mower.boosted = false; 
                 }, 5000);
                 updateCommentary("Charlie approves! Speed boost activated! 🍺");
@@ -1142,20 +1230,24 @@
             
             if (type === "golfcart") {
                 score += 500;
-                updateCommentary("Found the golf cart! Bonus points! 🚗");
+                mower.invincible = true;
+                setTimeout(function() { 
+                    mower.invincible = false; 
+                }, 3000);
+                updateCommentary("Found the golf cart! Bonus points and temporary invincibility! 🚗");
             }
             
             if (type === "leafblower") {
-                obstacles = [];
+                obstacles = obstacles.filter(function(o) { return o.type !== 'rock'; });
                 score += 200;
-                updateCommentary("Leaf blower cleared the obstacles! 🍃");
+                updateCommentary("Leaf blower cleared the rocks! 🍃");
             }
         }
 
         function updateCommentary(text) {
             const commentary = document.getElementById('charlieCommentary');
             commentary.textContent = text;
-            setTimeout(() => {
+            setTimeout(function() {
                 commentary.textContent = getRandomCommentary();
             }, 3000);
         }
@@ -1169,7 +1261,7 @@
                 "Time's ticking! Mow faster!",
                 "Looking good out there, champ!"
             ];
-            return `"${randChoice(comments)}" - Charlie`;
+            return '"' + randChoice(comments) + '" - Charlie';
         }
 
         // === Game Events ===
@@ -1195,6 +1287,8 @@
         function startLevel() {
             if (gameRunning) return;
             
+            const levelInfo = getLevelData(currentLevel);
+            
             gameRunning = true;
             levelStartTime = totalTime;
             
@@ -1203,13 +1297,15 @@
             btn.disabled = true;
             
             spawnRandomStuff();
-            updateCommentary("Level started! Mow all the grass before time runs out!");
+            updateCommentary(levelInfo.commentary);
             
             lastTimestamp = performance.now();
             gameLoopId = requestAnimationFrame(gameLoop);
         }
 
         function setupLevel(level) {
+            const levelInfo = getLevelData(level);
+            
             grassTiles = [];
             powerUps = [];
             obstacles = [];
@@ -1218,6 +1314,9 @@
             mower.y = 50;
             mower.velX = 0;
             mower.velY = 0;
+            mower.speed = 120;
+            mower.boosted = false;
+            mower.invincible = false;
             
             const tileSize = 20;
             const cols = Math.floor(canvas.width / tileSize);
@@ -1240,31 +1339,42 @@
             levelTimeLimit = Math.max(60, 90 - (level * 2));
             
             const btn = document.getElementById('startLevelBtn');
-            btn.textContent = `Start Level ${level}`;
+            btn.textContent = 'Start: ' + levelInfo.name;
             btn.disabled = false;
+            
+            updateCommentary('"Ready for ' + levelInfo.name + '? ' + levelInfo.commentary + '" - Charlie');
         }
 
         function spawnRandomStuff() {
-            if (Math.random() < 0.4) {
+            if (Math.random() < 0.6) {
                 spawnPowerUp("budweiser", randInt(100, canvas.width - 100), randInt(100, canvas.height - 100));
             }
-            if (Math.random() < 0.3) {
+            if (Math.random() < 0.5) {
                 spawnPowerUp("golfcart", randInt(100, canvas.width - 100), randInt(100, canvas.height - 100));
             }
-            if (Math.random() < 0.2) {
+            if (Math.random() < 0.4) {
                 spawnPowerUp("leafblower", randInt(100, canvas.width - 100), randInt(100, canvas.height - 100));
             }
             
-            for (let i = 0; i < currentLevel; i++) {
-                if (Math.random() < 0.5) {
+            const obstacleTypes = [
+                { type: 'rock', icon: '🪨', active: true },
+                { type: 'tree', icon: '🌳', active: true },
+                { type: 'sprinkler', icon: '💦', active: true }
+            ];
+            
+            for (let i = 0; i < Math.min(currentLevel, 4); i++) {
+                if (Math.random() < 0.7) {
+                    const obstacleType = randChoice(obstacleTypes);
                     obstacles.push({
-                        type: 'bbq',
-                        icon: '🔥',
+                        type: obstacleType.type,
+                        icon: obstacleType.icon,
+                        active: obstacleType.active,
                         x: randInt(150, canvas.width - 50),
                         y: randInt(100, canvas.height - 50),
                         width: 24,
                         height: 24,
-                        dx: randInt(20, 50) * (Math.random() < 0.5 ? 1 : -1)
+                        sway: 0,
+                        rotation: 0
                     });
                 }
             }
@@ -1319,7 +1429,7 @@
             
             const levelTimes = document.getElementById("levelTimes");
             levelTimes.innerHTML = "<strong>Level Breakdown:</strong><br>" +
-                `Completed ${currentLevel - 1} levels in ${formatTime(totalTime)}`;
+                "Completed " + (currentLevel - 1) + " levels in " + formatTime(totalTime);
         }
 
         function restartGame() {
@@ -1341,9 +1451,7 @@
         function challengeFriend() {
             const modal = document.getElementById("challengeModal");
             const message = document.getElementById("challengeMessage");
-            const challengeText = `Hey! I just completed Charlie's Lawn Mowing Championship with a score of ${score}! Think you can beat me? Try it here: ${window.location.href}
-
-"Better bring your barefoot mowing skills!" - Charlie 🚜🍺`;
+            const challengeText = "Hey! I just completed Charlie's Lawn Mowing Championship with a score of " + score + "! Think you can beat me? Try it here: " + window.location.href + "\n\n\"Better bring your barefoot mowing skills!\" - Charlie 🚜🍺";
             
             message.value = challengeText;
             modal.style.display = "block";
@@ -1380,11 +1488,11 @@
             if (navigator.share) {
                 navigator.share({
                     title: "I'm a Lawn Mowing Champion!",
-                    text: `I just completed Charlie's Lawn Service Championship with ${score} points!`,
+                    text: "I just completed Charlie's Lawn Service Championship with " + score + " points!",
                     url: window.location.href
                 });
             } else {
-                alert(`I just completed Charlie's Lawn Service Championship with ${score} points! ${window.location.href}`);
+                alert("I just completed Charlie's Lawn Service Championship with " + score + " points! " + window.location.href);
             }
         }
 
@@ -1400,9 +1508,11 @@
         }
 
         function filterLeaderboard(filter) {
-            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.filter-btn').forEach(function(btn) { 
+                btn.classList.remove('active'); 
+            });
             event.target.classList.add('active');
-            console.log(`Filtering leaderboard by: ${filter}`);
+            console.log('Filtering leaderboard by: ' + filter);
         }
 
         // === Audio Controls ===
