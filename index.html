@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>Charlie's Lawn Service - Waning Way Championship</title>
+<title>Charlie's Lawn Service - Cainhoy Championship</title>
 <meta name="description" content="Help Charlie mow lawns in this mobile-friendly comedy challenge. 12 levels, power ups, obstacles, and a local leaderboard." />
 <style>
   :root{
@@ -34,7 +34,7 @@
   }
   h1{margin:0;text-align:center;font-weight:900;font-size:1.9rem;
      background:linear-gradient(135deg,#2d5016,#4a7c4a,#87CEEB);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-  h1::after{content:"🏡 Waning Way Neighborhood";display:block;color:#667;font-size:.9rem;margin-top:4px;font-weight:600;opacity:.85}
+  h1::after{content:"🏡 WW Neighborhood";display:block;color:#667;font-size:.9rem;margin-top:4px;font-weight:600;opacity:.85}
   .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center}
   .card{background:var(--glass);border:2px solid rgba(255,255,255,.45);border-radius:16px;padding:14px}
   .hud{display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap;background:var(--glass);border-radius:12px;border:2px solid rgba(255,255,255,.4);padding:8px 12px;font-weight:800}
@@ -130,7 +130,7 @@
     <div class="row">
       <div class="level-title" id="levelName">Charlie's Front Yard</div>
     </div>
-    <div class="desc" id="levelDesc">Welcome to Waning Way. Mind the flamingo, the Dodge RAM, and that Bud cooler in the shade. 🦩🚛🍺</div>
+    <div class="desc" id="levelDesc">Welcome to Cainhoy. Mind the flamingo, the Dodge RAM, and that Bud cooler in the shade. 🦩🚛🍺</div>
 
     <div class="timers">
       <div>Total: <span id="timer">0:00</span></div>
@@ -195,7 +195,7 @@
 </div>
 
 <div class="overlay" id="ovLB">
-  <h2>🏆 Waning Way Champions</h2>
+  <h2>🏆 WW Champions</h2>
   <div class="leader-filters">
     <button class="filter active" id="fAll">All Time</button>
     <button class="filter" id="fWeek">This Week</button>
@@ -240,7 +240,7 @@ const levels=[
   {n:"Blower Showdown",        c:"#8FBC8F", d:"Blast corners clean. Leave no crumb behind."},
   {n:"EGO vs Husky Derby",     c:"#ADFF2F", d:"Talks smack about electric, borrows EGO anyway."},
   {n:"Budweiser Yard Party",   c:"#228B22", d:"Mow around the coolers. Cans are not power ups."},
-  {n:"Waning Way HOA Finals",  c:"#7CFC00", d:"Every neighbor is judging the stripes."},
+  {n:"Cainhoy Dollar Tree HOA Finals",  c:"#7CFC00", d:"Every neighbor is judging the stripes."},
   {n:"Lowcountry Crosswind",   c:"#6B8E23", d:"Cainhoy gusts push your deck. Hold the line."},
   {n:"Overtime Overgrowth",    c:"#556B2F", d:"Bonus jungle. The clippings will tell your story."},
   {n:"Golden Grass Champion",  c:"#FFD700", d:"Perfect pass, perfect blow, perfect edge."}
@@ -273,7 +273,7 @@ const introsByLevel=[
    "The cooler calls your name. You say later, champ.",
    "BBQ smoke gives +2 swagger and -1 visibility."],
   ["Smile and wave. The HOA is timing your turns.",
-   "Perfect lines earn a slow clap from Mrs. Henderson.",
+   "Perfect lines earn a slow clap from Mr. Dickson.",
    "Stripe like a barber for grass."],
   ["Lowcountry wind steals hats and secrets. Keep both.",
    "If a gust moves you, call it tactical drifting.",
@@ -287,7 +287,7 @@ const introsByLevel=[
 ];
 
 const congratsByLevel=[
-  ["{n}, Mrs. Henderson saluted with her garden glove. That never happens.",
+  ["{n}, Mr. Dickson saluted with her garden glove. That never happens.",
    "{n}, barefoot prints and perfect stripes. Museum worthy.",
    "{n}, the lawn said thank you and learned manners."],
   ["{n}, the RAM’s reflection on those lines is illegal in three counties.",
@@ -312,7 +312,7 @@ const congratsByLevel=[
    "{n}, you mowed around the party like a secret service agent.",
    "{n}, cooler called. It says you earned a victory lap."],
   ["{n}, the HOA framed your pattern by the pool.",
-   "{n}, Mrs. Henderson upgraded your wave to a nod.",
+   "{n}, Mr. Dickson upgraded your wave to a nod.",
    "{n}, your stripes passed inspection before you finished."],
   ["{n}, Cainhoy winds took a day off out of respect.",
    "{n}, tactical drift achieved. Style points awarded.",
@@ -322,7 +322,7 @@ const congratsByLevel=[
    "{n}, you just invented polite deforestation."],
   ["{n}, crown secured. The lawn genuflected.",
    "{n}, the golf cart started playing anthem music.",
-   "{n}, Waning Way submitted your lines to the Library of Congress."]
+   "{n}, Cainhoy Dollar Tree submitted your lines to the Library of Congress."]
 ];
 
 /* -------------------- State -------------------- */
@@ -616,7 +616,7 @@ function power(t){
   if(t==='bud'){
     counts.bud++; mower.spd=Math.min(220,mower.spd*1.5); mower.boost=true; score+=100;
     setComment("Bud boost activated. Hydration and horsepower.");
-    showToast("bubweiser boobster activated");
+    showToast("boobweiser boobster activated");
     beep(880,.05,.15); vibr(30);
     setTimeout(()=>{mower.spd=Math.max(120,mower.spd/1.5); mower.boost=false;},5000);
   }else if(t==='golf'){
@@ -679,7 +679,7 @@ function startGame(){
   score=0; total=0; lvl=1; counts.bud=counts.golf=counts.leaf=0; renderCounts();
   landing.style.display='none'; game.style.display='block';
   hudName.textContent=name; hudBest.textContent=localStorage.getItem('clmc_best')||0;
-  setup(lvl); ui(); setComment("Welcome to Waning Way. Tap Start when ready.");
+  setup(lvl); ui(); setComment("Welcome to Cainhoy. Tap Start when ready.");
 }
 function startLevel(){ handleStartLevelClick(); }
 
@@ -738,7 +738,7 @@ async function shareShotImg(){
     c.fillStyle='#fff'; c.fillRect(0,0,W,B); c.fillStyle='#2d5016'; c.font='bold 16px Segoe UI, Arial'; c.fillText("🚜 Charlie's Lawn Service - Championship",12,22);
     c.font='12px Segoe UI, Arial'; c.fillText(`Player: ${name} • Level: ${lvl}/12 • Score: ${score} • Time: ${fmt(total)}`,12,42);
     c.drawImage(cvs,0,B,BASE_W,BASE_H);
-    c.fillStyle='rgba(0,0,0,.08)'; c.fillRect(0,out.height-22,W,22); c.fillStyle='#333'; c.font='11px Segoe UI, Arial'; c.fillText('🏆 Waning Way Champions - Can you beat my run?',12,out.height-8);
+    c.fillStyle='rgba(0,0,0,.08)'; c.fillRect(0,out.height-22,W,22); c.fillStyle='#333'; c.font='11px Segoe UI, Arial'; c.fillText('🏆 Cainhoy Champions - Can you beat my run?',12,out.height-8);
     const blob=await new Promise(r=>out.toBlob(r,'image/png',.95)); const file=new File([blob],'charlies-championship.png',{type:'image/png'});
     if(navigator.canShare?.({files:[file]})){ await navigator.share({title:"Charlie's Lawn Service screenshot",text:`My score: ${score}`,files:[file]}); }
     else{ const url=URL.createObjectURL(blob); dl.href=url; dl.click(); setTimeout(()=>URL.revokeObjectURL(url),1500); alert('Screenshot saved'); }
