@@ -1,1809 +1,779 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Charlie's Lawn Service - Championship Edition</title>
-    <meta name="description" content="Help Charlie mow lawns in this fun mobile-friendly game! 12 challenging levels with power-ups and obstacles.">
-    
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://villekaresto.github.io/charlies-lawn-service/">
-    <meta property="og:title" content="🚜 Charlie's Lawn Service - Championship Edition">
-    <meta property="og:description" content="Join Charlie for the ultimate lawn mowing championship! 12 hilarious levels, power-ups, obstacles, and non-stop lawn care action. Can you become the Master Mower? 🏆">
-    <meta property="og:image" content="https://villekaresto.github.io/charlies-lawn-service/game-preview.png">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://villekaresto.github.io/charlies-lawn-service/">
-    <meta property="twitter:title" content="🚜 Charlie's Lawn Service - Championship Edition">
-    <meta property="twitter:description" content="Join Charlie for the ultimate lawn mowing championship! 12 hilarious levels, power-ups, obstacles, and non-stop lawn care action. Can you become the Master Mower? 🏆">
-    <meta property="twitter:image" content="https://villekaresto.github.io/charlies-lawn-service/game-preview.png">
-    <style>
-        html, body {
-            height: 100%;
-        }
-
-        * {
-            touch-action: manipulation;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(135deg, #1a2332 0%, #2d5016 20%, #4a7c4a 60%, #87CEEB 100%);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: center;
-            min-height: 100vh;
-            color: #2d5016;
-            overflow-x: hidden;
-            overflow-y: auto;
-            position: relative;
-        }
-
-        button {
-            font-family: inherit;
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        .screen {
-            text-align: center;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            padding: 25px;
-            border-radius: 25px;
-            box-shadow: 
-                0 8px 32px rgba(0, 0, 0, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.5);
-            max-width: 95vw;
-            min-height: 80vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            position: relative;
-        }
-
-        .game-container {
-            text-align: center;
-            background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(15px);
-            padding: 15px;
-            border-radius: 20px;
-            box-shadow: 
-                0 8px 32px rgba(0, 0, 0, 0.25),
-                inset 0 1px 0 rgba(255, 255, 255, 0.6);
-            max-width: 95vw;
-            border: 2px solid rgba(255, 255, 255, 0.4);
-            margin: 10px auto;
-            overflow: hidden;
-        }
-
-        h1 {
-            margin: 0 0 10px 0;
-            font-size: 1.8em;
-            font-weight: 700;
-            background: linear-gradient(135deg, #2d5016, #4a7c4a, #87CEEB);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            position: relative;
-        }
-
-        h1::after {
-            content: '🏡 Waning Way Neighborhood';
-            display: block;
-            font-size: 0.4em;
-            color: #666;
-            margin-top: 3px;
-            font-weight: 400;
-        }
-
-        h2 {
-            margin: 0 0 25px 0;
-            font-size: 1.4em;
-            color: #FF6B35;
-            font-weight: 600;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-        }
-
-        .name-input-container {
-            margin: 40px 0;
-            padding: 30px;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(240, 248, 255, 0.9));
-            border-radius: 20px;
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-        }
-
-        .name-input-container label {
-            display: block;
-            font-size: 1.3em;
-            margin-bottom: 15px;
-            font-weight: 600;
-            color: #2d5016;
-        }
-
-        .name-input-container input {
-            padding: 15px 20px;
-            font-size: 1.2em;
-            border: 2px solid #4CAF50;
-            border-radius: 15px;
-            margin: 15px;
-            width: 250px;
-            text-align: center;
-            font-family: inherit;
-            font-weight: 500;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(5px);
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .name-input-container input:focus {
-            outline: none;
-            border-color: #FF6B35;
-            box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.2);
-            transform: scale(1.02);
-        }
-
-        #startGameBtn {
-            background: linear-gradient(135deg, #FF6B35, #F7931E);
-            color: white;
-            border: none;
-            padding: 15px 35px;
-            border-radius: 15px;
-            font-size: 1.2em;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        #startGameBtn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
-        }
-
-        .social-section {
-            margin: 20px 0;
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .social-btn {
-            background: linear-gradient(135deg, #4CAF50, #45a049);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 12px;
-            font-size: 1em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 3px 10px rgba(76, 175, 80, 0.3);
-        }
-
-        .social-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
-        }
-
-        .leaderboard-preview, .leaderboard-screen {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(240, 248, 255, 0.95));
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 25px;
-            margin: 25px 0;
-            border: 2px solid rgba(255, 215, 0, 0.3);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .leaderboard-preview h3 {
-            margin-top: 0;
-            color: #FFD700;
-            font-size: 1.4em;
-            font-weight: 700;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-        }
-
-        #leaderboardPreview, #fullLeaderboard {
-            text-align: left;
-            max-height: 250px;
-            overflow-y: auto;
-            font-size: 0.95em;
-            color: #333;
-            padding-right: 10px;
-        }
-
-        .hud {
-            display: flex;
-            justify-content: space-around;
-            padding: 8px;
-            background: rgba(255, 255, 255, 0.85);
-            border-radius: 10px;
-            border: 2px solid rgba(255, 255, 255, 0.4);
-            margin-bottom: 8px;
-            font-weight: 600;
-            font-size: 0.9em;
-        }
-
-        .level-name-container {
-            margin-bottom: 8px;
-        }
-
-        .level-name {
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.9), rgba(255, 140, 0, 0.9));
-            color: #333;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-weight: 700;
-            font-size: 1.1em;
-            border: 3px solid rgba(255, 215, 0, 0.8);
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
-            margin-bottom: 8px;
-            animation: glow 2s ease-in-out infinite alternate;
-        }
-
-        .level-description {
-            background: rgba(255, 248, 220, 0.95);
-            color: #444;
-            padding: 8px 12px;
-            border-radius: 12px;
-            font-size: 0.8em;
-            font-style: italic;
-            border: 2px solid rgba(255, 215, 0, 0.3);
-            line-height: 1.3;
-            text-align: center;
-        }
-
-        @keyframes glow {
-            from {
-                box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
-            }
-            to {
-                box-shadow: 0 4px 25px rgba(255, 215, 0, 0.7);
-            }
-        }
-
-        .timer-container {
-            display: flex;
-            justify-content: space-around;
-            padding: 6px;
-            background: rgba(240, 255, 240, 0.9);
-            border-radius: 8px;
-            border: 2px solid rgba(76, 175, 80, 0.4);
-            margin-bottom: 8px;
-            font-weight: 500;
-            font-size: 0.85em;
-        }
-
-        .weather {
-            font-weight: bold;
-            color: #4CAF50;
-        }
-
-        .progress-container {
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 15px;
-            overflow: hidden;
-            margin-bottom: 8px;
-            border: 2px solid rgba(255, 255, 255, 0.4);
-        }
-
-        .progress-bar {
-            background: linear-gradient(90deg, #4CAF50, #8BC34A);
-            color: white;
-            padding: 4px;
-            text-align: center;
-            font-weight: 700;
-            transition: width 0.3s ease;
-            font-size: 0.8em;
-        }
-
-        .charlie-commentary {
-            padding: 6px;
-            background: rgba(255, 248, 220, 0.9);
-            border-radius: 8px;
-            border: 2px solid rgba(255, 215, 0, 0.3);
-            font-style: italic;
-            margin-bottom: 8px;
-            font-size: 0.85em;
-        }
-
-        #gameCanvas {
-            background: #7CFC00;
-            border: 3px solid #4CAF50;
-            border-radius: 8px;
-            margin: 0 auto 8px auto;
-            display: block;
-            max-width: 100%;
-            height: auto;
-            touch-action: none;
-        }
-
-        .instructions {
-            font-size: 0.8em;
-            margin-bottom: 8px;
-            background: rgba(240, 248, 255, 0.9);
-            border-radius: 8px;
-            padding: 6px;
-            border: 2px solid rgba(173, 216, 230, 0.3);
-        }
-
-        .power-ups {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 8px;
-        }
-
-        .power-up-slot {
-            background: rgba(255, 255, 255, 0.9);
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            border-radius: 8px;
-            padding: 4px 8px;
-            font-size: 1em;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            font-weight: bold;
-        }
-
-        .power-up-slot span {
-            font-size: 0.8em;
-            margin-top: 2px;
-        }
-
-        .game-controls {
-            margin-bottom: 8px;
-        }
-
-        .start-level-btn {
-            background: linear-gradient(135deg, #4CAF50, #388E3C);
-            color: white;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 8px;
-            font-size: 0.9em;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .start-level-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
-        }
-
-        .share-btn {
-            background: linear-gradient(135deg, #2196F3, #1976D2);
-            color: white;
-            border: none;
-            padding: 10px 18px;
-            border-radius: 12px;
-            font-size: 0.95em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .share-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
-        }
-
-        .controls {
-            display: grid;
-            grid-template-columns: repeat(3, 45px);
-            grid-template-rows: repeat(2, 45px);
-            gap: 5px;
-            justify-content: center;
-            margin-bottom: 8px;
-            touch-action: none;
-            -webkit-user-select: none;
-            user-select: none;
-        }
-
-        .control-btn {
-            background: linear-gradient(135deg, #f0f0f0, #dcdcdc);
-            border: 2px solid #ccc;
-            border-radius: 6px;
-            font-size: 1.1em;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            user-select: none;
-            touch-action: none;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-        }
-
-        .control-btn:active {
-            background: linear-gradient(135deg, #4CAF50, #388E3C);
-            color: white;
-            transform: scale(0.95);
-        }
-
-        .control-btn:hover {
-            background: linear-gradient(135deg, #e0e0e0, #c0c0c0);
-        }
-
-        .control-btn.up {
-            grid-column: 2;
-        }
-
-        .control-btn.left {
-            grid-column: 1;
-            grid-row: 2;
-        }
-
-        .control-btn.right {
-            grid-column: 3;
-            grid-row: 2;
-        }
-
-        .control-btn.down {
-            grid-column: 2;
-            grid-row: 2;
-        }
-
-        .mobile-gestures {
-            display: block;
-            margin-bottom: 8px;
-        }
-
-        .gesture-hint {
-            font-size: 0.75em;
-            color: #555;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 6px;
-            padding: 4px 8px;
-        }
-
-        .audio-controls {
-            margin-top: 8px;
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .audio-controls button {
-            background: none;
-            border: none;
-            font-size: 1.3em;
-            cursor: pointer;
-            touch-action: none;
-            user-select: none;
-        }
-
-        .level-complete, .game-over, .final-results, .leaderboard-screen, .challenge-modal {
-            display: none;
-            text-align: center;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            padding: 25px;
-            border-radius: 25px;
-            box-shadow: 
-                0 8px 32px rgba(0, 0, 0, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.5);
-            max-width: 95vw;
-            margin: auto;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 1000;
-        }
-
-        .next-btn {
-            background: linear-gradient(135deg, #FF6B35, #F7931E);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 12px;
-            font-size: 1em;
-            font-weight: 700;
-            cursor: pointer;
-            margin: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .next-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
-        }
-
-        .charlie-quote {
-            font-style: italic;
-            margin-top: 15px;
-            color: #555;
-        }
-
-        .level-times {
-            margin-top: 20px;
-            font-size: 0.95em;
-            color: #444;
-            text-align: left;
-        }
-
-        .leaderboard-filter {
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .filter-btn {
-            background: linear-gradient(135deg, #4CAF50, #388E3C);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 10px;
-            font-size: 0.9em;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        .filter-btn.active {
-            background: linear-gradient(135deg, #FF6B35, #F7931E);
-        }
-
-        .challenge-modal .modal-content {
-            background: rgba(255, 255, 255, 0.98);
-            padding: 20px;
-            border-radius: 20px;
-            max-width: 400px;
-            margin: auto;
-            text-align: center;
-        }
-
-        .challenge-modal textarea {
-            width: 100%;
-            height: 120px;
-            resize: none;
-            margin: 15px 0;
-            padding: 10px;
-            border-radius: 10px;
-            border: 2px solid #ccc;
-            font-family: inherit;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .fade-in {
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        @media (max-width: 768px) {
-            .hud, .timer-container {
-                flex-direction: column;
-                gap: 8px;
-            }
-
-            #gameCanvas {
-                width: 100%;
-                height: auto;
-            }
-
-            .mobile-gestures {
-                display: block;
-                margin-bottom: 15px;
-            }
-
-            .controls {
-                grid-template-columns: repeat(3, 60px);
-                grid-template-rows: repeat(2, 60px);
-            }
-
-            .control-btn {
-                font-size: 1.5em;
-            }
-
-            .name-input-container input {
-                width: 80%;
-            }
-        }
-
-        @media (max-width: 480px) {
-            h1 {
-                font-size: 1.6em;
-            }
-
-            h2 {
-                font-size: 1.1em;
-            }
-
-            .hud, .timer-container {
-                font-size: 0.9em;
-            }
-
-            .progress-bar {
-                font-size: 0.8em;
-            }
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Charlie's Lawn Service - Moving Championship</title>
+<meta name="description" content="Help Charlie mow lawns in this mobile-friendly comedy challenge. 12 levels, power ups, obstacles, and a local leaderboard." />
+<style>
+  :root{
+    --bg1:#1a2332; --bg2:#2d5016; --bg3:#4a7c4a; --sky:#87CEEB;
+    --brand:#FF6B35; --accent:#4CAF50; --accent2:#8BC34A;
+    --card:rgba(255,255,255,.95); --glass:rgba(255,255,255,.85);
+  }
+  html,body{height:100%}*{box-sizing:border-box;user-select:none}
+  body{
+    margin:0;background:linear-gradient(135deg,var(--bg1) 0%,var(--bg2) 20%,var(--bg3) 60%,var(--sky) 100%);
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Arial,sans-serif;color:#2d5016;
+    display:flex;align-items:center;justify-content:center;padding:16px;
+  }
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;
+    background:
+      radial-gradient(circle at 20% 80%,rgba(255,255,255,.12),transparent 50%),
+      radial-gradient(circle at 80% 20%,rgba(255,255,255,.06),transparent 50%);
+  }
+  .screen{
+    width:min(920px,95vw);min-height:min(86vh,960px);background:var(--card);
+    border:2px solid rgba(255,255,255,.35);border-radius:22px;padding:20px;
+    box-shadow:0 10px 40px rgba(0,0,0,.28);display:flex;flex-direction:column;gap:12px;
+  }
+  h1{margin:0;text-align:center;font-weight:900;font-size:1.9rem;
+     background:linear-gradient(135deg,#2d5016,#4a7c4a,#87CEEB);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  h1::after{content:"🏡 Waning Way Neighborhood";display:block;color:#667;font-size:.9rem;margin-top:4px;font-weight:600;opacity:.85}
+  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center}
+  .card{background:var(--glass);border:2px solid rgba(255,255,255,.45);border-radius:16px;padding:14px}
+  .hud{display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap;background:var(--glass);border-radius:12px;border:2px solid rgba(255,255,255,.4);padding:8px 12px;font-weight:800}
+  .hud > div{min-width:120px;text-align:center}
+  .level-title{display:inline-block;background:linear-gradient(135deg,rgba(255,215,0,.98),rgba(255,140,0,.95));
+    border:3px solid rgba(255,215,0,.9);color:#222;padding:8px 16px;border-radius:18px;box-shadow:0 4px 18px rgba(255,215,0,.45);font-weight:900}
+  .desc{font-size:.95rem;background:rgba(240,248,255,.92);border:2px solid rgba(173,216,230,.35);border-radius:10px;padding:8px}
+  #gameCanvas{display:block;margin:0 auto;border-radius:10px;border:3px solid var(--accent);background:#7CFC00;touch-action:none}
+  .progress{background:rgba(255,255,255,.9);border:2px solid rgba(255,255,255,.5);border-radius:12px;overflow:hidden}
+  .bar{height:24px;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;font-weight:900;text-align:center;line-height:24px;transition:width .25s}
+  .controls-wrap{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:10px;justify-items:center;align-items:center}
+  .pad-btn{
+    width:84px;height:84px;max-width:28vw;max-height:28vw;border-radius:16px;border:2px solid #cfcfcf;
+    background:linear-gradient(135deg,#f4f4f4,#dadada);font-size:1.6rem;font-weight:900;box-shadow:0 4px 10px rgba(0,0,0,.1);
+  }
+  .pad-btn:active{background:linear-gradient(135deg,var(--accent),#2f7a35);color:#fff;transform:scale(.97)}
+  .pad-up{grid-column:2;grid-row:1} .pad-left{grid-column:1;grid-row:2}
+  .pad-right{grid-column:3;grid-row:2} .pad-down{grid-column:2;grid-row:2}
+  .btn{cursor:pointer;border:none;font-weight:900;border-radius:10px;padding:10px 16px}
+  .btn-primary{background:linear-gradient(135deg,var(--brand),#F7931E);color:#fff}
+  .btn-green{background:linear-gradient(135deg,var(--accent),#388E3C);color:#fff}
+  .btn-blue{background:linear-gradient(135deg,#2196F3,#1976D2);color:#fff}
+  .comment{background:rgba(255,248,220,.95);border:2px solid rgba(255,215,0,.35);border-radius:10px;padding:8px;font-style:italic}
+  .overlay{display:none;position:fixed;inset:0;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);z-index:20;
+           border:2px solid rgba(255,255,255,.35);border-radius:16px;max-width:min(720px,95vw);margin:auto;padding:20px;box-shadow:0 10px 40px rgba(0,0,0,.32)}
+  .leader-filters{display:flex;gap:8px;justify-content:center;margin-bottom:8px}
+  .filter{background:linear-gradient(135deg,var(--accent),#388E3C);color:#fff;border:none;border-radius:9px;padding:8px 12px;font-weight:800}
+  .filter.active{background:linear-gradient(135deg,var(--brand),#F7931E)}
+  .power-slots{display:flex;gap:10px;justify-content:center}
+  .slot{background:#fff;border:2px solid rgba(0,0,0,.08);border-radius:10px;padding:6px 10px;font-weight:900}
+  .timers{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  .mute{font-size:1.4rem;background:none;border:none}
+  /* Toast */
+  #toast{position:fixed;left:50%;top:16px;transform:translateX(-50%);background:#111;color:#fff;padding:10px 14px;border-radius:12px;font-weight:900;letter-spacing:.3px;opacity:0;pointer-events:none;transition:opacity .2s, transform .2s; z-index:99}
+  #toast.show{opacity:1;transform:translateX(-50%) scale(1.02)}
+  @media (max-width:520px){
+    .pad-btn{width:92px;height:92px;font-size:1.8rem}
+  }
+</style>
 </head>
 <body>
-    <!-- Name Entry Screen -->
-    <div id="nameEntry" class="screen">
-        <h1>🚜 Charlie's Lawn Service</h1>
-        <h2>Championship Edition</h2>
-        <div class="name-input-container">
-            <label for="playerName">Enter Your Name:</label>
-            <input type="text" id="playerName" placeholder="Your Name" maxlength="15">
-            <button id="startGameBtn" type="button" onclick="startGame()">Start Mowing!</button>
-        </div>
-        <div class="leaderboard-preview">
-            <h3>🏆 Waning Way Champions</h3>
-            <div id="leaderboardPreview">
-                <div>1. Charlie Pro - 15,420 pts</div>
-                <div>2. Grass Master - 12,850 pts</div>
-                <div>3. Mowing Legend - 11,200 pts</div>
-            </div>
-        </div>
-        <div class="social-section">
-            <button class="social-btn" type="button" onclick="challengeFriend()">🎯 Challenge a Friend</button>
-            <button class="social-btn" type="button" onclick="shareGame()">📱 Share Game</button>
-        </div>
+
+<div class="screen" id="app">
+  <h1>🚜 Charlie's Lawn Service</h1>
+
+  <!-- Landing -->
+  <div class="card row" id="landing">
+    <div class="card">
+      <div style="text-align:center;font-weight:800;margin-bottom:6px">Enter Your Name</div>
+      <input id="playerName" type="text" maxlength="15" placeholder="Your Name" style="padding:10px 12px;border-radius:10px;border:2px solid var(--accent);font-weight:700;text-align:center;min-width:min(260px,80vw)" />
+      <div class="row" style="margin-top:10px">
+        <button id="startGameBtn" class="btn btn-primary">Start Mowing!</button>
+      </div>
+      <div class="desc" style="margin-top:8px">
+        Cainhoy breeze in his hair, bare feet on the turf, Bud on ice, and a borrowed EGO he swears he hates but actually loves. Ladies' man energy, HOA precision.
+      </div>
+    </div>
+    <div class="card" style="min-width:min(320px,90vw)">
+      <div style="font-weight:900;margin-bottom:6px">🏆 Top Champions</div>
+      <div id="leaderboardPreview">Be the first champion! 🌱</div>
+    </div>
+    <div class="row">
+      <button id="challengeBtn" class="btn btn-green">🎯 Challenge a Friend</button>
+      <button id="shareGameBtn" class="btn btn-green">📱 Share Game</button>
+    </div>
+  </div>
+
+  <!-- Game -->
+  <div id="game" style="display:none">
+    <div class="hud">
+      <div>Player: <span id="hudName"></span></div>
+      <div>Level: <span id="hudLevel">1</span>/12</div>
+      <div>Score: <span id="hudScore">0</span></div>
+      <div>Best: <span id="hudBest">0</span></div>
     </div>
 
-    <!-- Game Screen -->
-    <div id="gameScreen" class="screen" style="display: none;">
-        <div class="game-container">
-            <h1>🚜 Charlie's Lawn Service</h1>
-            
-            <div class="hud">
-                <div>Player: <span id="playerNameDisplay"></span></div>
-                <div>Level: <span id="level">1</span>/12</div>
-                <div>Score: <span id="score">0</span></div>
-            </div>
-            
-            <div class="level-name-container">
-                <div class="level-name" id="levelName">Charlie's Front Yard</div>
-                <div class="level-description" id="levelDescription">Welcome to Charlie's humble abode! Watch out for the pink flamingo and that rusty old truck he refuses to move. 🦩🚛</div>
-            </div>
-            
-            <div class="timer-container">
-                <div class="timer">Total: <span id="timer">0:00</span></div>
-                <div class="level-time">Level: <span id="levelTimer">0:00</span></div>
-                <div class="weather" id="weather">☀️ Perfect</div>
-            </div>
-            
-            <div class="progress-container">
-                <div class="progress-bar" id="progressBar" style="width: 0%;">0% Mowed</div>
-            </div>
-            
-            <div class="charlie-commentary" id="charlieCommentary">
-                "Welcome to the championship! Time to show your mowing skills!" - Charlie
-            </div>
-            
-            <canvas id="gameCanvas" width="400" height="300"></canvas>
-            
-            <div class="instructions" id="instructions">
-                Use WASD or Arrow Keys to move your mower. Mow all the grass to complete the level!
-            </div>
-            
-            <div class="power-ups" id="powerUpsDisplay">
-                <div class="power-up-slot" id="budweiser">🍺<span>0</span></div>
-                <div class="power-up-slot" id="golfcart">🚗<span>0</span></div>
-                <div class="power-up-slot" id="leafblower">🍃<span>0</span></div>
-            </div>
-            
-            <div class="game-controls">
-                <button id="startLevelBtn" class="start-level-btn" type="button" onclick="startLevel()">Start Level 1</button>
-                <button id="shareScreenshotBtn" class="share-btn" type="button" onclick="shareScreenshot()" style="display: none;">📸 Share Victory</button>
-            </div>
-            
-            <div class="controls">
-                <button class="control-btn up" id="upBtn" type="button">▲</button>
-                <button class="control-btn left" id="leftBtn" type="button">◄</button>
-                <button class="control-btn right" id="rightBtn" type="button">►</button>
-                <button class="control-btn down" id="downBtn" type="button">▼</button>
-            </div>
-            
-            <div class="mobile-gestures" id="gestureArea">
-                <div class="gesture-hint">💡 Swipe to move (mobile)</div>
-            </div>
-            
-            <div class="audio-controls">
-                <button type="button" onclick="toggleSound()" id="soundBtn">🔊</button>
-                <button type="button" onclick="toggleMusic()" id="musicBtn">🎵</button>
-            </div>
-        </div>
+    <div class="row">
+      <div class="level-title" id="levelName">Charlie's Front Yard</div>
+    </div>
+    <div class="desc" id="levelDesc">Welcome to Waning Way. Mind the flamingo, the Dodge RAM, and that Bud cooler in the shade. 🦩🚛🍺</div>
+
+    <div class="timers">
+      <div>Total: <span id="timer">0:00</span></div>
+      <div>Level: <span id="levelTimer">0:00</span></div>
+      <div id="weather">☀️ Perfect</div>
+      <div>Left: <span id="countdown">0:00</span></div>
     </div>
 
-    <!-- Level Complete -->
-    <div class="level-complete" id="levelComplete">
-        <h2 style="color: #4CAF50; margin-top: 0;">Level Complete! 🎉</h2>
-        <p>Time: <span id="completionTime">0:00</span></p>
-        <p>Score: <span id="levelScore">0</span></p>
-        <p>Time Bonus: <span id="timeBonus">0</span></p>
-        <div class="achievement-unlock" id="achievementUnlock"></div>
-        <button class="next-btn" type="button" onclick="nextLevel()">Next Level</button>
-        <button class="next-btn" type="button" onclick="shareScreenshot()">📸 Share</button>
+    <div class="progress"><div id="bar" class="bar" style="width:0%">0% Mowed</div></div>
+
+    <div class="comment" id="comment" aria-live="polite">Welcome to the championship. Time to edge like the HOA is watching.</div>
+
+    <canvas id="gameCanvas" width="400" height="300" aria-label="Game field" role="img"></canvas>
+
+    <div class="power-slots">
+      <div class="slot">🍺 <span id="c-bud">0</span></div>
+      <div class="slot">🚗 <span id="c-golf">0</span></div>
+      <div class="slot">🍃 <span id="c-leaf">0</span></div>
     </div>
 
-    <!-- Game Over -->
-    <div class="game-over" id="gameOver">
-        <h2 style="color: #ff4444; margin-top: 0;">Time's Up! ⏰</h2>
-        <p>You ran out of time on Level <span id="failedLevel">1</span></p>
-        <p>Final Score: <span id="finalScore">0</span></p>
-        <div class="charlie-quote">"Don't worry, even the best mowers need practice!" - Charlie</div>
-        <button class="next-btn" type="button" onclick="restartGame()">Try Again</button>
-        <button class="next-btn" type="button" onclick="showLeaderboard()">View Leaderboard</button>
-        <button class="next-btn" type="button" onclick="challengeFriend()">Challenge Friend</button>
+    <div class="row">
+      <button id="startLevelBtn" class="btn btn-green">Start Level 1</button>
+      <button id="pauseBtn" class="btn btn-green" disabled>Pause</button>
+      <button id="shareShot" class="btn btn-blue" style="display:none">📸 Share Victory</button>
+      <button id="soundBtn" class="mute" aria-pressed="true" title="Toggle sound">🔊</button>
+      <button id="musicBtn" class="mute" aria-pressed="true" title="Toggle music">🎵</button>
     </div>
 
-    <!-- Final Results -->
-    <div class="final-results" id="finalResults">
-        <h2 style="color: #FFD700; margin-top: 0;">🏆 Championship Complete! 🏆</h2>
-        <p><strong><span id="winnerName"></span></strong> - Master Mower!</p>
-        <p>Total Time: <span id="totalTime">0:00</span></p>
-        <p>Final Score: <span id="championScore">0</span></p>
-        <div class="charlie-quote">"You mow like a pro! Time for a Budweiser!" - Charlie</div>
-        <div class="level-times" id="levelTimes"></div>
-        <div class="social-share">
-            <button class="next-btn" type="button" onclick="shareChampionship()">🏆 Share Victory</button>
-            <button class="next-btn" type="button" onclick="challengeFriend()">Challenge Friend</button>
-        </div>
-        <button class="next-btn" type="button" onclick="showLeaderboard()">View Leaderboard</button>
-        <button class="next-btn" type="button" onclick="restartGame()">Play Again</button>
+    <!-- On-screen d-pad -->
+    <div class="controls-wrap" id="pad" aria-hidden="false" style="margin-top:6px">
+      <button id="padUp" class="pad-btn pad-up" aria-label="Move up">▲</button>
+      <button id="padLeft" class="pad-btn pad-left" aria-label="Move left">◄</button>
+      <button id="padRight" class="pad-btn pad-right" aria-label="Move right">►</button>
+      <button id="padDown" class="pad-btn pad-down" aria-label="Move down">▼</button>
     </div>
-
-    <!-- Leaderboard -->
-    <div class="leaderboard-screen" id="leaderboardScreen">
-        <h2>🏆 Waning Way Champions 🏆</h2>
-        <div class="leaderboard-filter">
-            <button type="button" onclick="filterLeaderboard('all')" class="filter-btn active">All Time</button>
-            <button type="button" onclick="filterLeaderboard('weekly')" class="filter-btn">This Week</button>
-            <button type="button" onclick="filterLeaderboard('friends')" class="filter-btn">Friends</button>
-        </div>
-        <div id="fullLeaderboard">
-            <div>1. Charlie Pro - 15,420 pts - 8:45</div>
-            <div>2. Grass Master - 12,850 pts - 9:12</div>
-            <div>3. Mowing Legend - 11,200 pts - 9:45</div>
-            <div>4. Lawn Warrior - 10,500 pts - 10:03</div>
-            <div>5. Blade Runner - 9,800 pts - 10:22</div>
-        </div>
-        <button class="next-btn" type="button" onclick="backToGame()">Back to Game</button>
-    </div>
-
-    <!-- Challenge Modal -->
-    <div class="challenge-modal" id="challengeModal" style="display: none;">
-        <div class="modal-content">
-            <h3>🎯 Challenge a Friend!</h3>
-            <p>Share this message with your friend:</p>
-            <textarea id="challengeMessage" readonly>Hey! I just completed Charlie's Lawn Mowing Championship with a score of [SCORE]! Think you can beat me? Try it here: [LINK]
-
-"Better bring your barefoot mowing skills!" - Charlie 🚜🍺</textarea>
-            <button type="button" onclick="copyChallengeMessage()" class="next-btn">📋 Copy Message</button>
-            <button type="button" onclick="closeChallengeModal()" class="next-btn">Close</button>
-        </div>
-    </div>
-
-    <script>
-        // === Game Data ===
-        const levelData = [
-            { 
-                name: "Charlie's Front Yard", 
-                color: "#7CFC00", 
-                commentary: "Easy does it! Just getting warmed up!",
-                description: "Welcome to Charlie's humble abode! Watch out for the pink flamingo and that rusty old truck he refuses to move. The sprinkler system hasn't worked since '92, but hey, at least the grass is green! Time to show this lawn who's boss. 🦩🚛"
-            },
-            { 
-                name: "The Neighbor's Maze", 
-                color: "#32CD32", 
-                commentary: "Watch out for those garden gnomes!",
-                description: "Mrs. Henderson went a little overboard with the garden decorations. Navigate through her army of gnomes, dodge the birdbath she claims is 'artistic,' and whatever you do, DON'T hit her prize-winning roses! She's watching from the window... 👀🌹"
-            },
-            { 
-                name: "Budweiser Memorial Lawn", 
-                color: "#228B22", 
-                commentary: "This one's dedicated to cold ones!",
-                description: "This sacred ground is where Charlie hosts his legendary BBQ parties. Mind the permanent grill marks, avoid the horseshoe pit, and respect the cooler shrine. Legend says if you mow this lawn perfectly, a cold Budweiser appears in your hand! 🍺⚡"
-            },
-            { 
-                name: "The Dandelion Disaster", 
-                color: "#ADFF2F", 
-                commentary: "Those weeds won't mow themselves!",
-                description: "What happens when you skip lawn care for three weeks? THIS NIGHTMARE! Battle through the dandelion army while avoiding Charlie's abandoned tools scattered everywhere. Pro tip: The dandelions fight back, so bring your A-game! 🌼⚔️"
-            },
-            { 
-                name: "Backyard BBQ Cleanup", 
-                color: "#9AFF9A", 
-                commentary: "Grill's hot, grass needs cutting!",
-                description: "The aftermath of Charlie's epic Saturday cookout. Navigate around passed-out lawn chairs, dodge the still-hot grill, and mind the horseshoe tournament remnants. That pool noodle? Nobody knows why it's there either... 🏊‍♂️🔥"
-            },
-            { 
-                name: "The Golf Course Challenge", 
-                color: "#98FB98", 
-                commentary: "Fairway conditions expected!",
-                description: "Charlie's attempt at creating a 'professional' putting green in his backyard. Avoid the sand bunkers (aka cat litter boxes), navigate the water hazards (sprinkler puddles), and respect the 'clubhouse' (tool shed with a beer fridge). ⛳🏌️"
-            },
-            { 
-                name: "Sprinkler System Chaos", 
-                color: "#90EE90", 
-                commentary: "Hope you brought your rain boots!",
-                description: "Charlie tried to fix the sprinklers himself... BIG MISTAKE! Now they spray randomly in all directions. Slip 'n slide through this aquatic obstacle course while avoiding the geysers of doom. Waterproof mascara recommended! 💦😅"
-            },
-            { 
-                name: "The Crabgrass Nightmare", 
-                color: "#8FBC8F", 
-                commentary: "This stuff grows faster than you can cut!",
-                description: "The crabgrass has achieved sentience and declared war on lawn mowers everywhere! These mutant weeds regenerate faster than you can say 'weed whacker.' It's you vs. the botanical apocalypse. May the mulch be with you! 🦀🌱"
-            },
-            { 
-                name: "Championship Clippings", 
-                color: "#7CFC00", 
-                commentary: "Almost there, keep that mower humming!",
-                description: "The pressure is ON! This is where champions are made and lawn care legends are born. Navigate through Charlie's obstacle course of excellence while the neighborhood watches. No pressure, but your lawn care legacy depends on this! 🏆👑"
-            },
-            { 
-                name: "The Final Frontier Lawn", 
-                color: "#6B8E23", 
-                commentary: "One small step for Charlie, one giant leap for lawn care!",
-                description: "Houston, we have a grass problem! This otherworldly lawn defies the laws of physics and common sense. Alien crop circles, mysterious garden formations, and Charlie's UFO-shaped shed await. Truth is out there... in the yard! 🛸👽"
-            },
-            { 
-                name: "Overtime Overgrowth", 
-                color: "#556B2F", 
-                commentary: "Bonus round! Time to prove your worth!",
-                description: "The grass grew three feet overnight! Navigate this jungle of overgrowth while avoiding the 'Lost City of Atlantis' (Charlie's flooded basement entrance). Rumor has it there's buried treasure... or just Charlie's lost car keys. 🗝️🌿"
-            },
-            { 
-                name: "Charlie's Dream Lawn", 
-                color: "#FFD700", 
-                commentary: "The lawn of legends! Make Charlie proud!",
-                description: "The Holy Grail of grass! This perfect lawn exists only in Charlie's dreams and lawn care magazines. Every blade is sacred, every obstacle is a test of worthiness. Complete this, and you'll achieve lawn care nirvana! Enlightenment guaranteed! ✨🧘"
-            }
-        ];
-
-        function getLevelData(level) {
-            const index = Math.min(level - 1, levelData.length - 1);
-            return levelData[index];
-        }
-
-        // === Core Game State ===
-        let gameRunning = false;
-        let currentLevel = 1;
-        let score = 0;
-        let totalTime = 0;
-        let levelStartTime = 0;
-        let playerName = "";
-        let levelTimeLimit = 60;
-        let gameLoopId = null;
-
-        let mower = {
-            x: 50,
-            y: 50,
-            width: 16,
-            height: 16,
-            speed: 120,
-            accel: 350,
-            velX: 0,
-            velY: 0,
-            boosted: false,
-            invincible: false
-        };
-
-        let grassTiles = [];
-        let powerUps = [];
-        let obstacles = [];
-        let weather = { type: "sun", timer: 0 };
-
-        // === Canvas Setup ===
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-
-        function resizeCanvas() {
-            canvas.width = 400;
-            canvas.height = 300;
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
-        // === Utilities ===
-        function randInt(min, max) {
-            return Math.floor(Math.random() * (max - min + 1)) + min;
-        }
-
-        function randChoice(arr) {
-            return arr[Math.floor(Math.random() * arr.length)];
-        }
-
-        function formatTime(t) {
-            const m = Math.floor(t / 60);
-            const s = Math.floor(t % 60);
-            return m + ":" + (s < 10 ? "0" + s : s);
-        }
-
-        function rectIntersect(a, b) {
-            return !(a.x + a.width < b.x || a.x > b.x + b.width || a.y + a.height < b.y || a.y > b.y + b.height);
-        }
-
-        // === Input System ===
-        const keys = {};
-        document.addEventListener('keydown', function(e) {
-            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(e.code)) {
-                e.preventDefault();
-            }
-            keys[e.key] = true;
-            keys[e.code] = true;
-        });
-        document.addEventListener('keyup', function(e) {
-            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(e.code)) {
-                e.preventDefault();
-            }
-            keys[e.key] = false;
-            keys[e.code] = false;
-        });
-
-        // Touch prevention
-        function preventTouchScroll(e) {
-            if (e.target.closest('.controls, .control-btn, #gameCanvas, .audio-controls')) {
-                e.preventDefault();
-            }
-        }
-
-        document.addEventListener('touchstart', preventTouchScroll, { passive: false });
-        document.addEventListener('touchmove', preventTouchScroll, { passive: false });
-        document.addEventListener('touchend', preventTouchScroll, { passive: false });
-
-        // Touch controls for mobile
-        let touchStartX = null, touchStartY = null;
-        canvas.addEventListener('touchstart', function(e) {
-            e.preventDefault();
-            const t = e.touches[0];
-            touchStartX = t.clientX;
-            touchStartY = t.clientY;
-        });
-
-        canvas.addEventListener('touchmove', function(e) {
-            e.preventDefault();
-            if (!touchStartX || !touchStartY) return;
-            const t = e.touches[0];
-            const dx = t.clientX - touchStartX;
-            const dy = t.clientY - touchStartY;
-            
-            keys['ArrowLeft'] = false;
-            keys['ArrowRight'] = false;
-            keys['ArrowUp'] = false;
-            keys['ArrowDown'] = false;
-            
-            if (Math.abs(dx) > Math.abs(dy)) {
-                if (dx > 20) keys['ArrowRight'] = true;
-                if (dx < -20) keys['ArrowLeft'] = true;
-            } else {
-                if (dy > 20) keys['ArrowDown'] = true;
-                if (dy < -20) keys['ArrowUp'] = true;
-            }
-        });
-
-        canvas.addEventListener('touchend', function(e) {
-            e.preventDefault();
-            keys['ArrowLeft'] = keys['ArrowRight'] = keys['ArrowUp'] = keys['ArrowDown'] = false;
-            touchStartX = touchStartY = null;
-        });
-
-        // Control button events
-        function setupControlButtons() {
-            const buttons = [
-                { id: 'upBtn', key: 'ArrowUp' },
-                { id: 'downBtn', key: 'ArrowDown' },
-                { id: 'leftBtn', key: 'ArrowLeft' },
-                { id: 'rightBtn', key: 'ArrowRight' }
-            ];
-            
-            buttons.forEach(function(button) {
-                const btn = document.getElementById(button.id);
-                
-                btn.addEventListener('mousedown', function(e) {
-                    e.preventDefault();
-                    keys[button.key] = true;
-                });
-                btn.addEventListener('mouseup', function(e) {
-                    e.preventDefault();
-                    keys[button.key] = false;
-                });
-                btn.addEventListener('mouseleave', function(e) {
-                    e.preventDefault();
-                    keys[button.key] = false;
-                });
-                
-                btn.addEventListener('touchstart', function(e) {
-                    e.preventDefault();
-                    keys[button.key] = true;
-                });
-                btn.addEventListener('touchend', function(e) {
-                    e.preventDefault();
-                    keys[button.key] = false;
-                });
-                btn.addEventListener('touchcancel', function(e) {
-                    e.preventDefault();
-                    keys[button.key] = false;
-                });
-                
-                btn.addEventListener('contextmenu', function(e) {
-                    e.preventDefault();
-                });
-            });
-        }
-
-        setupControlButtons();
-
-        // === Game Loop ===
-        let lastTimestamp = 0;
-        function gameLoop(timestamp) {
-            if (!gameRunning) return;
-            const delta = Math.min((timestamp - lastTimestamp) / 1000, 0.1);
-            lastTimestamp = timestamp;
-            updateGame(delta);
-            renderGame();
-            gameLoopId = requestAnimationFrame(gameLoop);
-        }
-
-        function updateGame(delta) {
-            handleInput(delta);
-            updateMower(delta);
-            checkGrassCollision();
-            checkPowerUpPickup();
-            checkObstacleCollision();
-            updatePowerUps(delta);
-            updateObstacles(delta);
-            updateWeather(delta);
-            totalTime += delta;
-            updateUI();
-            checkLevelComplete();
-            checkTimeLimit();
-        }
-
-        function handleInput(delta) {
-            let targetVelX = 0;
-            let targetVelY = 0;
-            
-            if (keys['ArrowUp'] || keys['KeyW'] || keys['w']) targetVelY = -mower.speed;
-            if (keys['ArrowDown'] || keys['KeyS'] || keys['s']) targetVelY = mower.speed;
-            if (keys['ArrowLeft'] || keys['KeyA'] || keys['a']) targetVelX = -mower.speed;
-            if (keys['ArrowRight'] || keys['KeyD'] || keys['d']) targetVelX = mower.speed;
-            
-            const accelFactor = Math.min(1, mower.accel * delta / mower.speed);
-            mower.velX += (targetVelX - mower.velX) * accelFactor;
-            mower.velY += (targetVelY - mower.velY) * accelFactor;
-        }
-
-        function updateMower(delta) {
-            mower.x += mower.velX * delta;
-            mower.y += mower.velY * delta;
-            
-            const maxX = canvas.width - mower.width;
-            const maxY = canvas.height - mower.height;
-            mower.x = Math.max(0, Math.min(maxX, mower.x));
-            mower.y = Math.max(0, Math.min(maxY, mower.y));
-        }
-
-        function checkGrassCollision() {
-            for (let i = 0; i < grassTiles.length; i++) {
-                const tile = grassTiles[i];
-                if (!tile.mowed && rectIntersect(mower, tile)) {
-                    tile.mowed = true;
-                    score += 10;
-                }
-            }
-        }
-
-        function checkObstacleCollision() {
-            if (mower.invincible) return;
-            
-            for (let i = 0; i < obstacles.length; i++) {
-                const obstacle = obstacles[i];
-                if (obstacle.active && rectIntersect(mower, obstacle)) {
-                    // Stop the mower completely when hitting obstacle
-                    mower.velX = 0;
-                    mower.velY = 0;
-                    
-                    // Push mower back slightly
-                    const pushBackDistance = 5;
-                    if (mower.x + mower.width/2 < obstacle.x + obstacle.width/2) {
-                        mower.x = Math.max(0, obstacle.x - mower.width - pushBackDistance);
-                    } else {
-                        mower.x = Math.min(canvas.width - mower.width, obstacle.x + obstacle.width + pushBackDistance);
-                    }
-                    
-                    if (mower.y + mower.height/2 < obstacle.y + obstacle.height/2) {
-                        mower.y = Math.max(0, obstacle.y - mower.height - pushBackDistance);
-                    } else {
-                        mower.y = Math.min(canvas.height - mower.height, obstacle.y + obstacle.height + pushBackDistance);
-                    }
-                    
-                    updateCommentary("Whoa there! Go around the " + obstacle.type + "!");
-                    break;
-                }
-            }
-        }
-
-        function checkLevelComplete() {
-            const totalGrass = grassTiles.length;
-            const mowedGrass = grassTiles.filter(function(tile) { return tile.mowed; }).length;
-            const progress = (mowedGrass / totalGrass) * 100;
-            
-            const progressBar = document.getElementById('progressBar');
-            progressBar.style.width = progress + '%';
-            progressBar.textContent = Math.floor(progress) + '% Mowed';
-            
-            if (mowedGrass === totalGrass) {
-                completeLevel();
-            }
-        }
-
-        function checkTimeLimit() {
-            const levelTime = totalTime - levelStartTime;
-            if (levelTime >= levelTimeLimit) {
-                gameOver();
-            }
-        }
-
-        function updatePowerUps(delta) {
-            for (let i = 0; i < powerUps.length; i++) {
-                const p = powerUps[i];
-                if (p.active) {
-                    p.timer -= delta;
-                    if (p.timer <= 0) p.active = false;
-                }
-            }
-        }
-
-        function updateObstacles(delta) {
-            for (let i = 0; i < obstacles.length; i++) {
-                const o = obstacles[i];
-                if (o.type === 'tree') {
-                    o.sway = (o.sway || 0) + delta;
-                    o.offsetX = Math.sin(o.sway) * 2;
-                }
-                if (o.type === 'sprinkler') {
-                    o.rotation = (o.rotation || 0) + delta * 3;
-                }
-            }
-        }
-
-        function updateWeather(delta) {
-            weather.timer -= delta;
-            if (weather.timer <= 0) {
-                weather.type = randChoice(["sun", "rain", "wind"]);
-                weather.timer = randInt(10, 20);
-                updateWeatherDisplay();
-            }
-        }
-
-        function updateWeatherDisplay() {
-            const weatherEl = document.getElementById('weather');
-            switch (weather.type) {
-                case 'sun': weatherEl.textContent = '☀️ Perfect'; break;
-                case 'rain': weatherEl.textContent = '🌧️ Rainy'; break;
-                case 'wind': weatherEl.textContent = '💨 Windy'; break;
-            }
-        }
-
-        function updateUI() {
-            const levelInfo = getLevelData(currentLevel);
-            document.getElementById("score").textContent = score;
-            document.getElementById("level").textContent = currentLevel;
-            document.getElementById("timer").textContent = formatTime(totalTime);
-            document.getElementById("levelTimer").textContent = formatTime(totalTime - levelStartTime);
-            document.getElementById("playerNameDisplay").textContent = playerName;
-            
-            const levelNameEl = document.getElementById("levelName");
-            const levelDescEl = document.getElementById("levelDescription");
-            if (levelNameEl) {
-                levelNameEl.textContent = levelInfo.name;
-            }
-            if (levelDescEl) {
-                levelDescEl.textContent = levelInfo.description;
-            }
-        }
-
-        function renderGame() {
-            const levelInfo = getLevelData(currentLevel);
-            
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            canvas.style.backgroundColor = levelInfo.color;
-            
-            drawGrass();
-            
-            // Draw obstacles
-            for (let i = 0; i < obstacles.length; i++) {
-                const o = obstacles[i];
-                ctx.save();
-                if (o.type === 'tree' && o.offsetX) {
-                    ctx.translate(o.offsetX, 0);
-                }
-                
-                // Draw obstacle shadow for depth
-                ctx.fillStyle = "rgba(0,0,0,0.3)";
-                ctx.fillRect(o.x + 2, o.y + 2, o.width, o.height);
-                
-                // Draw obstacle
-                ctx.font = "20px Arial";
-                ctx.fillText(o.icon, o.x, o.y);
-                ctx.restore();
-            }
-            
-            // Draw power-ups
-            for (let i = 0; i < powerUps.length; i++) {
-                const p = powerUps[i];
-                if (p.active) {
-                    // Add sparkle effect to power-ups
-                    ctx.save();
-                    ctx.translate(p.x + 12, p.y + 12);
-                    ctx.rotate(Date.now() / 1000);
-                    ctx.font = "16px Arial";
-                    ctx.fillText(p.icon, -8, 8);
-                    ctx.restore();
-                }
-            }
-            
-            // Draw realistic mower with Charlie
-            drawCharlieMower();
-            
-            drawWeatherOverlay();
-        }
-
-        function drawCharlieMower() {
-            // Mower body (red)
-            ctx.fillStyle = "#CC0000";
-            ctx.fillRect(mower.x - 2, mower.y - 2, mower.width + 4, mower.height + 4);
-            
-            // Mower deck (darker red)
-            ctx.fillStyle = "#990000";
-            ctx.fillRect(mower.x, mower.y, mower.width, mower.height);
-            
-            // Mower handle
-            ctx.strokeStyle = "#666";
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(mower.x + mower.width/2, mower.y);
-            ctx.lineTo(mower.x + mower.width/2, mower.y - 8);
-            ctx.stroke();
-            
-            // Charlie behind mower (simple stick figure)
-            const charlieX = mower.x + mower.width/2;
-            const charlieY = mower.y - 15;
-            
-            // Charlie's head
-            ctx.fillStyle = "#FFDBAC";
-            ctx.beginPath();
-            ctx.arc(charlieX, charlieY, 4, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Charlie's hat
-            ctx.fillStyle = "#0066CC";
-            ctx.fillRect(charlieX - 5, charlieY - 8, 10, 4);
-            
-            // Charlie's body
-            ctx.strokeStyle = "#4169E1";
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(charlieX, charlieY + 4);
-            ctx.lineTo(charlieX, charlieY + 12);
-            ctx.stroke();
-            
-            // Charlie's arms (holding mower)
-            ctx.beginPath();
-            ctx.moveTo(charlieX - 3, charlieY + 6);
-            ctx.lineTo(charlieX + 3, charlieY + 6);
-            ctx.stroke();
-            
-            // Mower wheels
-            ctx.fillStyle = "#333";
-            ctx.beginPath();
-            ctx.arc(mower.x + 3, mower.y + mower.height, 3, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(mower.x + mower.width - 3, mower.y + mower.height, 3, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Boost/invincibility effects
-            if (mower.boosted) {
-                ctx.strokeStyle = "#FF6B35";
-                ctx.lineWidth = 3;
-                ctx.strokeRect(mower.x - 5, mower.y - 20, mower.width + 10, mower.height + 25);
-            }
-            
-            if (mower.invincible) {
-                ctx.strokeStyle = "#FFD700";
-                ctx.lineWidth = 2;
-                ctx.setLineDash([5, 5]);
-                ctx.strokeRect(mower.x - 3, mower.y - 18, mower.width + 6, mower.height + 23);
-                ctx.setLineDash([]);
-            }
-        }
-
-        function drawGrass() {
-            for (let i = 0; i < grassTiles.length; i++) {
-                const tile = grassTiles[i];
-                ctx.fillStyle = tile.mowed ? "#90EE90" : "#228B22";
-                ctx.fillRect(tile.x, tile.y, tile.width, tile.height);
-                
-                if (!tile.mowed) {
-                    ctx.fillStyle = "#32CD32";
-                    ctx.fillRect(tile.x + 2, tile.y + 2, tile.width - 4, tile.height - 4);
-                }
-            }
-        }
-
-        function drawWeatherOverlay() {
-            if (weather.type === "rain") {
-                ctx.fillStyle = "rgba(0,0,255,0.1)";
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
-                for (let i = 0; i < 20; i++) {
-                    const x = (Date.now() / 10 + i * 50) % canvas.width;
-                    const y = (Date.now() / 5 + i * 30) % canvas.height;
-                    ctx.fillStyle = "rgba(173,216,230,0.7)";
-                    ctx.fillRect(x, y, 2, 8);
-                }
-            } else if (weather.type === "wind") {
-                ctx.fillStyle = "rgba(200,200,200,0.1)";
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-            }
-        }
-
-        // === Power-ups ===
-        function spawnPowerUp(type, x, y) {
-            const icons = { budweiser: "🍺", golfcart: "🚗", leafblower: "🍃" };
-            powerUps.push({
-                type: type,
-                icon: icons[type],
-                x: x, 
-                y: y,
-                width: 24, 
-                height: 24,
-                active: true,
-                timer: 15
-            });
-        }
-
-        function checkPowerUpPickup() {
-            for (let i = 0; i < powerUps.length; i++) {
-                const p = powerUps[i];
-                if (p.active && rectIntersect(mower, p)) {
-                    p.active = false;
-                    activatePowerUp(p.type);
-                }
-            }
-        }
-
-        function activatePowerUp(type) {
-            if (type === "budweiser") {
-                mower.speed = Math.min(200, mower.speed * 1.5);
-                mower.boosted = true;
-                score += 100;
-                setTimeout(function() { 
-                    mower.speed = Math.max(120, mower.speed / 1.5); 
-                    mower.boosted = false; 
-                }, 5000);
-                updateCommentary("Charlie approves! Speed boost activated! 🍺");
-            }
-            
-            if (type === "golfcart") {
-                score += 500;
-                mower.invincible = true;
-                setTimeout(function() { 
-                    mower.invincible = false; 
-                }, 3000);
-                updateCommentary("Found the golf cart! Bonus points and temporary invincibility! 🚗");
-            }
-            
-            if (type === "leafblower") {
-                obstacles = obstacles.filter(function(o) { return o.type !== 'rock'; });
-                score += 200;
-                updateCommentary("Leaf blower cleared the rocks! 🍃");
-            }
-        }
-
-        function updateCommentary(text) {
-            const commentary = document.getElementById('charlieCommentary');
-            commentary.textContent = text;
-            setTimeout(function() {
-                commentary.textContent = getRandomCommentary();
-            }, 3000);
-        }
-
-        function getRandomCommentary() {
-            const comments = [
-                "Keep mowing! You're doing great!",
-                "Watch out for those obstacles!",
-                "Nice technique! Charlie would be proud!",
-                "Don't forget to grab those power-ups!",
-                "Time's ticking! Mow faster!",
-                "Looking good out there, champ!"
-            ];
-            return '"' + randChoice(comments) + '" - Charlie';
-        }
-
-        // === Game Events ===
-        function startGame() {
-            try {
-                playerName = document.getElementById("playerName").value.trim() || "Mower Champ";
-                score = 0;
-                totalTime = 0;
-                currentLevel = 1;
-                
-                document.getElementById("nameEntry").style.display = "none";
-                document.getElementById("gameScreen").style.display = "block";
-                
-                setupLevel(currentLevel);
-                updateUI();
-                updateCommentary("Welcome to the championship! Click 'Start Level' to begin!");
-            } catch (error) {
-                console.error("Error starting game:", error);
-                alert("Error starting game. Please refresh and try again.");
-            }
-        }
-
-        function startLevel() {
-            if (gameRunning) return;
-            
-            const levelInfo = getLevelData(currentLevel);
-            
-            gameRunning = true;
-            levelStartTime = totalTime;
-            
-            const btn = document.getElementById('startLevelBtn');
-            btn.textContent = 'Level in Progress...';
-            btn.disabled = true;
-            
-            spawnRandomStuff();
-            updateCommentary(levelInfo.commentary);
-            
-            lastTimestamp = performance.now();
-            gameLoopId = requestAnimationFrame(gameLoop);
-        }
-
-        function setupLevel(level) {
-            const levelInfo = getLevelData(level);
-            
-            grassTiles = [];
-            powerUps = [];
-            obstacles = [];
-            
-            mower.x = 50;
-            mower.y = 50;
-            mower.velX = 0;
-            mower.velY = 0;
-            mower.speed = 120;
-            mower.boosted = false;
-            mower.invincible = false;
-            
-            const tileSize = 20;
-            const cols = Math.floor(canvas.width / tileSize);
-            const rows = Math.floor(canvas.height / tileSize);
-            
-            for (let r = 0; r < rows; r++) {
-                for (let c = 0; c < cols; c++) {
-                    if (r < 3 && c < 3) continue;
-                    
-                    grassTiles.push({
-                        x: c * tileSize,
-                        y: r * tileSize,
-                        width: tileSize,
-                        height: tileSize,
-                        mowed: false
-                    });
-                }
-            }
-            
-            levelTimeLimit = Math.max(60, 90 - (level * 2));
-            
-            const btn = document.getElementById('startLevelBtn');
-            btn.textContent = 'Start: ' + levelInfo.name;
-            btn.disabled = false;
-            
-            updateCommentary('"Ready for ' + levelInfo.name + '? ' + levelInfo.commentary + '" - Charlie');
-        }
-
-        function spawnRandomStuff() {
-            // Power-ups
-            if (Math.random() < 0.6) {
-                spawnPowerUp("budweiser", randInt(100, canvas.width - 100), randInt(100, canvas.height - 100));
-            }
-            if (Math.random() < 0.5) {
-                spawnPowerUp("golfcart", randInt(100, canvas.width - 100), randInt(100, canvas.height - 100));
-            }
-            if (Math.random() < 0.4) {
-                spawnPowerUp("leafblower", randInt(100, canvas.width - 100), randInt(100, canvas.height - 100));
-            }
-            
-            // Charlie's house (always present)
-            obstacles.push({
-                type: 'house',
-                icon: '🏠',
-                active: true,
-                x: canvas.width - 60,
-                y: 20,
-                width: 40,
-                height: 40
-            });
-            
-            // More obstacles per level (5+ guaranteed)
-            const obstacleTypes = [
-                { type: 'rock', icon: '🪨' },
-                { type: 'tree', icon: '🌳' },
-                { type: 'sprinkler', icon: '💦' },
-                { type: 'gnome', icon: '🧙‍♂️' },
-                { type: 'flamingo', icon: '🦩' },
-                { type: 'grill', icon: '🔥' },
-                { type: 'chair', icon: '🪑' },
-                { type: 'bucket', icon: '🪣' },
-                { type: 'bike', icon: '🚲' },
-                { type: 'barrel', icon: '🛢️' },
-                { type: 'shed', icon: '🏚️' },
-                { type: 'fountain', icon: '⛲' }
-            ];
-            
-            // Minimum 5 obstacles + 1-3 more based on level
-            const numObstacles = 5 + Math.min(currentLevel, 3);
-            
-            for (let i = 0; i < numObstacles; i++) {
-                const obstacleType = randChoice(obstacleTypes);
-                let attempts = 0;
-                let validPosition = false;
-                let x, y;
-                
-                // Try to find a valid position (not overlapping with mower start or house)
-                while (!validPosition && attempts < 20) {
-                    x = randInt(80, canvas.width - 80);
-                    y = randInt(80, canvas.height - 80);
-                    
-                    // Check if position conflicts with mower start area or house
-                    const conflictsWithStart = (x < 100 && y < 100);
-                    const conflictsWithHouse = (x > canvas.width - 100 && y < 60);
-                    
-                    if (!conflictsWithStart && !conflictsWithHouse) {
-                        validPosition = true;
-                    }
-                    attempts++;
-                }
-                
-                if (validPosition) {
-                    obstacles.push({
-                        type: obstacleType.type,
-                        icon: obstacleType.icon,
-                        active: true,
-                        x: x,
-                        y: y,
-                        width: 24,
-                        height: 24,
-                        sway: 0,
-                        rotation: 0
-                    });
-                }
-            }
-        }
-
-        function completeLevel() {
-            gameRunning = false;
-            if (gameLoopId) {
-                cancelAnimationFrame(gameLoopId);
-                gameLoopId = null;
-            }
-            
-            const levelTime = totalTime - levelStartTime;
-            const timeBonus = Math.max(0, (levelTimeLimit - levelTime) * 50);
-            const roundedTimeBonus = Math.round(timeBonus);
-            score += roundedTimeBonus;
-            
-            // Round total score to nearest 10
-            score = Math.round(score / 10) * 10;
-            
-            const levelInfo = getLevelData(currentLevel);
-            
-            document.getElementById("levelComplete").style.display = "block";
-            document.getElementById("levelScore").textContent = score;
-            document.getElementById("completionTime").textContent = formatTime(levelTime);
-            document.getElementById("timeBonus").textContent = roundedTimeBonus;
-            
-            // Update the level complete message
-            const levelCompleteTitle = document.querySelector("#levelComplete h2");
-            levelCompleteTitle.innerHTML = 'You completed <span style="color: #FFD700; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">' + levelInfo.name + '</span>! 🎉';
-            levelCompleteTitle.style.fontSize = "1.3em";
-        }
-
-        function nextLevel() {
-            document.getElementById("levelComplete").style.display = "none";
-            currentLevel++;
-            
-            if (currentLevel > 12) {
-                endGame();
-            } else {
-                setupLevel(currentLevel);
-                updateUI();
-            }
-        }
-
-        function gameOver() {
-            gameRunning = false;
-            if (gameLoopId) {
-                cancelAnimationFrame(gameLoopId);
-                gameLoopId = null;
-            }
-            
-            document.getElementById("gameOver").style.display = "block";
-            document.getElementById("failedLevel").textContent = currentLevel;
-            document.getElementById("finalScore").textContent = score;
-        }
-
-        function endGame() {
-            document.getElementById("finalResults").style.display = "block";
-            document.getElementById("winnerName").textContent = playerName;
-            document.getElementById("championScore").textContent = score;
-            document.getElementById("totalTime").textContent = formatTime(totalTime);
-            
-            const levelTimes = document.getElementById("levelTimes");
-            levelTimes.innerHTML = "<strong>Level Breakdown:</strong><br>" +
-                "Completed " + (currentLevel - 1) + " levels in " + formatTime(totalTime);
-        }
-
-        function restartGame() {
-            document.getElementById("gameOver").style.display = "none";
-            document.getElementById("finalResults").style.display = "none";
-            document.getElementById("levelComplete").style.display = "none";
-            
-            gameRunning = false;
-            if (gameLoopId) {
-                cancelAnimationFrame(gameLoopId);
-                gameLoopId = null;
-            }
-            
-            document.getElementById("gameScreen").style.display = "none";
-            document.getElementById("nameEntry").style.display = "block";
-        }
-
-        // === Social Features ===
-        function challengeFriend() {
-            const modal = document.getElementById("challengeModal");
-            const message = document.getElementById("challengeMessage");
-            const challengeText = "Hey! I just completed Charlie's Lawn Mowing Championship with a score of " + score + "! Think you can beat me? Try it here: " + window.location.href + "\n\n\"Better bring your barefoot mowing skills!\" - Charlie 🚜🍺";
-            
-            message.value = challengeText;
-            modal.style.display = "block";
-        }
-
-        function closeChallengeModal() {
-            document.getElementById("challengeModal").style.display = "none";
-        }
-
-        function copyChallengeMessage() {
-            const message = document.getElementById("challengeMessage");
-            message.select();
-            document.execCommand('copy');
-            alert("Challenge message copied to clipboard!");
-        }
-
-        function shareGame() {
-            if (navigator.share) {
-                navigator.share({
-                    title: "Charlie's Lawn Service Championship",
-                    text: "Try this awesome lawn mowing game!",
-                    url: window.location.href
-                });
-            } else {
-                alert("Share this link: " + window.location.href);
-            }
-        }
-
-        function shareScreenshot() {
-            alert("Screenshot feature coming soon! Share your victory with friends!");
-        }
-
-        function shareChampionship() {
-            if (navigator.share) {
-                navigator.share({
-                    title: "I'm a Lawn Mowing Champion!",
-                    text: "I just completed Charlie's Lawn Service Championship with " + score + " points!",
-                    url: window.location.href
-                });
-            } else {
-                alert("I just completed Charlie's Lawn Service Championship with " + score + " points! " + window.location.href);
-            }
-        }
-
-        function showLeaderboard() {
-            document.getElementById("gameOver").style.display = "none";
-            document.getElementById("finalResults").style.display = "none";
-            document.getElementById("leaderboardScreen").style.display = "block";
-        }
-
-        function backToGame() {
-            document.getElementById("leaderboardScreen").style.display = "none";
-            document.getElementById("nameEntry").style.display = "block";
-        }
-
-        function filterLeaderboard(filter) {
-            document.querySelectorAll('.filter-btn').forEach(function(btn) { 
-                btn.classList.remove('active'); 
-            });
-            event.target.classList.add('active');
-            console.log('Filtering leaderboard by: ' + filter);
-        }
-
-        // === Audio Controls ===
-        let soundEnabled = true;
-        let musicEnabled = true;
-
-        function toggleSound() {
-            soundEnabled = !soundEnabled;
-            const btn = document.getElementById("soundBtn");
-            btn.textContent = soundEnabled ? "🔊" : "🔇";
-        }
-
-        function toggleMusic() {
-            musicEnabled = !musicEnabled;
-            const btn = document.getElementById("musicBtn");
-            btn.textContent = musicEnabled ? "🎵" : "🔇";
-        }
-
-        // === Initialize ===
-        function init() {
-            setupLevel(1);
-            renderGame();
-            updateWeatherDisplay();
-            document.getElementById("playerName").focus();
-            updateCommentary(getRandomCommentary());
-        }
-
-        // Make all functions globally available
-        window.startGame = startGame;
-        window.startLevel = startLevel;
-        window.nextLevel = nextLevel;
-        window.restartGame = restartGame;
-        window.challengeFriend = challengeFriend;
-        window.closeChallengeModal = closeChallengeModal;
-        window.copyChallengeMessage = copyChallengeMessage;
-        window.shareGame = shareGame;
-        window.shareScreenshot = shareScreenshot;
-        window.shareChampionship = shareChampionship;
-        window.showLeaderboard = showLeaderboard;
-        window.backToGame = backToGame;
-        window.filterLeaderboard = filterLeaderboard;
-        window.toggleSound = toggleSound;
-        window.toggleMusic = toggleMusic;
-
-        window.addEventListener('load', init);
-        document.addEventListener('DOMContentLoaded', init);
-    </script>
+  </div>
+</div>
+
+<!-- Overlays -->
+<div class="overlay" id="ovComplete">
+  <h2>Level Complete! 🎉</h2>
+  <p id="ovCongrats" style="font-weight:700"></p>
+  <p>Time: <span id="ovTime">0:00</span></p>
+  <p>Score: <span id="ovScore">0</span></p>
+  <p>Time Bonus: <span id="ovBonus">0</span></p>
+  <div class="row"><button id="nextLevel" class="btn btn-primary">Next Level</button><button id="shareLevel" class="btn btn-blue">📸 Share</button></div>
+</div>
+
+<div class="overlay" id="ovGameOver">
+  <h2>Time's Up! ⏰</h2>
+  <p>You ran out of time on Level <span id="ovFailed">1</span></p>
+  <p>Final Score: <span id="ovFinalScore">0</span></p>
+  <div class="row"><button id="restart" class="btn btn-primary">Try Again</button><button id="showLB" class="btn btn-green">View Leaderboard</button></div>
+</div>
+
+<div class="overlay" id="ovFinalOverlay">
+  <h2>🏆 Championship Complete! 🏆</h2>
+  <p><strong><span id="ovWinner"></span></strong> - Master Mower!</p>
+  <p>Total Time: <span id="ovTotal">0:00</span></p>
+  <p>Final Score: <span id="ovChamp">0</span></p>
+  <div class="row"><button id="shareChamp" class="btn btn-blue">🏆 Share Victory</button><button id="again" class="btn btn-primary">Play Again</button><button id="goLB" class="btn btn-green">View Leaderboard</button></div>
+</div>
+
+<div class="overlay" id="ovLB">
+  <h2>🏆 Waning Way Champions</h2>
+  <div class="leader-filters">
+    <button class="filter active" id="fAll">All Time</button>
+    <button class="filter" id="fWeek">This Week</button>
+    <button class="filter" id="fYou">Your Runs</button>
+  </div>
+  <div id="lbList"></div>
+  <div class="row"><button id="lbBack" class="btn btn-primary">Back</button></div>
+</div>
+
+<div class="overlay" id="ovPause">
+  <h2>⏸ Paused</h2>
+  <p>Press P or Space or tap Resume.</p>
+  <div class="row"><button id="resume" class="btn btn-primary">Resume</button></div>
+</div>
+
+<!-- Pre-level intro overlay -->
+<div class="overlay" id="ovIntro">
+  <h2 id="introTitle">Level Intro</h2>
+  <p id="introDesc" class="desc" style="margin-top:0"></p>
+  <p id="introBody" style="font-size:1.02rem"></p>
+  <div class="row"><button id="introGo" class="btn btn-primary">Let’s mow</button></div>
+</div>
+
+<div class="overlay" id="ovChallenge">
+  <h3>🎯 Challenge a Friend!</h3>
+  <p>Share this message:</p>
+  <textarea id="chText" readonly style="width:min(520px,90vw);height:120px"></textarea>
+  <div class="row"><button id="copyCh" class="btn btn-primary">📋 Copy</button><button id="closeCh" class="btn btn-green">Close</button></div>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+<a id="dl" download="charlies-championship.png" style="display:none"></a>
+
+<script>
+/* -------------------- Data: levels + descriptions -------------------- */
+const levels=[
+  {n:"Barefoot Boulevard",     c:"#7CFC00", d:"Toes out, dew cold, bottle caps everywhere."},
+  {n:"RAM Yard Test Track",    c:"#32CD32", d:"The Dodge RAM is blocking your line. Work around it."},
+  {n:"Golf Cart Grand Prix",   c:"#98FB98", d:"Shortcuts allowed. Avoid the welcome mat pothole."},
+  {n:"Trampoline Tangle",      c:"#9AFF9A", d:"Orbit the trampoline legs. No flips, all stripes."},
+  {n:"Edging Invitational",    c:"#90EE90", d:"Driveway, beds, sidewalk. Sharp lines only."},
+  {n:"Blower Showdown",        c:"#8FBC8F", d:"Blast corners clean. Leave no crumb behind."},
+  {n:"EGO vs Husky Derby",     c:"#ADFF2F", d:"Talks smack about electric, borrows EGO anyway."},
+  {n:"Budweiser Yard Party",   c:"#228B22", d:"Mow around the coolers. Cans are not power ups."},
+  {n:"Waning Way HOA Finals",  c:"#7CFC00", d:"Every neighbor is judging the stripes."},
+  {n:"Lowcountry Crosswind",   c:"#6B8E23", d:"Cainhoy gusts push your deck. Hold the line."},
+  {n:"Overtime Overgrowth",    c:"#556B2F", d:"Bonus jungle. The clippings will tell your story."},
+  {n:"Golden Grass Champion",  c:"#FFD700", d:"Perfect pass, perfect blow, perfect edge."}
+];
+const L=idx=>levels[Math.min(idx-1,levels.length-1)];
+
+/* Randomized intro jokes per level */
+const introsByLevel=[
+  ["Charlie kicks off his sandals and tells the lawn behave. The lawn refuses. You accept.",
+   "Barefoot mode engaged. Stub a toe, gain +5 focus and a new swear word.",
+   "You whisper to the EGO we are just friends. Husqvarna looks jealous."],
+  ["The RAM is parked like a shrine. Mow around it without carving a logo.",
+   "Rub the RAM for +1 horsepower and -10 dignity.",
+   "Neighbors say parallel park. You say parallel stripe."],
+  ["Golf cart is NASCAR ready. Keep straighter lines than your weekend alibi.",
+   "Pit stop in five laps. Bud is for morale, not hydration. Probably.",
+   "Wave to the gallery. It is Charlie’s cousin. He claps loud."],
+  ["Orbit the trampoline legs. Touch one and kids boo in surround sound.",
+   "No flips, all stripes. The trampoline squeaks in fear.",
+   "Remember: trampoline is lava, grass is glory."],
+  ["Edge so crisp it slices gossip. The HOA writes poetry.",
+   "If the line wobbles, call it modern art. Then fix it.",
+   "Chase a stray blade like it owes you money."],
+  ["Time to blow. The leaves, obviously. Mind out of gutter.",
+   "Corners hide confetti. Blast like 3 a.m. party cleanup.",
+   "One good puff and the driveway applauds."],
+  ["Husqvarna shirt, EGO in hand. It is a safe space for contradictions.",
+   "You talk smack about batteries then whisper wow that torque.",
+   "Borrowed gear is faster. That is just physics."],
+  ["Bud pyramid by the porch. Hydrate with your eyes only.",
+   "The cooler calls your name. You say later, champ.",
+   "BBQ smoke gives +2 swagger and -1 visibility."],
+  ["Smile and wave. The HOA is timing your turns.",
+   "Perfect lines earn a slow clap from Mr. Dickson.",
+   "Stripe like a barber for grass."],
+  ["Lowcountry wind steals hats and secrets. Keep both.",
+   "If a gust moves you, call it tactical drifting.",
+   "Bend like grass, mow like steel."],
+  ["The yard grew like it had a coupon. Time to void it.",
+   "It is a jungle. You are the polite machete.",
+   "Clip first, questions later."],
+  ["Final lap. The lawn wants a photo finish.",
+   "Smile. This is the one for the fridge.",
+   "Legend mode on. Husky and EGO both wink."]
+];
+
+/* Randomized congrats per level (uses player name) */
+const congratsByLevel=[
+  lvl1=["{n}, Mr. Dickson saluted with her garden glove. That never happens.",
+        "{n}, barefoot prints and perfect stripes. Museum worthy.",
+        "{n}, the lawn said thank you and learned manners."],
+  lvl2=["{n}, the RAM’s reflection on those lines is illegal in three counties.",
+        "{n}, you parked the stripes better than the truck.",
+        "{n}, zero bumper kisses, maximum bragging rights."],
+  lvl3=["{n}, the golf cart asked for your autograph. Twice.",
+        "{n}, pit crew said you are the reason for the season.",
+        "{n}, your turns were so clean the cooler chilled faster."],
+  lvl4=["{n}, even the trampoline stopped squeaking to admire you.",
+        "{n}, you orbited those legs like a satellite with swag.",
+        "{n}, trampoline kids booed then begged for lessons."],
+  lvl5=["{n}, the edger winked. The sidewalk took notes.",
+        "{n}, those borders have their own zip code now.",
+        "{n}, crisp enough to slice rumors into confetti."],
+  lvl6=["{n}, that blower finale had neighbors clapping like fireworks.",
+        "{n}, you evacuated a leaf colony and they left a thank you note.",
+        "{n}, driveway said it feels ten pounds lighter."],
+  lvl7=["{n}, Husqvarna and EGO both claim you now. Peace talks scheduled.",
+        "{n}, battery and gas shook hands after that run.",
+        "{n}, the EGO blushed. The Husky pretended not to notice."],
+  lvl8=["{n}, Bud pyramid remains untouched. That is self control.",
+        "{n}, you mowed around the party like a secret service agent.",
+        "{n}, cooler called. It says you earned a victory lap."],
+  lvl9=["{n}, the HOA framed your pattern by the pool.",
+        "{n}, Mr. Dickson upgraded your wave to a nod.",
+        "{n}, your stripes passed inspection before you finished."],
+  lvl10=["{n}, Cainhoy winds took a day off out of respect.",
+         "{n}, tactical drift achieved. Style points awarded.",
+         "{n}, even the breeze followed your lines."],
+  lvl11=["{n}, the jungle cried uncle and paid taxes.",
+         "{n}, clippings spelled hero by accident.",
+         "{n}, you just invented polite deforestation."],
+  lvl12=["{n}, crown secured. The lawn genuflected.",
+         "{n}, the golf cart started playing anthem music.",
+         "{n}, Waning Way submitted your lines to the Library of Congress."]
+];
+
+/* -------------------- State -------------------- */
+let running=false, paused=false, lvl=1, score=0, total=0, lvlStart=0;
+let mower={x:50,y:50,w:16,h:16,spd:120,acc:350,vx:0,vy:0,boost:false,inv:false};
+let tiles=[], powerUps=[], obs=[], weather={type:"sun",t:0};
+let name=""; let loop=0, last=0;
+const keys={}; const counts={bud:0,golf:0,leaf:0};
+let introShown=false;
+let budTimer=null;
+
+/* -------------------- Canvas (DPR) -------------------- */
+const cvs=document.getElementById('gameCanvas'), ctx=cvs.getContext('2d');
+function fitCanvas(){
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  const W=400,H=300;
+  cvs.style.width=W+"px"; cvs.style.height=H+"px";
+  cvs.width=Math.round(W*dpr); cvs.height=Math.round(H*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+addEventListener('resize',fitCanvas); fitCanvas();
+
+/* -------------------- Utils -------------------- */
+const ri=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const rc=a=>a[Math.floor(Math.random()*a.length)];
+const fmt=s=>{const m=Math.floor(s/60),sec=Math.floor(s%60);return `${m}:${sec<10?"0":""}${sec}`};
+const hit=(a,b)=>!(a.x+a.w<b.x||a.x>b.x+b.w||a.y+a.h<b.y||a.y>b.y+b.h);
+
+/* -------------------- Input -------------------- */
+addEventListener('keydown',e=>{
+  const block=['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','KeyW','KeyA','KeyS','KeyD','Space'];
+  if(block.includes(e.code)) e.preventDefault();
+  keys[e.key]=keys[e.code]=true;
+  if(e.key==='p'||e.key==='P'||e.code==='Space') togglePause();
+  if(e.key==='Enter'&&!running) handleStartLevelClick();
+});
+addEventListener('keyup',e=>{
+  const block=['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','KeyW','KeyA','KeyS','KeyD'];
+  if(block.includes(e.code)) e.preventDefault();
+  keys[e.key]=keys[e.code]=false;
+});
+[['padUp','ArrowUp'],['padDown','ArrowDown'],['padLeft','ArrowLeft'],['padRight','ArrowRight']].forEach(([id,k])=>{
+  const el=document.getElementById(id);
+  el.addEventListener('pointerdown',e=>{e.preventDefault();keys[k]=true; el.setPointerCapture(e.pointerId)});
+  ['pointerup','pointercancel','pointerleave'].forEach(t=>el.addEventListener(t,()=>{keys[k]=false;}));
+});
+
+/* -------------------- Audio -------------------- */
+let snd=true, music=true, actx=null;
+function audio(){ if(!actx){ try{ actx=new (window.AudioContext||window.webkitAudioContext)(); }catch{} } }
+function beep(f=880,d=.05,v=.15){ if(!snd) return; audio(); if(!actx) return; const o=actx.createOscillator(), g=actx.createGain(); o.type='square'; o.frequency.value=f; g.gain.value=v; o.connect(g).connect(actx.destination); o.start(); o.stop(actx.currentTime+d); }
+function chime(){ beep(660,.07,.18); setTimeout(()=>beep(990,.07,.18),65); }
+function thud(){ beep(130,.07,.2); }
+const vibr=ms=>(navigator.vibrate&&navigator.vibrate(ms));
+
+/* -------------------- Toast -------------------- */
+const toastEl=document.getElementById('toast');
+let toastTimer=null;
+function showToast(msg,ms=1800){
+  toastEl.textContent=msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>toastEl.classList.remove('show'),ms);
+}
+
+/* -------------------- Game Loop -------------------- */
+function frame(ts){
+  if(!running||paused) return;
+  const dt=Math.min((ts-last)/1000,.1); last=ts;
+  step(dt); draw(); loop=requestAnimationFrame(frame);
+}
+function step(d){
+  handle(d); move(d); eatGrass(); pickPower(); collide();
+  tickPowers(d); tickObs(d); tickWeather(d); total+=d; ui(); winCheck(); timeCheck();
+}
+function handle(d){
+  let tx=0,ty=0;
+  if(keys.ArrowUp||keys.KeyW||keys.w) ty=-mower.spd;
+  if(keys.ArrowDown||keys.KeyS||keys.s) ty= mower.spd;
+  if(keys.ArrowLeft||keys.KeyA||keys.a) tx=-mower.spd;
+  if(keys.ArrowRight||keys.KeyD||keys.d) tx= mower.spd;
+  const a=Math.min(1,mower.acc*d/mower.spd);
+  mower.vx+=(tx-mower.vx)*a; mower.vy+=(ty-mower.vy)*a;
+  if(tx===0) mower.vx*=0.92; if(ty===0) mower.vy*=0.92;
+}
+function move(d){
+  let fx=1; if(weather.type==='rain') fx=.9; if(weather.type==='wind') mower.x+=Math.sin(Date.now()/330)*8*d;
+  mower.x+=mower.vx*d*fx; mower.y+=mower.vy*d*fx;
+  mower.x=Math.max(0,Math.min(400-mower.w,mower.x));
+  mower.y=Math.max(0,Math.min(300-mower.h,mower.y));
+}
+function eatGrass(){
+  for(const t of tiles){ if(!t.m && hit(mower,t)){ t.m=true; score+=10; if((t.x+t.y)%40===0) beep(520,.02,.08); } }
+}
+function collide(){
+  if(mower.inv) return;
+  for(const o of obs){
+    if(o.a && hit(mower,o)){
+      mower.vx=mower.vy=0; const pad=5;
+      mower.x=(mower.x+mower.w/2<o.x+o.w/2)?Math.max(0,o.x-mower.w-pad):Math.min(400-mower.w,o.x+o.w+pad);
+      mower.y=(mower.y+mower.h/2<o.y+o.h/2)?Math.max(0,o.y-mower.h-pad):Math.min(300-mower.h,o.y+o.h+pad);
+      setComment(`Easy there. Go around the ${o.t}.`); thud(); vibr(25); break;
+    }
+  }
+}
+function pickPower(){ for(const p of powerUps){ if(p.a&&hit(mower,p)){ p.a=false; power(p.t); } } }
+function tickPowers(d){ for(const p of powerUps){ if(p.a){ p.tt-=d; if(p.tt<=0) p.a=false; } } }
+function tickObs(d){ for(const o of obs){ if(o.t==='tree'){ o.s=(o.s||0)+d; o.off=Math.sin(o.s)*2 } if(o.t==='sprinkler') o.r=(o.r||0)+3*d; } }
+function tickWeather(d){ weather.t-=d; if(weather.t<=0){ weather.type=rc(['sun','rain','wind']); weather.t=ri(12,22); weath(); } }
+function winCheck(){
+  const totalTiles=tiles.length, mowed=tiles.reduce((n,t)=>n+(t.m?1:0),0);
+  const prog=Math.floor((mowed/Math.max(1,totalTiles))*100);
+  if(winCheck.last!==prog){ winCheck.last=prog; bar.style.width=prog+"%"; bar.textContent=prog+"% Mowed"; }
+  if(mowed===totalTiles) levelComplete();
+}
+function timeCheck(){
+  const elapsed=total-lvlStart, left=Math.max(0, limit - elapsed);
+  countdown.textContent=fmt(left);
+  if(left<=10 && (Math.floor(left*10)%5===0)) beep(900,.02,.06);
+  if(elapsed>=limit) gameOver();
+}
+
+/* -------------------- World Gen + Bud spawner -------------------- */
+let limit=60;
+function clearBudTimer(){ if(budTimer){ clearInterval(budTimer); budTimer=null; } }
+function spawnBud(){
+  const start={x:0,y:0,w:100,h:100};
+  for(let tries=0; tries<40; tries++){
+    const p={x:ri(20,400-44), y:ri(20,300-44), w:24, h:24};
+    const overlapsObs = obs.some(o=>hit(p,o)) || hit(p,start);
+    if(!overlapsObs){ powerUps.push({t:'bud',i:'🍺',x:p.x,y:p.y,w:24,h:24,a:true,tt:18}); return; }
+  }
+  powerUps.push({t:'bud',i:'🍺',x:ri(20,360),y:ri(20,260),w:24,h:24,a:true,tt:18});
+}
+function setup(level){
+  tiles=[]; powerUps=[]; obs=[];
+  mower={x:50,y:50,w:16,h:16,spd:120,acc:350,vx:0,vy:0,boost:false,inv:false};
+  introShown=false; clearBudTimer();
+
+  const house={t:'house',i:'🏠',a:true,x:260,y:20,w:110,h:90};
+  obs.push(house);
+
+  const ts=20, cols=Math.floor(400/ts), rows=Math.floor(300/ts);
+  for(let r=0;r<rows;r++) for(let c=0;c<cols;c++){
+    const x=c*ts,y=r*ts; if(r<3&&c<3) continue;
+    const tile={x,y,w:ts,h:ts,m:false};
+    if(hit(tile,house)) continue;
+    tiles.push(tile);
+  }
+
+  const kinds=[['rock','🪨',26,26],['tree','🌳',30,30],['sprinkler','💦',26,26],['gnome','🧙‍♂️',26,26],['flamingo','🦩',28,28],['grill','🔥',26,26],['chair','🪑',26,26],['bucket','🪣',26,26],['bike','🚲',32,24],['barrel','🛢️',26,26],['shed','🏚️',34,28],['fountain','⛲',28,28]];
+  const n=6+Math.min(level,4);
+  for(let i=0;i<n;i++){
+    const k=rc(kinds); let tries=0, placed=false;
+    while(!placed && tries<28){
+      const x=ri(40,400-60), y=ri(50,300-60);
+      const cand={x,y,w:k[2],h:k[3]}; const start={x:0,y:0,w:100,h:100};
+      if(hit(cand,start) || hit(cand,house)) {tries++; continue;}
+      obs.push({t:k[0],i:k[1],a:true,x,y,w:cand.w,h:cand.h});
+      tiles=tiles.filter(t=>!hit(t,cand));
+      placed=true;
+    }
+  }
+
+  // Other powerups
+  const rnd=()=>({x:ri(60,340),y:ri(70,220)});
+  if(Math.random()<.5){const p=rnd(); powerUps.push({t:'golf',i:'🚗',x:p.x,y:p.y,w:24,h:24,a:true,tt:18});}
+  if(Math.random()<.4){const p=rnd(); powerUps.push({t:'leaf',i:'🍃',x:p.x,y:p.y,w:24,h:24,a:true,tt:18});}
+
+  // Budweiser boobster
+  spawnBud(); budTimer=setInterval(spawnBud, 10000);
+
+  limit = Math.round(70 + 25/Math.sqrt(level));
+
+  levelName.textContent=L(level).n;
+  levelDesc.textContent=L(level).d;
+  weath();
+  bar.style.width='0%'; bar.textContent='0% Mowed';
+  startLevelBtn.textContent='Start: '+L(level).n; startLevelBtn.disabled=false;
+  pauseBtn.disabled=true; shareShot.style.display='none';
+}
+function weath(){ weatherEl.textContent = weather.type==='sun'?'☀️ Perfect':weather.type==='rain'?'🌧️ Rainy':'💨 Windy'; }
+
+/* -------------------- Drawing -------------------- */
+function draw(){
+  cvs.style.backgroundColor=L(lvl).c;
+  ctx.clearRect(0,0,400,300);
+
+  for(const t of tiles){
+    ctx.fillStyle=t.m?"#90EE90":"#228B22"; ctx.fillRect(t.x,t.y,t.w,t.h);
+    if(!t.m){ ctx.fillStyle="#32CD32"; ctx.fillRect(t.x+2,t.y+2,t.w-4,t.h-4); }
+  }
+
+  for(const o of obs){
+    ctx.save();
+    if(o.t==='sprinkler'){
+      o.r=(o.r||0)+.04; ctx.translate(o.x+o.w/2,o.y+o.h/2); ctx.rotate(o.r);
+      drawEmoji('💦',-12,10,28); ctx.restore(); continue;
+    }
+    ctx.fillStyle="rgba(0,0,0,.14)"; roundRect(o.x-2,o.y-2,o.w+4,o.h+4,6); ctx.fill();
+    drawEmoji(o.i, o.x+o.w*0.14, o.y+o.h*0.78, Math.max(o.w,o.h));
+    ctx.restore();
+  }
+
+  for(const p of powerUps){ if(p.a){ ctx.save(); ctx.translate(p.x+12,p.y+12); ctx.rotate((Date.now()/500)%(Math.PI*2)); drawEmoji(p.i,-8,8,22); ctx.restore(); } }
+
+  drawMower();
+
+  if(weather.type==="rain"){
+    ctx.fillStyle="rgba(0,0,255,.08)"; ctx.fillRect(0,0,400,300);
+    for(let i=0;i<14;i++){ const x=(Date.now()/10+i*50)%400, y=(Date.now()/5+i*30)%300; ctx.fillStyle="rgba(173,216,230,.7)"; ctx.fillRect(x,y,2,8) }
+  }else if(weather.type==="wind"){ ctx.fillStyle="rgba(200,200,200,.08)"; ctx.fillRect(0,0,400,300); }
+}
+function drawEmoji(e,x,y,size){
+  ctx.font=`${Math.floor(size)}px "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",system-ui,Arial`;
+  ctx.lineWidth=3; ctx.strokeStyle='rgba(255,255,255,.85)';
+  ctx.strokeText(e,x,y); ctx.fillText(e,x,y);
+}
+function roundRect(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+function drawMower(){
+  const m=mower;
+  // EGO green during Bud boost, Husqvarna orange otherwise
+  const base = m.boost ? "#78BE20" : "#FF6A13";
+  const dark = m.boost ? "#5FA61A" : "#C84E00";
+  ctx.fillStyle=dark; ctx.fillRect(m.x-2,m.y-2,m.w+4,m.h+4);
+  ctx.fillStyle=base; ctx.fillRect(m.x,m.y,m.w,m.h);
+  ctx.strokeStyle="#666"; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(m.x+m.w/2,m.y); ctx.lineTo(m.x+m.w/2,m.y-8); ctx.stroke();
+  const cx=m.x+m.w/2, cy=m.y-15;
+  ctx.fillStyle="#FFDBAC"; ctx.beginPath(); ctx.arc(cx,cy,4,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle="#0066CC"; ctx.fillRect(cx-5,cy-8,10,4);
+  ctx.strokeStyle="#4169E1"; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(cx,cy+4); ctx.lineTo(cx,cy+12); ctx.stroke(); ctx.beginPath(); ctx.moveTo(cx-3,cy+6); ctx.lineTo(cx+3,cy+6); ctx.stroke();
+  ctx.fillStyle="#333"; ctx.beginPath(); ctx.arc(m.x+3,m.y+m.h,3,0,Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(m.x+m.w-3,m.y+m.h,3,0,Math.PI*2); ctx.fill();
+  if(m.boost){ ctx.strokeStyle="#2E7D32"; ctx.lineWidth=3; ctx.strokeRect(m.x-5,m.y-20,m.w+10,m.h+25); }
+  if(m.inv){ ctx.strokeStyle="#FFD700"; ctx.lineWidth=2; ctx.setLineDash([5,5]); ctx.strokeRect(m.x-3,m.y-18,m.w+6,m.h+23); ctx.setLineDash([]); }
+}
+
+/* -------------------- Power ups -------------------- */
+function power(t){
+  if(t==='bud'){
+    counts.bud++; mower.spd=Math.min(220,mower.spd*1.5); mower.boost=true; score+=100;
+    setComment("Bud boost activated. Hydration and horsepower.");
+    showToast("bubweiser boobster activated");
+    beep(880,.05,.15); vibr(30);
+    setTimeout(()=>{mower.spd=Math.max(120,mower.spd/1.5); mower.boost=false;},5000);
+  }else if(t==='golf'){
+    counts.golf++; score+=500; mower.inv=true;
+    setComment("Golf cart mode. You are untouchable and oddly stylish.");
+    chime(); vibr(40);
+    setTimeout(()=>mower.inv=false,3200);
+  }else if(t==='leaf'){
+    counts.leaf++; score+=200; obs=obs.filter(o=>o.t!=='rock');
+    setComment("Leaf blower engaged. Rocks cleared. Neighbors impressed.");
+    beep(520,.05,.12); vibr(20);
+  }
+  renderCounts();
+}
+function renderCounts(){ cBud.textContent=counts.bud; cGolf.textContent=counts.golf; cLeaf.textContent=counts.leaf; }
+
+/* -------------------- Commentary -------------------- */
+let comT=null;
+function setComment(t){
+  clearTimeout(comT); comment.textContent=t;
+  comT=setTimeout(()=>{ comment.textContent=rc([
+    "Keep mowing. Barefoot traction is elite.",
+    "Ville wants his EGO back by 5. No pressure.",
+    "Edges so sharp they cut gossip.",
+    "Grab those power ups. The HOA senses weakness.",
+    "Perfect stripes. Golf cart parade later.",
+    "Talk less about electric. Mow more with it."
+  ]); },3000);
+}
+
+/* -------------------- Intros and Congrats -------------------- */
+const ovIntro=document.getElementById('ovIntro');
+const introTitle=document.getElementById('introTitle');
+const introBody=document.getElementById('introBody');
+const introDesc=document.getElementById('introDesc');
+
+function handleStartLevelClick(){
+  if(!introShown){
+    introTitle.textContent=`Level ${lvl}: ${L(lvl).n}`;
+    introDesc.textContent=L(lvl).d;
+    const jokes = introsByLevel[Math.min(lvl-1,introsByLevel.length-1)];
+    introBody.textContent = rc(jokes);
+    ovIntro.style.display='block';
+    introShown=true;
+    return;
+  }
+  startLevelRun();
+}
+function startLevelRun(){
+  if(running) return;
+  ovIntro.style.display='none';
+  running=true; paused=false; ovPause.style.display='none';
+  lvlStart=total; startLevelBtn.textContent='Level in Progress'; startLevelBtn.disabled=true; pauseBtn.disabled=false;
+  last=performance.now(); requestAnimationFrame(frame);
+}
+function genCongrats(player,level){
+  const idx=Math.min(level-1, congratsByLevel.length-1);
+  const pick=rc(congratsByLevel[idx]);
+  return pick.replace('{n}', player);
+}
+
+/* -------------------- Level Flow -------------------- */
+function startGame(){
+  name=(playerName.value||"").trim()||"Mower Champ"; localStorage.setItem('clmc_name',name);
+  score=0; total=0; lvl=1; counts.bud=counts.golf=counts.leaf=0; renderCounts();
+  landing.style.display='none'; game.style.display='block';
+  hudName.textContent=name; hudBest.textContent=localStorage.getItem('clmc_best')||0;
+  setup(lvl); ui(); setComment("Welcome to Waning Way. Tap Start when ready.");
+}
+function startLevel(){ handleStartLevelClick(); } // keep old ID wired
+
+function levelComplete(){
+  running=false; cancelAnimationFrame(loop); clearBudTimer();
+  const lt=total-lvlStart, bonus=Math.round(Math.max(0,(limit-lt)*50)); score=Math.round((score+bonus)/10)*10;
+  ovTime.textContent=fmt(lt); ovScore.textContent=score; ovBonus.textContent=bonus;
+  document.getElementById('ovCongrats').textContent = genCongrats(name,lvl);
+  ovComplete.style.display='block';
+  chime(); vibr(60); record({n:name,s:score,t:total,l:lvl,ts:Date.now()}); previewLB();
+  shareShot.style.display='inline-block';
+}
+function next(){
+  ovComplete.style.display='none'; lvl++; if(lvl>12) finale(); else { setup(lvl); ui(); }
+}
+function gameOver(){
+  running=false; cancelAnimationFrame(loop); clearBudTimer();
+  ovFailed.textContent=lvl; ovFinalScore.textContent=score; ovGameOver.style.display='block';
+  thud(); vibr(80); record({n:name,s:score,t:total,l:lvl,ts:Date.now()}); previewLB();
+}
+function finale(){
+  clearBudTimer();
+  ovWinner.textContent=name; ovTotal.textContent=fmt(total); ovChamp.textContent=score; ovFinalOverlay.style.display='block';
+  const best=Math.max(score, parseInt(localStorage.getItem('clmc_best')||'0',10)); localStorage.setItem('clmc_best',best);
+  chime(); setTimeout(chime,100); record({n:name,s:score,t:total,l:lvl,ts:Date.now()}); previewLB();
+}
+function again(){
+  [ovGameOver,ovFinalOverlay,ovComplete,ovLB,ovPause,ovChallenge,ovIntro].forEach(el=>el.style.display='none');
+  running=false; paused=false; cancelAnimationFrame(loop); clearBudTimer();
+  game.style.display='none'; landing.style.display='flex';
+  counts.bud=counts.golf=counts.leaf=0; renderCounts();
+}
+
+/* -------------------- UI -------------------- */
+function ui(){
+  hudLevel.textContent=lvl; hudScore.textContent=score; hudName.textContent=name;
+  timer.textContent=fmt(total); levelTimer.textContent=fmt(total-lvlStart);
+}
+function togglePause(){
+  if(!running) return;
+  paused=!paused; pauseBtn.textContent=paused?'Resume':'Pause';
+  ovPause.style.display=paused?'block':'none';
+  if(!paused){ last=performance.now(); requestAnimationFrame(frame); }
+}
+
+/* -------------------- Social and Share -------------------- */
+function challenge(){
+  const msg=`I scored ${score} on level ${lvl} in Charlie's Lawn Service. Barefoot, Bud powered, EGO borrowed. Beat me: ${location.href}`;
+  chText.value=msg; ovChallenge.style.display='block';
+}
+async function copyCh(){ try{ await navigator.clipboard.writeText(chText.value); alert('Copied'); }catch{ alert('Copy failed, select and copy'); } }
+function shareGame(){ if(navigator.share){ navigator.share({title:"Charlie's Lawn Service",text:"Try this hilarious lawn game",url:location.href}); }else alert("Share this link: "+location.href); }
+async function shareShotImg(){
+  try{
+    const W=400,H=300,B=56, out=document.createElement('canvas'); out.width=W; out.height=H+B; const c=out.getContext('2d');
+    c.fillStyle='#fff'; c.fillRect(0,0,W,B); c.fillStyle='#2d5016'; c.font='bold 16px Segoe UI, Arial'; c.fillText("🚜 Charlie's Lawn Service - Championship",12,22);
+    c.font='12px Segoe UI, Arial'; c.fillText(`Player: ${name} • Level: ${lvl}/12 • Score: ${score} • Time: ${fmt(total)}`,12,42);
+    c.drawImage(cvs,0,B,400,300);
+    c.fillStyle='rgba(0,0,0,.08)'; c.fillRect(0,out.height-22,W,22); c.fillStyle='#333'; c.font='11px Segoe UI, Arial'; c.fillText('🏆 Waning Way Champions - Can you beat my run?',12,out.height-8);
+    const blob=await new Promise(r=>out.toBlob(r,'image/png',.95)); const file=new File([blob],'charlies-championship.png',{type:'image/png'});
+    if(navigator.canShare?.({files:[file]})){ await navigator.share({title:"Charlie's Lawn Service screenshot",text:`My score: ${score}`,files:[file]}); }
+    else{ const url=URL.createObjectURL(blob); dl.href=url; dl.click(); setTimeout(()=>URL.revokeObjectURL(url),1500); alert('Screenshot saved'); }
+  }catch(e){ console.error(e); alert('Screenshot failed'); }
+}
+function shareChamp(){ if(navigator.share){ navigator.share({title:"I am a Lawn Mowing Champion!",text:`Completed with ${score} points`,url:location.href}); } else alert(`I completed the championship with ${score} points. ${location.href}`); }
+
+/* -------------------- Leaderboard (local) -------------------- */
+const KEY='clmc_runs_v1';
+const loadRuns=()=>{ try{ return JSON.parse(localStorage.getItem(KEY)||'[]'); }catch{ return []; } };
+const saveRuns=a=>localStorage.setItem(KEY,JSON.stringify(a.slice(0,200)));
+function record(run){ const a=loadRuns(); a.unshift(run); a.sort((x,y)=>y.s-x.s || x.t-y.t); saveRuns(a); }
+function previewLB(){
+  const a=loadRuns(); leaderboardPreview.innerHTML = a.length? a.slice(0,3).map((r,i)=>`${i+1}. ${escapeHTML(r.n)} — ${r.s} pts — ${fmt(r.t)}`).join('<br/>') : "Be the first champion! 🌱";
+}
+function week(ts){ const d=new Date(ts), now=new Date(); const day=now.getDay(); const monday=new Date(now.getFullYear(),now.getMonth(),now.getDate()-((day+6)%7)); return d>=monday; }
+function showLB(filter='all'){
+  const all=loadRuns(); let list=[];
+  if(filter==='all') list=all; else if(filter==='week') list=all.filter(r=>week(r.ts)); else if(filter==='you') list=all.filter(r=>r.n===name);
+  lbList.innerHTML = list.length? list.slice(0,30).map((r,i)=>`${i+1}. ${escapeHTML(r.n)} - ${r.s} pts - ${fmt(r.t)}`).join('<br/>') : "No entries yet.";
+  ovLB.style.display='block';
+}
+const escapeHTML=s=>s.replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+
+/* -------------------- DOM refs -------------------- */
+const landing=document.getElementById('landing');
+const game=document.getElementById('game');
+const playerName=document.getElementById('playerName');
+const startGameBtn=document.getElementById('startGameBtn');
+const startLevelBtn=document.getElementById('startLevelBtn');
+const pauseBtn=document.getElementById('pauseBtn');
+const shareShot=document.getElementById('shareShot');
+const cBud=document.getElementById('c-bud'), cGolf=document.getElementById('c-golf'), cLeaf=document.getElementById('c-leaf');
+const comment=document.getElementById('comment');
+const levelName=document.getElementById('levelName'), levelDesc=document.getElementById('levelDesc');
+const hudName=document.getElementById('hudName'), hudLevel=document.getElementById('hudLevel'), hudScore=document.getElementById('hudScore'), hudBest=document.getElementById('hudBest');
+const timer=document.getElementById('timer'), levelTimer=document.getElementById('levelTimer'), weatherEl=document.getElementById('weather'), countdown=document.getElementById('countdown');
+const bar=document.getElementById('bar'); const dl=document.getElementById('dl');
+const ovComplete=document.getElementById('ovComplete'), ovGameOver=document.getElementById('ovGameOver'), ovFinalOverlay=document.getElementById('ovFinalOverlay'), ovLB=document.getElementById('ovLB'), ovPause=document.getElementById('ovPause'), ovChallenge=document.getElementById('ovChallenge');
+const ovTime=document.getElementById('ovTime'), ovScore=document.getElementById('ovScore'), ovBonus=document.getElementById('ovBonus'); const ovFailed=document.getElementById('ovFailed'); const ovFinalScore=document.getElementById('ovFinalScore');
+const nextLevelBtn=document.getElementById('nextLevel'), shareLevel=document.getElementById('shareLevel'), restart=document.getElementById('restart'), showLBbtn=document.getElementById('showLB');
+const againBtn=document.getElementById('again'), goLB=document.getElementById('goLB'); const resumeBtn=document.getElementById('resume');
+const fAll=document.getElementById('fAll'), fWeek=document.getElementById('fWeek'), fYou=document.getElementById('fYou'); const lbList=document.getElementById('lbList'); const lbBack=document.getElementById('lbBack');
+const challengeBtn=document.getElementById('challengeBtn'), shareGameBtn=document.getElementById('shareGameBtn'); const chText=document.getElementById('chText'), copyChBtn=document.getElementById('copyCh'), closeCh=document.getElementById('closeCh');
+const soundBtn=document.getElementById('soundBtn'), musicBtn=document.getElementById('musicBtn');
+const introGo=document.getElementById('introGo');
+
+/* -------------------- Bindings -------------------- */
+function bind(){
+  startGameBtn.addEventListener('click',startGame);
+  playerName.addEventListener('keydown',e=>{ if(e.key==='Enter') startGame(); });
+  startLevelBtn.addEventListener('click',handleStartLevelClick);
+  introGo.addEventListener('click',startLevelRun);
+  pauseBtn.addEventListener('click',togglePause);
+  resumeBtn.addEventListener('click',togglePause);
+  shareShot.addEventListener('click',shareShotImg);
+  nextLevelBtn.addEventListener('click',next);
+  shareLevel.addEventListener('click',shareShotImg);
+  restart.addEventListener('click',again);
+  showLBbtn.addEventListener('click',()=>{ ovGameOver.style.display='none'; showLB('all'); });
+  againBtn.addEventListener('click',again);
+  goLB.addEventListener('click',()=>showLB('all'));
+  fAll.addEventListener('click',()=>{ setF(fAll); showLB('all'); });
+  fWeek.addEventListener('click',()=>{ setF(fWeek); showLB('week'); });
+  fYou.addEventListener('click',()=>{ setF(fYou); showLB('you'); });
+  lbBack.addEventListener('click',()=>ovLB.style.display='none');
+  challengeBtn.addEventListener('click',challenge);
+  shareGameBtn.addEventListener('click',shareGame);
+  copyChBtn.addEventListener('click',copyCh);
+  closeCh.addEventListener('click',()=>ovChallenge.style.display='none');
+  soundBtn.addEventListener('click',()=>{ snd=!snd; soundBtn.textContent=snd?'🔊':'🔇'; soundBtn.setAttribute('aria-pressed',String(snd)); });
+  musicBtn.addEventListener('click',()=>{ music=!music; musicBtn.textContent=music?'🎵':'🔇'; musicBtn.setAttribute('aria-pressed',String(music)); });
+  document.getElementById('shareChamp').addEventListener('click',shareChamp);
+}
+function setF(active){ [fAll,fWeek,fYou].forEach(b=>b.classList.remove('active')); active.classList.add('active'); }
+
+/* -------------------- Safe Init -------------------- */
+function init(){
+  const last=localStorage.getItem('clmc_name'); if(last) playerName.value=last;
+  hudBest.textContent = localStorage.getItem('clmc_best')||0;
+  previewLB();
+  setup(1);
+  setComment("Press P or Space to pause. Use keys or the big on screen arrows.");
+}
+
+/* Run after DOM is ready */
+(function () {
+  function ready(fn){ if (document.readyState !== 'loading') fn(); else document.addEventListener('DOMContentLoaded', fn); }
+  ready(() => {
+    try {
+      bind();
+      init();
+      document.addEventListener('click', (e) => {
+        const t = e.target;
+        if (!t) return;
+        if (t.id === 'startGameBtn') { e.preventDefault(); startGame(); }
+        if (t.id === 'startLevelBtn') { e.preventDefault(); handleStartLevelClick(); }
+      }, { capture: true });
+    } catch (err) { console.error('Init error:', err); }
+  });
+})();
+</script>
 </body>
 </html>
