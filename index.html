@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>Charlie's Lawn Service - Moving Championship</title>
+<title>Charlie's Lawn Service - Waning Way Championship</title>
 <meta name="description" content="Help Charlie mow lawns in this mobile-friendly comedy challenge. 12 levels, power ups, obstacles, and a local leaderboard." />
 <style>
   :root{
@@ -253,7 +253,7 @@ const introsByLevel=[
    "The cooler calls your name. You say later, champ.",
    "BBQ smoke gives +2 swagger and -1 visibility."],
   ["Smile and wave. The HOA is timing your turns.",
-   "Perfect lines earn a slow clap from Mr. Dickson.",
+   "Perfect lines earn a slow clap from Mrs. Henderson.",
    "Stripe like a barber for grass."],
   ["Lowcountry wind steals hats and secrets. Keep both.",
    "If a gust moves you, call it tactical drifting.",
@@ -268,42 +268,42 @@ const introsByLevel=[
 
 /* Randomized congrats per level (uses player name) */
 const congratsByLevel=[
-  lvl1=["{n}, Mr. Dickson saluted with her garden glove. That never happens.",
-        "{n}, barefoot prints and perfect stripes. Museum worthy.",
-        "{n}, the lawn said thank you and learned manners."],
-  lvl2=["{n}, the RAM’s reflection on those lines is illegal in three counties.",
-        "{n}, you parked the stripes better than the truck.",
-        "{n}, zero bumper kisses, maximum bragging rights."],
-  lvl3=["{n}, the golf cart asked for your autograph. Twice.",
-        "{n}, pit crew said you are the reason for the season.",
-        "{n}, your turns were so clean the cooler chilled faster."],
-  lvl4=["{n}, even the trampoline stopped squeaking to admire you.",
-        "{n}, you orbited those legs like a satellite with swag.",
-        "{n}, trampoline kids booed then begged for lessons."],
-  lvl5=["{n}, the edger winked. The sidewalk took notes.",
-        "{n}, those borders have their own zip code now.",
-        "{n}, crisp enough to slice rumors into confetti."],
-  lvl6=["{n}, that blower finale had neighbors clapping like fireworks.",
-        "{n}, you evacuated a leaf colony and they left a thank you note.",
-        "{n}, driveway said it feels ten pounds lighter."],
-  lvl7=["{n}, Husqvarna and EGO both claim you now. Peace talks scheduled.",
-        "{n}, battery and gas shook hands after that run.",
-        "{n}, the EGO blushed. The Husky pretended not to notice."],
-  lvl8=["{n}, Bud pyramid remains untouched. That is self control.",
-        "{n}, you mowed around the party like a secret service agent.",
-        "{n}, cooler called. It says you earned a victory lap."],
-  lvl9=["{n}, the HOA framed your pattern by the pool.",
-        "{n}, Mr. Dickson upgraded your wave to a nod.",
-        "{n}, your stripes passed inspection before you finished."],
-  lvl10=["{n}, Cainhoy winds took a day off out of respect.",
-         "{n}, tactical drift achieved. Style points awarded.",
-         "{n}, even the breeze followed your lines."],
-  lvl11=["{n}, the jungle cried uncle and paid taxes.",
-         "{n}, clippings spelled hero by accident.",
-         "{n}, you just invented polite deforestation."],
-  lvl12=["{n}, crown secured. The lawn genuflected.",
-         "{n}, the golf cart started playing anthem music.",
-         "{n}, Waning Way submitted your lines to the Library of Congress."]
+  ["{n}, Mrs. Henderson saluted with her garden glove. That never happens.",
+   "{n}, barefoot prints and perfect stripes. Museum worthy.",
+   "{n}, the lawn said thank you and learned manners."],
+  ["{n}, the RAM’s reflection on those lines is illegal in three counties.",
+   "{n}, you parked the stripes better than the truck.",
+   "{n}, zero bumper kisses, maximum bragging rights."],
+  ["{n}, the golf cart asked for your autograph. Twice.",
+   "{n}, pit crew said you are the reason for the season.",
+   "{n}, your turns were so clean the cooler chilled faster."],
+  ["{n}, even the trampoline stopped squeaking to admire you.",
+   "{n}, you orbited those legs like a satellite with swag.",
+   "{n}, trampoline kids booed then begged for lessons."],
+  ["{n}, the edger winked. The sidewalk took notes.",
+   "{n}, those borders have their own zip code now.",
+   "{n}, crisp enough to slice rumors into confetti."],
+  ["{n}, that blower finale had neighbors clapping like fireworks.",
+   "{n}, you evacuated a leaf colony and they left a thank you note.",
+   "{n}, driveway said it feels ten pounds lighter."],
+  ["{n}, Husqvarna and EGO both claim you now. Peace talks scheduled.",
+   "{n}, battery and gas shook hands after that run.",
+   "{n}, the EGO blushed. The Husky pretended not to notice."],
+  ["{n}, Bud pyramid remains untouched. That is self control.",
+   "{n}, you mowed around the party like a secret service agent.",
+   "{n}, cooler called. It says you earned a victory lap."],
+  ["{n}, the HOA framed your pattern by the pool.",
+   "{n}, Mrs. Henderson upgraded your wave to a nod.",
+   "{n}, your stripes passed inspection before you finished."],
+  ["{n}, Cainhoy winds took a day off out of respect.",
+   "{n}, tactical drift achieved. Style points awarded.",
+   "{n}, even the breeze followed your lines."],
+  ["{n}, the jungle cried uncle and paid taxes.",
+   "{n}, clippings spelled hero by accident.",
+   "{n}, you just invented polite deforestation."],
+  ["{n}, crown secured. The lawn genuflected.",
+   "{n}, the golf cart started playing anthem music.",
+   "{n}, Waning Way submitted your lines to the Library of Congress."]
 ];
 
 /* -------------------- State -------------------- */
@@ -345,10 +345,44 @@ addEventListener('keyup',e=>{
   if(block.includes(e.code)) e.preventDefault();
   keys[e.key]=keys[e.code]=false;
 });
+
+/* On-screen D-pad */
 [['padUp','ArrowUp'],['padDown','ArrowDown'],['padLeft','ArrowLeft'],['padRight','ArrowRight']].forEach(([id,k])=>{
   const el=document.getElementById(id);
   el.addEventListener('pointerdown',e=>{e.preventDefault();keys[k]=true; el.setPointerCapture(e.pointerId)});
   ['pointerup','pointercancel','pointerleave'].forEach(t=>el.addEventListener(t,()=>{keys[k]=false;}));
+});
+
+/* NEW: Canvas virtual joystick (press/drag anywhere on grass) */
+let canvasPad={active:false,id:null,startX:0,startY:0};
+const DEAD=10, BIAS=6; // px thresholds
+function setDirFromDelta(dx,dy){
+  const ax=Math.abs(dx), ay=Math.abs(dy);
+  const up= ay>DEAD && dy<0 && ay>=ax-BIAS;
+  const down= ay>DEAD && dy>0 && ay>=ax-BIAS;
+  const left= ax>DEAD && dx<0 && ax>=ay-BIAS;
+  const right= ax>DEAD && dx>0 && ax>=ay-BIAS;
+  keys.ArrowUp=up; keys.ArrowDown=down; keys.ArrowLeft=left; keys.ArrowRight=right;
+}
+cvs.addEventListener('pointerdown',e=>{
+  e.preventDefault();
+  canvasPad.active=true; canvasPad.id=e.pointerId;
+  canvasPad.startX=e.clientX; canvasPad.startY=e.clientY;
+  cvs.setPointerCapture(e.pointerId);
+  setDirFromDelta(0,0);
+});
+cvs.addEventListener('pointermove',e=>{
+  if(!canvasPad.active || e.pointerId!==canvasPad.id) return;
+  e.preventDefault();
+  setDirFromDelta(e.clientX-canvasPad.startX, e.clientY-canvasPad.startY);
+});
+['pointerup','pointercancel','pointerleave'].forEach(t=>{
+  cvs.addEventListener(t, e=>{
+    if(e.pointerId!==canvasPad.id) return;
+    e.preventDefault();
+    canvasPad.active=false; canvasPad.id=null;
+    keys.ArrowUp=keys.ArrowDown=keys.ArrowLeft=keys.ArrowRight=false;
+  });
 });
 
 /* -------------------- Audio -------------------- */
@@ -576,7 +610,7 @@ function setComment(t){
   ]); },3000);
 }
 
-/* -------------------- Intros and Congrats -------------------- */
+/* -------------------- Intros & Congrats -------------------- */
 const ovIntro=document.getElementById('ovIntro');
 const introTitle=document.getElementById('introTitle');
 const introBody=document.getElementById('introBody');
@@ -602,9 +636,8 @@ function startLevelRun(){
   last=performance.now(); requestAnimationFrame(frame);
 }
 function genCongrats(player,level){
-  const idx=Math.min(level-1, congratsByLevel.length-1);
-  const pick=rc(congratsByLevel[idx]);
-  return pick.replace('{n}', player);
+  const pool=congratsByLevel[Math.min(level-1,congratsByLevel.length-1)];
+  return rc(pool).replace('{n}', player);
 }
 
 /* -------------------- Level Flow -------------------- */
@@ -615,7 +648,7 @@ function startGame(){
   hudName.textContent=name; hudBest.textContent=localStorage.getItem('clmc_best')||0;
   setup(lvl); ui(); setComment("Welcome to Waning Way. Tap Start when ready.");
 }
-function startLevel(){ handleStartLevelClick(); } // keep old ID wired
+function startLevel(){ handleStartLevelClick(); }
 
 function levelComplete(){
   running=false; cancelAnimationFrame(loop); clearBudTimer();
@@ -659,7 +692,7 @@ function togglePause(){
   if(!paused){ last=performance.now(); requestAnimationFrame(frame); }
 }
 
-/* -------------------- Social and Share -------------------- */
+/* -------------------- Social & Share -------------------- */
 function challenge(){
   const msg=`I scored ${score} on level ${lvl} in Charlie's Lawn Service. Barefoot, Bud powered, EGO borrowed. Beat me: ${location.href}`;
   chText.value=msg; ovChallenge.style.display='block';
@@ -755,7 +788,7 @@ function init(){
   hudBest.textContent = localStorage.getItem('clmc_best')||0;
   previewLB();
   setup(1);
-  setComment("Press P or Space to pause. Use keys or the big on screen arrows.");
+  setComment("Press P or Space to pause. Use keys, D-pad, or drag your thumb on the grass.");
 }
 
 /* Run after DOM is ready */
