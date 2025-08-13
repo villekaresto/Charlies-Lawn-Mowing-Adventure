@@ -342,6 +342,8 @@ let budTimer=null;
 /* -------------------- Canvas (DPR + responsive scaling) -------------------- */
 const BASE_W=400, BASE_H=300; // internal game world
 const cvs=document.getElementById('gameCanvas'), ctx=cvs.getContext('2d');
+const staticCvs=document.createElement('canvas'), staticCtx=staticCvs.getContext('2d');
+staticCvs.width=BASE_W; staticCvs.height=BASE_H;
 const mowerSheet = new Image();
 const tileShadeGrad=ctx.createLinearGradient(0,0,0,20);
 tileShadeGrad.addColorStop(0,'rgba(0,0,0,0)');
@@ -369,6 +371,18 @@ const ri=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
 const rc=a=>a[Math.floor(Math.random()*a.length)];
 const fmt=s=>{const m=Math.floor(s/60),sec=Math.floor(s%60);return `${m}:${sec<10?"0":""}${sec}`};
 const hit=(a,b)=>!(a.x+a.w<b.x||a.x>b.x+b.w||a.y+a.h<b.y||a.y>b.y+b.h);
+
+const IMGS={};
+function preloadImages(){
+  const names=['rock','tree','sprinkler','gnome','flamingo','grill','chair','bucket','bike','barrel','shed','fountain','bud','golf','leaf','house'];
+  const placeholder='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiI+PHJlY3Qgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiBmaWxsPSIjNzc3Ii8+PC9zdmc+';
+  for(const n of names){
+    const img=new Image();
+    img.src=placeholder;
+    IMGS[n]=img;
+  }
+}
+preloadImages();
 
 /* -------------------- Input -------------------- */
 addEventListener('keydown',e=>{
@@ -562,16 +576,16 @@ function spawnBud(){
   for(let tries=0; tries<40; tries++){
     const p={x:ri(20,BASE_W-44), y:ri(20,BASE_H-44), w:24, h:24};
     const overlapsObs = obs.some(o=>o.a && hit(p,o)) || hit(p,start);
-    if(!overlapsObs){ powerUps.push({t:'bud',i:'🍺',x:p.x,y:p.y,w:24,h:24,a:true,tt:18}); return; }
+    if(!overlapsObs){ powerUps.push({t:'bud',img:IMGS.bud,x:p.x,y:p.y,w:24,h:24,a:true,tt:18}); return; }
   }
-  powerUps.push({t:'bud',i:'🍺',x:ri(20,BASE_W-40),y:ri(20,BASE_H-40),w:24,h:24,a:true,tt:18});
+  powerUps.push({t:'bud',img:IMGS.bud,x:ri(20,BASE_W-40),y:ri(20,BASE_H-40),w:24,h:24,a:true,tt:18});
 }
 function setup(level){
   tiles=[]; powerUps=[]; obs=[];
   mower={x:50,y:50,w:16,h:16,spd:120,acc:350,vx:0,vy:0,boost:false,inv:false,dir:'down',frame:0,anim:0};
   introShown=false; clearBudTimer();
 
-  const house={t:'house',i:'🏠',a:true,x:260,y:20,w:110,h:90};
+  const house={t:'house',img:IMGS.house,a:true,x:260,y:20,w:110,h:90};
   obs.push(house);
 
   const ts=20, cols=Math.floor(BASE_W/ts), rows=Math.floor(BASE_H/ts);
@@ -582,7 +596,7 @@ function setup(level){
     tiles.push(tile);
   }
 
-  const kinds=[['rock','🪨',26,26],['tree','🌳',30,30],['sprinkler','💦',26,26],['gnome','🧙‍♂️',26,26],['flamingo','🦩',28,28],['grill','🔥',26,26],['chair','🪑',26,26],['bucket','🪣',26,26],['bike','🚲',32,24],['barrel','🛢️',26,26],['shed','🏚️',34,28],['fountain','⛲',28,28]];
+  const kinds=[['rock',26,26],['tree',30,30],['sprinkler',26,26],['gnome',26,26],['flamingo',28,28],['grill',26,26],['chair',26,26],['bucket',26,26],['bike',32,24],['barrel',26,26],['shed',34,28],['fountain',28,28]];
   const n=6+Math.min(level,4);
   for(let i=0;i<n;i++){
     const k=rc(kinds); let tries=0, placed=false;
@@ -590,7 +604,7 @@ function setup(level){
       const x=ri(40,BASE_W-60), y=ri(50,BASE_H-60);
       const cand={x,y,w:k[2],h:k[3]}; const start={x:0,y:0,w:100,h:100};
       if(hit(cand,start) || hit(cand,house)) {tries++; continue;}
-      obs.push({t:k[0],i:k[1],a:true,x,y,w:cand.w,h:cand.h});
+      obs.push({t:k[0],img:IMGS[k[0]],a:true,x,y,w:cand.w,h:cand.h});
       tiles=tiles.filter(t=>!hit(t,cand));
       placed=true;
     }
@@ -598,11 +612,13 @@ function setup(level){
 
   // Other powerups
   const rnd=()=>({x:ri(60,BASE_W-60),y:ri(70,BASE_H-80)});
-  if(Math.random()<.5){const p=rnd(); powerUps.push({t:'golf',i:'🚗',x:p.x,y:p.y,w:24,h:24,a:true,tt:18});}
-  if(Math.random()<.4){const p=rnd(); powerUps.push({t:'leaf',i:'🍃',x:p.x,y:p.y,w:24,h:24,a:true,tt:18});}
+  if(Math.random()<.5){const p=rnd(); powerUps.push({t:'golf',img:IMGS.golf,x:p.x,y:p.y,w:24,h:24,a:true,tt:18});}
+  if(Math.random()<.4){const p=rnd(); powerUps.push({t:'leaf',img:IMGS.leaf,x:p.x,y:p.y,w:24,h:24,a:true,tt:18});}
 
   // Budweiser boobster every 10s
   spawnBud(); budTimer=setInterval(spawnBud, 10000);
+
+  buildStatic();
 
   limit = Math.round(70 + 25/Math.sqrt(level));
 
@@ -616,28 +632,57 @@ function setup(level){
 function weath(){ weatherEl.textContent = weather.type==='sun'?'☀️ Perfect':weather.type==='rain'?'🌧️ Rainy':'💨 Windy'; }
 
 /* -------------------- Drawing -------------------- */
+function drawTileStatic(t){
+  staticCtx.fillStyle="#228B22"; staticCtx.fillRect(t.x,t.y,t.w,t.h);
+  staticCtx.fillStyle="#32CD32"; staticCtx.fillRect(t.x+2,t.y+2,t.w-4,t.h-4);
+  staticCtx.fillStyle=tileShadeGrad; staticCtx.fillRect(t.x,t.y,t.w,t.h);
+}
+function buildStatic(){
+  staticCtx.clearRect(0,0,BASE_W,BASE_H);
+  for(const t of tiles){ drawTileStatic(t); }
+}
 function draw(){
   cvs.style.backgroundColor=L(lvl).c;
   ctx.clearRect(0,0,BASE_W,BASE_H);
+  ctx.drawImage(staticCvs,0,0);
 
   for(const t of tiles){
-    ctx.fillStyle=t.m?"#90EE90":"#228B22"; ctx.fillRect(t.x,t.y,t.w,t.h);
-    if(!t.m){ ctx.fillStyle="#32CD32"; ctx.fillRect(t.x+2,t.y+2,t.w-4,t.h-4); }
+    if(t.m){
+      ctx.fillStyle="#90EE90"; ctx.fillRect(t.x,t.y,t.w,t.h);
+      ctx.save(); ctx.translate(t.x,t.y); ctx.fillStyle=tileShadeGrad; ctx.fillRect(0,0,t.w,t.h); ctx.restore();
+    }
   }
 
   for(const o of obs){
     if(!o.a) continue;
     ctx.save();
+    ctx.shadowColor="rgba(0,0,0,0.25)";
+    ctx.shadowBlur=6;
+    ctx.shadowOffsetY=2;
     if(o.t==='sprinkler'){
-      o.r=(o.r||0)+.04; ctx.translate(o.x+o.w/2,o.y+o.h/2); ctx.rotate(o.r);
-      drawEmoji('💦',-12,10,28); ctx.restore(); continue;
+      o.r=(o.r||0)+.04;
+      ctx.translate(o.x+o.w/2,o.y+o.h/2);
+      ctx.rotate(o.r);
+      ctx.drawImage(o.img,-o.w/2,-o.h/2,o.w,o.h);
+      ctx.restore();
+      continue;
     }
-    ctx.fillStyle="rgba(0,0,0,.14)"; roundRect(o.x-2,o.y-2,o.w+4,o.h+4,6); ctx.fill();
-    drawEmoji(o.i, o.x+o.w*0.14, o.y+o.h*0.78, Math.max(o.w,o.h));
+    ctx.fillStyle="rgba(0,0,0,.14)";
+    roundRect(o.x-2,o.y-2,o.w+4,o.h+4,6);
+    ctx.fill();
+    ctx.drawImage(o.img,o.x,o.y,o.w,o.h);
     ctx.restore();
   }
 
-  for(const p of powerUps){ if(p.a){ ctx.save(); ctx.translate(p.x+12,p.y+12); ctx.rotate((Date.now()/500)%(Math.PI*2)); drawEmoji(p.i,-8,8,22); ctx.restore(); } }
+  for(const p of powerUps){
+    if(p.a){
+      ctx.save();
+      ctx.translate(p.x+p.w/2,p.y+p.h/2);
+      ctx.rotate((Date.now()/500)%(Math.PI*2));
+      ctx.drawImage(p.img,-p.w/2,-p.h/2,p.w,p.h);
+      ctx.restore();
+    }
+  }
 
   drawMower();
 
@@ -645,13 +690,8 @@ function draw(){
     ctx.fillStyle="rgba(0,0,255,.08)"; ctx.fillRect(0,0,BASE_W,BASE_H);
     for(let i=0;i<14;i++){ const x=(Date.now()/10+i*50)%BASE_W, y=(Date.now()/5+i*30)%BASE_H; ctx.fillStyle="rgba(173,216,230,.7)"; ctx.fillRect(x,y,2,8) }
   }else if(weather.type==="wind"){ ctx.fillStyle="rgba(200,200,200,.08)"; ctx.fillRect(0,0,BASE_W,BASE_H); }
-}
-function drawEmoji(e,x,y,size){
-  ctx.font=`${Math.floor(size)}px "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",system-ui,Arial`;
-  ctx.lineWidth=3; ctx.strokeStyle='rgba(255,255,255,.85)';
-  ctx.strokeText(e,x,y); ctx.fillText(e,x,y);
-}
-function roundRect(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+  }
+  function roundRect(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
 function drawMower(){
   const m=mower;
   ctx.save();
