@@ -58,6 +58,11 @@
 
   .controls-wrap{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:10px;justify-items:center;align-items:center;
     touch-action:none; -ms-touch-action:none;  /* prevent scroll/zoom while pressing d-pad */
+    margin-bottom:10px;
+  }
+
+  @media (pointer:coarse){
+    .controls-wrap{margin-bottom:calc(10px + env(safe-area-inset-bottom,0) + 8vh);}
   }
   .pad-btn{
     width:84px;height:84px;max-width:28vw;max-height:28vw;border-radius:16px;border:2px solid #cfcfcf;
