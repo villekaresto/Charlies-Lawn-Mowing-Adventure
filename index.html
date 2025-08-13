@@ -10,13 +10,25 @@
 <link rel="preload" href="assets/powerups/bud.svg" as="image" type="image/svg+xml">
 <link rel="preload" href="assets/powerups/golf-cart.svg" as="image" type="image/svg+xml">
 <link rel="preload" href="assets/powerups/leaf.svg" as="image" type="image/svg+xml">
+<link rel="preload" href="assets/obstacles/rock.svg" as="image" type="image/svg+xml">
+<link rel="preload" href="assets/obstacles/tree.svg" as="image" type="image/svg+xml">
+<link rel="preload" href="assets/obstacles/sprinkler.svg" as="image" type="image/svg+xml">
+<link rel="preload" href="assets/obstacles/gnome.svg" as="image" type="image/svg+xml">
+<link rel="preload" href="assets/obstacles/flamingo.svg" as="image" type="image/svg+xml">
+<link rel="preload" href="assets/obstacles/grill.svg" as="image" type="image/svg+xml">
+<link rel="preload" href="assets/obstacles/chair.svg" as="image" type="image/svg+xml">
+<link rel="preload" href="assets/obstacles/bucket.svg" as="image" type="image/svg+xml">
+<link rel="preload" href="assets/obstacles/bike.svg" as="image" type="image/svg+xml">
+<link rel="preload" href="assets/obstacles/barrel.svg" as="image" type="image/svg+xml">
+<link rel="preload" href="assets/obstacles/shed.svg" as="image" type="image/svg+xml">
+<link rel="preload" href="assets/obstacles/fountain.svg" as="image" type="image/svg+xml">
 <style>
   :root{
     --bg1:#0C2340; --bg2:#1F3B73; --bg3:#B9975B; --sky:#87CEEB;
     --brand:#0C2340; --accent:#B9975B; --accent2:#E0CFA9; --accent-dark:#8A6D2A;
     --card:rgba(255,255,255,.95); --glass:rgba(255,255,255,.85);
   }
-  html,body{height:100%}
+  html,body{height:100%; overscroll-behavior:none}
   *{
     box-sizing:border-box;
     user-select:none; -webkit-user-select:none; /* iOS */
@@ -372,6 +384,11 @@ let introShown=false;
 let budTimer=null;
 let budBoostTimeout=null, golfInvTimeout=null;
 
+function clearPowerTimers(){
+  if (budBoostTimeout){ clearTimeout(budBoostTimeout); budBoostTimeout=null; }
+  if (golfInvTimeout){ clearTimeout(golfInvTimeout); golfInvTimeout=null; }
+}
+
 function loadImg(src){
   const img = new Image();
   img.addEventListener('error', () => {
@@ -538,7 +555,8 @@ function audio(){ if(!actx){ try{ actx=new (window.AudioContext||window.webkitAu
 function beep(f=880,d=.05,v=.15){ if(!snd) return; audio(); if(!actx) return; const o=actx.createOscillator(), g=actx.createGain(); o.type='square'; o.frequency.value=f; g.gain.value=v; o.connect(g).connect(actx.destination); o.start(); o.stop(actx.currentTime+d); }
 function chime(){ beep(660,.07,.18); setTimeout(()=>beep(990,.07,.18),65); }
 function thud(){ beep(130,.07,.2); }
-const vibr=ms=>(navigator.vibrate&&navigator.vibrate(ms));
+const prefersReduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+const vibr = ms => (!prefersReduce && navigator.vibrate) && navigator.vibrate(ms);
 
 function explode(x,y){
   const rect=cvs.getBoundingClientRect();
@@ -693,6 +711,7 @@ function spawnBud(){
   powerUps.push({t:'bud',img:IMG.bud,x:ri(20,BASE_W-40),y:ri(20,BASE_H-40),w:24,h:24,a:true,tt:18});
 }
 function setup(level){
+  clearPowerTimers();
   tiles=[]; powerUps=[]; obs=[]; particles=[]; particlePool=[];
   mower={x:50,y:50,px:50,py:50,w:16,h:16,spd:120,acc:350,vx:0,vy:0,boost:false,inv:false};
   introShown=false; clearBudTimer();
@@ -947,7 +966,12 @@ function genCongrats(player,level){
 
 /* -------------------- Level Flow -------------------- */
 async function startGame(){
-  await assetsReady;
+  try {
+    await assetsReady;
+  } catch(e){
+    console.warn('Continuing despite asset load error', e);
+    showToast('Some art failed to load — continuing anyway.');
+  }
   const entered=(playerName.value||"").trim();
   if(!entered){
     showToast('Please enter your name.');
@@ -963,6 +987,7 @@ async function startGame(){
 function startLevel(){ handleStartLevelClick(); }
 
 function levelComplete(){
+  clearPowerTimers();
   running=false; cancelAnimationFrame(loop); clearBudTimer();
   const lt=total-lvlStart, bonus=Math.round(Math.max(0,(limit-lt)*50)); score=Math.round((score+bonus)/10)*10;
   ovTime.textContent=fmt(lt); ovScore.textContent=score; ovBonus.textContent=bonus;
@@ -975,6 +1000,7 @@ function next(){
   hideOverlay(ovComplete); lvl++; if(lvl>12) finale(); else { setup(lvl); ui(); }
 }
 function gameOver(reason='time'){
+  clearPowerTimers();
   running=false; cancelAnimationFrame(loop); clearBudTimer();
   if(reason==='obstacle'){
     ovGameOverTitle.textContent='Crash! 💥';
@@ -990,11 +1016,13 @@ function gameOver(reason='time'){
 }
 function finale(){
   clearBudTimer();
+  clearPowerTimers();
   ovWinner.textContent=name; ovTotal.textContent=fmt(total); ovChamp.textContent=score; showOverlay(ovFinalOverlay);
   const best=Math.max(score, parseInt(localStorage.getItem('clmc_best')||'0',10)); localStorage.setItem('clmc_best',best);
   chime(); setTimeout(chime,100); record({n:name,s:score,t:total,l:lvl,ts:Date.now()}); previewLB();
 }
 function again(){
+  clearPowerTimers();
   [ovGameOver,ovFinalOverlay,ovComplete,ovLB,ovPause,ovChallenge,ovIntro].forEach(hideOverlay);
   running=false; paused=false; cancelAnimationFrame(loop); clearBudTimer();
   game.style.display='none'; landing.style.display='flex';
@@ -1008,9 +1036,16 @@ function ui(){
 }
 function togglePause(){
   if(!running) return;
-  paused=!paused; pauseBtn.textContent=paused?'Resume':'Pause';
-  paused?showOverlay(ovPause):hideOverlay(ovPause);
-  if(!paused){ last=performance.now(); requestAnimationFrame(frame); }
+  paused=!paused;
+  pauseBtn.textContent=paused?'Resume':'Pause';
+  paused ? showOverlay(ovPause) : hideOverlay(ovPause);
+  if(paused){
+    clearBudTimer();
+  } else {
+    if(!budTimer) budTimer=setInterval(spawnBud, 10000);
+    last=performance.now();
+    requestAnimationFrame(frame);
+  }
 }
 
 /* -------------------- Social & Share -------------------- */
@@ -1050,16 +1085,23 @@ function week(ts){
   next.setDate(monday.getDate()+7);
   return d>=monday && d<next;
 }
+let lastFocus=null;
 function showOverlay(el){
+  lastFocus=document.activeElement;
   el.style.display='block';
   el.classList.remove('hide');
   void el.offsetWidth;
   el.classList.add('show');
+  const btn=el.querySelector('button, [href], [tabindex]:not([tabindex="-1"])');
+  btn?.focus();
+  document.getElementById('app').setAttribute('aria-hidden','true');
 }
 function hideOverlay(el){
   el.classList.remove('show');
   el.classList.add('hide');
   setTimeout(()=>{ el.style.display='none'; el.classList.remove('hide'); },200);
+  document.getElementById('app').removeAttribute('aria-hidden');
+  lastFocus?.focus();
 }
 function showLB(filter='all'){
   const all=loadRuns(); let list=[];
@@ -1104,7 +1146,13 @@ const introGo=document.getElementById('introGo');
 /* -------------------- Bindings -------------------- */
 function bind(){
   console.debug('bind(): attaching start game listeners');
-  startGameBtn.addEventListener('click',e=>{ e.preventDefault(); console.debug('startGameBtn click'); startGame(); });
+  startGameBtn.addEventListener('click',async e=>{
+    e.preventDefault();
+    console.debug('startGameBtn click');
+    startGameBtn.disabled=true;
+    try{ await startGame(); }
+    finally{ startGameBtn.disabled=false; }
+  });
   playerName.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); console.debug('playerName Enter key'); startGame(); } });
   startLevelBtn.addEventListener('click',e=>{ e.preventDefault(); handleStartLevelClick(); });
   introGo.addEventListener('click',startLevelRun);
