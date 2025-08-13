@@ -358,7 +358,7 @@ const congratsByLevel=[
 
 /* -------------------- State -------------------- */
 let running=false, paused=false, lvl=1, score=0, total=0, lvlStart=0;
-let mower={x:50,y:50,w:16,h:16,spd:120,acc:350,vx:0,vy:0,boost:false,inv:false};
+let mower={x:50,y:50,px:50,py:50,w:16,h:16,spd:120,acc:350,vx:0,vy:0,boost:false,inv:false};
 let tiles=[], powerUps=[], obs=[], particles=[], particlePool=[], weather={type:"sun",t:0};
 let name=""; let loop=0, last=0;
 const keys={}; const counts={bud:0,golf:0,leaf:0};
@@ -570,6 +570,7 @@ function handle(d){
   if(tx===0) mower.vx*=0.92; if(ty===0) mower.vy*=0.92;
 }
 function move(d){
+  mower.px = mower.x; mower.py = mower.y;
   let fx=1; if(weather.type==='rain') fx=.9; if(weather.type==='wind') mower.x+=Math.sin(Date.now()/330)*8*d;
   mower.x+=mower.vx*d*fx; mower.y+=mower.vy*d*fx;
   mower.x=Math.max(0,Math.min(BASE_W-mower.w,mower.x));
@@ -670,7 +671,7 @@ function spawnBud(){
 }
 function setup(level){
   tiles=[]; powerUps=[]; obs=[]; particles=[]; particlePool=[];
-  mower={x:50,y:50,w:16,h:16,spd:120,acc:350,vx:0,vy:0,boost:false,inv:false};
+  mower={x:50,y:50,px:50,py:50,w:16,h:16,spd:120,acc:350,vx:0,vy:0,boost:false,inv:false};
   introShown=false; clearBudTimer();
   pal=L(level).palette;
   grassPattern=makeGrassTexture(pal.texture, pal.grassColor);
