@@ -607,6 +607,33 @@ function timeCheck(){
   if(elapsed>=limit) gameOver();
 }
 
+/* -------------------- Assets -------------------- */
+function loadImage(src){
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+
+const IMG = {
+  rock: loadImage('assets/obstacles/rock.png'),
+  tree: loadImage('assets/obstacles/tree.png'),
+  sprinkler: loadImage('assets/obstacles/sprinkler.png'),
+  gnome: loadImage('assets/obstacles/gnome.png'),
+  flamingo: loadImage('assets/obstacles/flamingo.png'),
+  grill: loadImage('assets/obstacles/grill.png'),
+  chair: loadImage('assets/obstacles/chair.png'),
+  bucket: loadImage('assets/obstacles/bucket.png'),
+  bike: loadImage('assets/obstacles/bike.png'),
+  barrel: loadImage('assets/obstacles/barrel.png'),
+  shed: loadImage('assets/obstacles/shed.png'),
+  fountain: loadImage('assets/obstacles/fountain.png')
+};
+
+const assetsReady = Promise.all(Object.values(IMG));
+
 /* -------------------- World Gen + Bud spawner -------------------- */
 let limit=60;
 function clearBudTimer(){ if(budTimer){ clearInterval(budTimer); budTimer=null; } }
@@ -851,7 +878,8 @@ function genCongrats(player,level){
 }
 
 /* -------------------- Level Flow -------------------- */
-function startGame(){
+async function startGame(){
+  await assetsReady;
   name=(playerName.value||"").trim()||"Mower Champ"; localStorage.setItem('clmc_name',name);
   score=0; total=0; lvl=1; counts.bud=counts.golf=counts.leaf=0; renderCounts();
   landing.style.display='none'; game.style.display='block';
