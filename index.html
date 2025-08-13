@@ -950,7 +950,11 @@ function genCongrats(player,level){
 
 /* -------------------- Level Flow -------------------- */
 async function startGame(){
-  await assetsReady;
+  try{
+    await assetsReady;
+  }catch(err){
+    console.warn('Continuing despite asset load failure:', err);
+  }
   const entered=(playerName.value||"").trim();
   if(!entered){
     showToast('Please enter your name.');
