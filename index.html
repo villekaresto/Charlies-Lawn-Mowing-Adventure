@@ -241,7 +241,7 @@
   <h2 id="introTitle">Level Intro</h2>
   <p id="introDesc" class="desc" style="margin-top:0"></p>
   <p id="introBody" style="font-size:1.02rem"></p>
-  <div class="row"><button id="introGo" class="btn btn-primary">Let’s mow</button></div>
+  <div class="row"><button id="introGo" class="btn btn-primary">Skip intro</button></div>
 </div>
 
 <div class="overlay" id="ovChallenge">
@@ -965,7 +965,7 @@ async function startGame(){
   score=0; total=0; lvl=1; counts.bud=counts.golf=counts.leaf=0; renderCounts();
   landing.style.display='none'; game.style.display='block';
   hudName.textContent=name; hudBest.textContent=localStorage.getItem('clmc_best')||0;
-  setup(lvl); ui(); setComment("Welcome to Cainhoy. Tap Start when ready.");
+  setup(lvl); ui(); handleStartLevelClick(); setComment("Welcome to Cainhoy. Let's mow!");
 }
 function startLevel(){ handleStartLevelClick(); }
 

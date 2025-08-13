@@ -27,7 +27,7 @@ const context = {
   togglePause: () => {},
   handleStartLevelClick: () => { context.handleCalls++; },
   handleCalls: 0,
-  startGame: () => { context.startCalls++; context.landing.style.display = 'none'; },
+  startGame: () => { context.startCalls++; context.landing.style.display = 'none'; context.handleStartLevelClick(); },
   startCalls: 0,
   playerName: {},
   landing: { style: { display: 'block' } },
@@ -46,6 +46,6 @@ context.playerHandler(evt); // invokes startGame
 context.handler(evt); // global keydown handler
 
 assert.strictEqual(context.startCalls, 1, 'startGame should be called once');
-assert.strictEqual(context.handleCalls, 0, 'handleStartLevelClick should not be called');
+assert.strictEqual(context.handleCalls, 1, 'handleStartLevelClick should be called once');
 
-console.log('Enter key in name field starts game without level intro');
+console.log('Enter key in name field starts game and level automatically');
