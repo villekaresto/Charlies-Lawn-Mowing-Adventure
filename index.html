@@ -968,21 +968,31 @@ function genCongrats(player,level){
 async function startGame(){
   try {
     await assetsReady;
-  } catch(e){
+  } catch (e) {
     console.warn('Continuing despite asset load error', e);
     showToast('Some art failed to load — continuing anyway.');
   }
-  const entered=(playerName.value||"").trim();
-  if(!entered){
+
+  const entered = (playerName.value || "").trim();
+  if (!entered) {
     showToast('Please enter your name.');
     playerName.focus();
     return;
   }
-  name=entered; localStorage.setItem('clmc_name',name);
-  score=0; total=0; lvl=1; counts.bud=counts.golf=counts.leaf=0; renderCounts();
-  landing.style.display='none'; game.style.display='block';
-  hudName.textContent=name; hudBest.textContent=localStorage.getItem('clmc_best')||0;
-  setup(lvl); ui(); setComment("Welcome to Cainhoy. Tap Start when ready.");
+  name = entered;
+  localStorage.setItem('clmc_name', name);
+  score = 0; total = 0; lvl = 1;
+  counts.bud = counts.golf = counts.leaf = 0;
+  renderCounts();
+
+  landing.style.display = 'none';
+  game.style.display = 'block';
+  hudName.textContent = name;
+  hudBest.textContent = localStorage.getItem('clmc_best') || 0;
+
+  setup(lvl);
+  ui();
+  setComment("Welcome to Cainhoy. Tap Start when ready.");
 }
 function startLevel(){ handleStartLevelClick(); }
 
