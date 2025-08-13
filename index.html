@@ -1137,29 +1137,30 @@ const introGo=document.getElementById('introGo');
 /* -------------------- Bindings -------------------- */
 function bind(){
   console.debug('bind(): attaching start game listeners');
-  startForm.addEventListener('submit', e => { e.preventDefault(); startGame(); });
-  startLevelBtn.addEventListener('click',e=>{ e.preventDefault(); handleStartLevelClick(); });
-  introGo.addEventListener('click',startLevelRun);
-  pauseBtn.addEventListener('click',togglePause);
-  resumeBtn.addEventListener('click',togglePause);
-  shareShot.addEventListener('click',shareShotImg);
-  nextLevelBtn.addEventListener('click',next);
-  shareLevel.addEventListener('click',shareShotImg);
-  restart.addEventListener('click',again);
-  showLBbtn.addEventListener('click',()=>{ hideOverlay(ovGameOver); showLB('all'); });
-  againBtn.addEventListener('click',again);
-  goLB.addEventListener('click',()=>showLB('all'));
-  fAll.addEventListener('click',()=>{ setF(fAll); showLB('all'); });
-  fWeek.addEventListener('click',()=>{ setF(fWeek); showLB('week'); });
-  fYou.addEventListener('click',()=>{ setF(fYou); showLB('you'); });
-  lbBack.addEventListener('click',()=>hideOverlay(ovLB));
-  challengeBtn.addEventListener('click',challenge);
-  shareGameBtn.addEventListener('click',shareGame);
-  copyChBtn.addEventListener('click',copyCh);
-  closeCh.addEventListener('click',()=>hideOverlay(ovChallenge));
-  soundBtn.addEventListener('click',()=>{ snd=!snd; soundBtn.textContent=snd?'🔊':'🔇'; soundBtn.setAttribute('aria-pressed',String(snd)); });
-  musicBtn.addEventListener('click',()=>{ music=!music; musicBtn.textContent=music?'🎵':'🔇'; musicBtn.setAttribute('aria-pressed',String(music)); });
-  document.getElementById('shareChamp').addEventListener('click',shareChamp);
+  if(startForm) startForm.addEventListener('submit', e => { e.preventDefault(); startGame(); });
+  if(startLevelBtn) startLevelBtn.addEventListener('click',e=>{ e.preventDefault(); handleStartLevelClick(); });
+  if(introGo) introGo.addEventListener('click',startLevelRun);
+  if(pauseBtn) pauseBtn.addEventListener('click',togglePause);
+  if(resumeBtn) resumeBtn.addEventListener('click',togglePause);
+  if(shareShot) shareShot.addEventListener('click',shareShotImg);
+  if(nextLevelBtn) nextLevelBtn.addEventListener('click',next);
+  if(shareLevel) shareLevel.addEventListener('click',shareShotImg);
+  if(restart) restart.addEventListener('click',again);
+  if(showLBbtn) showLBbtn.addEventListener('click',()=>{ hideOverlay(ovGameOver); showLB('all'); });
+  if(againBtn) againBtn.addEventListener('click',again);
+  if(goLB) goLB.addEventListener('click',()=>showLB('all'));
+  if(fAll) fAll.addEventListener('click',()=>{ setF(fAll); showLB('all'); });
+  if(fWeek) fWeek.addEventListener('click',()=>{ setF(fWeek); showLB('week'); });
+  if(fYou) fYou.addEventListener('click',()=>{ setF(fYou); showLB('you'); });
+  if(lbBack) lbBack.addEventListener('click',()=>hideOverlay(ovLB));
+  if(challengeBtn) challengeBtn.addEventListener('click',challenge);
+  if(shareGameBtn) shareGameBtn.addEventListener('click',shareGame);
+  if(copyChBtn) copyChBtn.addEventListener('click',copyCh);
+  if(closeCh) closeCh.addEventListener('click',()=>hideOverlay(ovChallenge));
+  if(soundBtn) soundBtn.addEventListener('click',()=>{ snd=!snd; soundBtn.textContent=snd?'🔊':'🔇'; soundBtn.setAttribute('aria-pressed',String(snd)); });
+  if(musicBtn) musicBtn.addEventListener('click',()=>{ music=!music; musicBtn.textContent=music?'🎵':'🔇'; musicBtn.setAttribute('aria-pressed',String(music)); });
+  const shareChampBtn = document.getElementById('shareChamp');
+  if(shareChampBtn) shareChampBtn.addEventListener('click',shareChamp);
 }
 function setF(active){ [fAll,fWeek,fYou].forEach(b=>b.classList.remove('active')); active.classList.add('active'); }
 
