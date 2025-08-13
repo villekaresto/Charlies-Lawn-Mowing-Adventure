@@ -342,6 +342,8 @@ let budTimer=null;
 /* -------------------- Canvas (DPR + responsive scaling) -------------------- */
 const BASE_W=400, BASE_H=300; // internal game world
 const cvs=document.getElementById('gameCanvas'), ctx=cvs.getContext('2d');
+const staticCvs=document.createElement('canvas'), staticCtx=staticCvs.getContext('2d');
+staticCvs.width=BASE_W; staticCvs.height=BASE_H;
 function fitCanvas(){
   const dpr=Math.min(window.devicePixelRatio||1,2);
   // target CSS width: nearly full card width, but cap for sanity
@@ -492,7 +494,13 @@ function move(d){
   mower.y=Math.max(0,Math.min(BASE_H-mower.h,mower.y));
 }
 function eatGrass(){
-  for(const t of tiles){ if(!t.m && hit(mower,t)){ t.m=true; score+=10; if((t.x+t.y)%40===0) beep(520,.02,.08); } }
+  for(const t of tiles){
+    if(!t.m && hit(mower,t)){
+      t.m=true; drawTileStatic(t);
+      score+=10;
+      if((t.x+t.y)%40===0) beep(520,.02,.08);
+    }
+  }
 }
 function collide(){
   if(mower.inv) return;
@@ -500,6 +508,7 @@ function collide(){
     if (o.a && hit(mower, o)) {
       explode(o.x + o.w / 2, o.y + o.h / 2);
       o.a = false;
+      renderStatic();
 
       mower.vx = mower.vy = 0;
       mower.x = mower.px; mower.y = mower.py;
@@ -589,6 +598,8 @@ function setup(level){
   // Budweiser boobster every 10s
   spawnBud(); budTimer=setInterval(spawnBud, 10000);
 
+  renderStatic();
+
   limit = Math.round(70 + 25/Math.sqrt(level));
 
   levelName.textContent=L(level).n;
@@ -601,24 +612,29 @@ function setup(level){
 function weath(){ weatherEl.textContent = weather.type==='sun'?'☀️ Perfect':weather.type==='rain'?'🌧️ Rainy':'💨 Windy'; }
 
 /* -------------------- Drawing -------------------- */
+function drawTileStatic(t){
+  staticCtx.fillStyle=t.m?"#90EE90":"#228B22"; staticCtx.fillRect(t.x,t.y,t.w,t.h);
+  if(!t.m){ staticCtx.fillStyle="#32CD32"; staticCtx.fillRect(t.x+2,t.y+2,t.w-4,t.h-4); }
+}
+function renderStatic(){
+  staticCtx.clearRect(0,0,BASE_W,BASE_H);
+  for(const t of tiles) drawTileStatic(t);
+  for(const o of obs){
+    if(!o.a||o.t==='sprinkler') continue;
+    staticCtx.fillStyle="rgba(0,0,0,.14)"; roundRect(o.x-2,o.y-2,o.w+4,o.h+4,6,staticCtx); staticCtx.fill();
+    drawEmoji(o.i, o.x+o.w*0.14, o.y+o.h*0.78, Math.max(o.w,o.h), staticCtx);
+  }
+}
 function draw(){
   cvs.style.backgroundColor=L(lvl).c;
   ctx.clearRect(0,0,BASE_W,BASE_H);
-
-  for(const t of tiles){
-    ctx.fillStyle=t.m?"#90EE90":"#228B22"; ctx.fillRect(t.x,t.y,t.w,t.h);
-    if(!t.m){ ctx.fillStyle="#32CD32"; ctx.fillRect(t.x+2,t.y+2,t.w-4,t.h-4); }
-  }
+  ctx.drawImage(staticCvs,0,0);
 
   for(const o of obs){
-    if(!o.a) continue;
+    if(!o.a||o.t!=='sprinkler') continue;
     ctx.save();
-    if(o.t==='sprinkler'){
-      o.r=(o.r||0)+.04; ctx.translate(o.x+o.w/2,o.y+o.h/2); ctx.rotate(o.r);
-      drawEmoji('💦',-12,10,28); ctx.restore(); continue;
-    }
-    ctx.fillStyle="rgba(0,0,0,.14)"; roundRect(o.x-2,o.y-2,o.w+4,o.h+4,6); ctx.fill();
-    drawEmoji(o.i, o.x+o.w*0.14, o.y+o.h*0.78, Math.max(o.w,o.h));
+    ctx.translate(o.x+o.w/2,o.y+o.h/2); ctx.rotate(o.r||0);
+    drawEmoji('💦',-12,10,28);
     ctx.restore();
   }
 
@@ -631,12 +647,12 @@ function draw(){
     for(let i=0;i<14;i++){ const x=(Date.now()/10+i*50)%BASE_W, y=(Date.now()/5+i*30)%BASE_H; ctx.fillStyle="rgba(173,216,230,.7)"; ctx.fillRect(x,y,2,8) }
   }else if(weather.type==="wind"){ ctx.fillStyle="rgba(200,200,200,.08)"; ctx.fillRect(0,0,BASE_W,BASE_H); }
 }
-function drawEmoji(e,x,y,size){
-  ctx.font=`${Math.floor(size)}px "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",system-ui,Arial`;
-  ctx.lineWidth=3; ctx.strokeStyle='rgba(255,255,255,.85)';
-  ctx.strokeText(e,x,y); ctx.fillText(e,x,y);
+function drawEmoji(e,x,y,size,c=ctx){
+  c.font=`${Math.floor(size)}px "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",system-ui,Arial`;
+  c.lineWidth=3; c.strokeStyle='rgba(255,255,255,.85)';
+  c.strokeText(e,x,y); c.fillText(e,x,y);
 }
-function roundRect(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+function roundRect(x,y,w,h,r,c=ctx){ c.beginPath(); c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r); c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath(); }
 function drawMower(){
   const m=mower;
   const base = m.boost ? "#78BE20" : "#FF6A13";  // EGO green vs Husqvarna orange
