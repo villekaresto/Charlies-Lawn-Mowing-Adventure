@@ -967,10 +967,16 @@ function genCongrats(player,level){
 
 /* -------------------- Level Flow -------------------- */
 async function startGame(){
-  try{
-    await assetsReady;
-  }catch(err){
-    console.warn('Continuing despite asset load failure:', err);
+  const ASSET_TIMEOUT = 4000;
+  const assetLoad = assetsReady
+    .then(() => 'loaded')
+    .catch(err => { console.error('Asset load failure:', err); return 'failed'; });
+  const result = await Promise.race([
+    assetLoad,
+    new Promise(resolve => setTimeout(() => resolve('timeout'), ASSET_TIMEOUT))
+  ]);
+  if(result !== 'loaded'){
+    console.warn('Continuing despite asset load issue:', result);
   }
   const entered=(playerName.value||"").trim();
   if(!entered){
