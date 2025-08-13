@@ -342,6 +342,12 @@ let budTimer=null;
 /* -------------------- Canvas (DPR + responsive scaling) -------------------- */
 const BASE_W=400, BASE_H=300; // internal game world
 const cvs=document.getElementById('gameCanvas'), ctx=cvs.getContext('2d');
+
+// offscreen canvas for grass tiles
+const tileCanvas=document.createElement('canvas'), tileCtx=tileCanvas.getContext('2d');
+tileCanvas.width=BASE_W; tileCanvas.height=BASE_H;
+
+let grassPattern, mowedPattern, tilesRendered=false;
 function fitCanvas(){
   const dpr=Math.min(window.devicePixelRatio||1,2);
   // target CSS width: nearly full card width, but cap for sanity
@@ -492,7 +498,12 @@ function move(d){
   mower.y=Math.max(0,Math.min(BASE_H-mower.h,mower.y));
 }
 function eatGrass(){
-  for(const t of tiles){ if(!t.m && hit(mower,t)){ t.m=true; score+=10; if((t.x+t.y)%40===0) beep(520,.02,.08); } }
+  for(const t of tiles){
+    if(!t.m && hit(mower,t)){
+      t.m=true; score+=10; if((t.x+t.y)%40===0) beep(520,.02,.08);
+      renderTile(t);
+    }
+  }
 }
 function collide(){
   if(mower.inv) return;
@@ -552,7 +563,7 @@ function spawnBud(){
   powerUps.push({t:'bud',i:'🍺',x:ri(20,BASE_W-40),y:ri(20,BASE_H-40),w:24,h:24,a:true,tt:18});
 }
 function setup(level){
-  tiles=[]; powerUps=[]; obs=[];
+  tiles=[]; powerUps=[]; obs=[]; tilesRendered=false;
   mower={x:50,y:50,w:16,h:16,spd:120,acc:350,vx:0,vy:0,boost:false,inv:false};
   introShown=false; clearBudTimer();
 
@@ -600,15 +611,45 @@ function setup(level){
 }
 function weath(){ weatherEl.textContent = weather.type==='sun'?'☀️ Perfect':weather.type==='rain'?'🌧️ Rainy':'💨 Windy'; }
 
+function ensurePatterns(){
+  if(grassPattern && mowedPattern) return;
+  const g=document.createElement('canvas');
+  g.width=g.height=20;
+  const gctx=g.getContext('2d');
+  gctx.fillStyle="#228B22"; gctx.fillRect(0,0,20,20);
+  gctx.strokeStyle="#32CD32"; gctx.lineWidth=2;
+  gctx.beginPath();
+  gctx.moveTo(0,10); gctx.lineTo(20,10);
+  gctx.moveTo(10,0); gctx.lineTo(10,20);
+  gctx.stroke();
+  grassPattern=ctx.createPattern(g,'repeat');
+
+  const m=document.createElement('canvas');
+  m.width=m.height=20;
+  const mctx=m.getContext('2d');
+  mctx.fillStyle="#90EE90"; mctx.fillRect(0,0,20,20);
+  mctx.strokeStyle="#76C776"; mctx.lineWidth=2;
+  mctx.beginPath();
+  mctx.moveTo(0,0); mctx.lineTo(20,20);
+  mctx.moveTo(20,0); mctx.lineTo(0,20);
+  mctx.stroke();
+  mowedPattern=ctx.createPattern(m,'repeat');
+}
+
+function renderTile(t){
+  ensurePatterns();
+  tileCtx.fillStyle=t.m?mowedPattern:grassPattern;
+  tileCtx.fillRect(t.x,t.y,t.w,t.h);
+}
+
 /* -------------------- Drawing -------------------- */
 function draw(){
   cvs.style.backgroundColor=L(lvl).c;
   ctx.clearRect(0,0,BASE_W,BASE_H);
 
-  for(const t of tiles){
-    ctx.fillStyle=t.m?"#90EE90":"#228B22"; ctx.fillRect(t.x,t.y,t.w,t.h);
-    if(!t.m){ ctx.fillStyle="#32CD32"; ctx.fillRect(t.x+2,t.y+2,t.w-4,t.h-4); }
-  }
+  ensurePatterns();
+  if(!tilesRendered){ tileCtx.clearRect(0,0,BASE_W,BASE_H); for(const t of tiles) renderTile(t); tilesRendered=true; }
+  ctx.drawImage(tileCanvas,0,0);
 
   for(const o of obs){
     if(!o.a) continue;
