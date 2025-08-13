@@ -7,6 +7,9 @@
 <meta name="description" content="Help Charlie mow lawns in this mobile-friendly comedy game. 12 levels, power ups, obstacles, and a local leaderboard." />
 <meta property="og:title" content="Charlie's Lawn Mowing Adventure – The Game" />
 <meta property="og:description" content="Play this mobile-friendly lawn mowing game with 12 levels, power ups, obstacles, and a local leaderboard." />
+<link rel="preload" href="assets/powerups/bud.svg" as="image" type="image/svg+xml">
+<link rel="preload" href="assets/powerups/golf-cart.svg" as="image" type="image/svg+xml">
+<link rel="preload" href="assets/powerups/leaf.svg" as="image" type="image/svg+xml">
 <style>
   :root{
     --bg1:#0C2340; --bg2:#1F3B73; --bg3:#B9975B; --sky:#87CEEB;
@@ -93,7 +96,8 @@
   .filter{background:linear-gradient(135deg,var(--accent),var(--accent-dark));color:#fff;border:none;border-radius:9px;padding:8px 12px;font-weight:800}
   .filter.active{background:linear-gradient(135deg,var(--brand),var(--accent))}
   .power-slots{display:flex;gap:10px;justify-content:center}
-  .slot{background:#fff;border:2px solid rgba(0,0,0,.08);border-radius:10px;padding:6px 10px;font-weight:900}
+  .slot{background:#fff;border:2px solid rgba(0,0,0,.08);border-radius:10px;padding:6px 10px;font-weight:900;display:flex;align-items:center;gap:4px}
+  .power-slots .icon{width:1.2em;height:1.2em}
   .timers{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
   .mute{font-size:1.4rem;background:none;border:none}
 
@@ -161,9 +165,9 @@
     <canvas id="gameCanvas" width="400" height="300" aria-label="Game field" role="img"></canvas>
 
     <div class="power-slots">
-      <div class="slot">🍺 <span id="c-bud">0</span></div>
-      <div class="slot">🚗 <span id="c-golf">0</span></div>
-      <div class="slot">🍃 <span id="c-leaf">0</span></div>
+      <div class="slot"><img id="c-bud" class="icon" src="assets/powerups/bud.svg" alt="Bud icon"/><span>0</span></div>
+      <div class="slot"><img id="c-golf" class="icon" src="assets/powerups/golf-cart.svg" alt="Golf cart icon"/><span>0</span></div>
+      <div class="slot"><img id="c-leaf" class="icon" src="assets/powerups/leaf.svg" alt="Leaf icon"/><span>0</span></div>
     </div>
 
     <div class="row">
@@ -804,7 +808,11 @@ function power(t){
   }
   renderCounts();
 }
-function renderCounts(){ cBud.textContent=counts.bud; cGolf.textContent=counts.golf; cLeaf.textContent=counts.leaf; }
+function renderCounts(){
+  cBud.nextElementSibling.textContent=counts.bud;
+  cGolf.nextElementSibling.textContent=counts.golf;
+  cLeaf.nextElementSibling.textContent=counts.leaf;
+}
 
 /* -------------------- Commentary -------------------- */
 let comT=null;
