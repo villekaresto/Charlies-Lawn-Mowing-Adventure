@@ -469,6 +469,7 @@ function frame(ts){
 }
 function step(d){
   handle(d); move(d); eatGrass(); pickPower(); collide();
+  if(!running) return;
   tickPowers(d); tickObs(d); tickWeather(d); total+=d; ui(); winCheck(); timeCheck();
 }
 function handle(d){
@@ -513,7 +514,8 @@ function collide(){
 
       setComment(`Easy there. Go around the ${o.t}.`);
       vibr(25);
-      break;
+      gameOver();
+      return;
     }
   }
 }
