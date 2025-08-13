@@ -342,6 +342,8 @@ let budTimer=null;
 /* -------------------- Canvas (DPR + responsive scaling) -------------------- */
 const BASE_W=400, BASE_H=300; // internal game world
 const cvs=document.getElementById('gameCanvas'), ctx=cvs.getContext('2d');
+const staticCvs=document.createElement('canvas'), staticCtx=staticCvs.getContext('2d');
+staticCvs.width=BASE_W; staticCvs.height=BASE_H;
 const tileShadeGrad=ctx.createLinearGradient(0,0,0,20);
 tileShadeGrad.addColorStop(0,'rgba(0,0,0,0)');
 tileShadeGrad.addColorStop(1,'rgba(0,0,0,0.15)');
@@ -592,6 +594,8 @@ function setup(level){
   // Budweiser boobster every 10s
   spawnBud(); budTimer=setInterval(spawnBud, 10000);
 
+  buildStatic();
+
   limit = Math.round(70 + 25/Math.sqrt(level));
 
   levelName.textContent=L(level).n;
@@ -604,18 +608,25 @@ function setup(level){
 function weath(){ weatherEl.textContent = weather.type==='sun'?'☀️ Perfect':weather.type==='rain'?'🌧️ Rainy':'💨 Windy'; }
 
 /* -------------------- Drawing -------------------- */
+function drawTileStatic(t){
+  staticCtx.fillStyle="#228B22"; staticCtx.fillRect(t.x,t.y,t.w,t.h);
+  staticCtx.fillStyle="#32CD32"; staticCtx.fillRect(t.x+2,t.y+2,t.w-4,t.h-4);
+  staticCtx.fillStyle=tileShadeGrad; staticCtx.fillRect(t.x,t.y,t.w,t.h);
+}
+function buildStatic(){
+  staticCtx.clearRect(0,0,BASE_W,BASE_H);
+  for(const t of tiles){ drawTileStatic(t); }
+}
 function draw(){
   cvs.style.backgroundColor=L(lvl).c;
   ctx.clearRect(0,0,BASE_W,BASE_H);
+  ctx.drawImage(staticCvs,0,0);
 
   for(const t of tiles){
-    ctx.fillStyle=t.m?"#90EE90":"#228B22"; ctx.fillRect(t.x,t.y,t.w,t.h);
-    if(!t.m){ ctx.fillStyle="#32CD32"; ctx.fillRect(t.x+2,t.y+2,t.w-4,t.h-4); }
-    ctx.save();
-    ctx.translate(t.x,t.y);
-    ctx.fillStyle=tileShadeGrad;
-    ctx.fillRect(0,0,t.w,t.h);
-    ctx.restore();
+    if(t.m){
+      ctx.fillStyle="#90EE90"; ctx.fillRect(t.x,t.y,t.w,t.h);
+      ctx.save(); ctx.translate(t.x,t.y); ctx.fillStyle=tileShadeGrad; ctx.fillRect(0,0,t.w,t.h); ctx.restore();
+    }
   }
 
   for(const o of obs){
