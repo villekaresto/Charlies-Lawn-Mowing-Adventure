@@ -3,8 +3,10 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>Charlie's Lawn Service - Cainhoy Championship</title>
-<meta name="description" content="Help Charlie mow lawns in this mobile-friendly comedy challenge. 12 levels, power ups, obstacles, and a local leaderboard." />
+<title>Charlie's Lawn Mowing Adventure – The Game</title>
+<meta name="description" content="Help Charlie mow lawns in this mobile-friendly comedy game. 12 levels, power ups, obstacles, and a local leaderboard." />
+<meta property="og:title" content="Charlie's Lawn Mowing Adventure – The Game" />
+<meta property="og:description" content="Play this mobile-friendly lawn mowing game with 12 levels, power ups, obstacles, and a local leaderboard." />
 <style>
   :root{
     --bg1:#1a2332; --bg2:#2d5016; --bg3:#4a7c4a; --sky:#87CEEB;
@@ -94,7 +96,7 @@
 <body>
 
 <div class="screen" id="app">
-  <h1>🚜 Charlie's Lawn Service</h1>
+  <h1>🚜 Charlie's Lawn Mowing Adventure – The Game</h1>
 
   <!-- Landing -->
   <div class="card row" id="landing">
@@ -154,7 +156,7 @@
     <div class="row">
       <button id="startLevelBtn" class="btn btn-green">Start Level 1</button>
       <button id="pauseBtn" class="btn btn-green" disabled>Pause</button>
-      <button id="shareShot" class="btn btn-blue" style="display:none">📸 Share Victory</button>
+      <button id="shareShot" class="btn btn-blue" style="display:none">📸 Share Game Victory</button>
       <button id="soundBtn" class="mute" aria-pressed="true" title="Toggle sound">🔊</button>
       <button id="musicBtn" class="mute" aria-pressed="true" title="Toggle music">🎵</button>
     </div>
@@ -191,7 +193,7 @@
   <p><strong><span id="ovWinner"></span></strong> - Master Mower!</p>
   <p>Total Time: <span id="ovTotal">0:00</span></p>
   <p>Final Score: <span id="ovChamp">0</span></p>
-  <div class="row"><button id="shareChamp" class="btn btn-blue">🏆 Share Victory</button><button id="again" class="btn btn-primary">Play Again</button><button id="goLB" class="btn btn-green">View Leaderboard</button></div>
+  <div class="row"><button id="shareChamp" class="btn btn-blue">🏆 Share Game Victory</button><button id="again" class="btn btn-primary">Play Again</button><button id="goLB" class="btn btn-green">View Leaderboard</button></div>
 </div>
 
 <div class="overlay" id="ovLB">
@@ -726,24 +728,24 @@ function togglePause(){
 
 /* -------------------- Social & Share -------------------- */
 function challenge(){
-  const msg=`I scored ${score} on level ${lvl} in Charlie's Lawn Service. Barefoot, Bud powered, EGO borrowed. Beat me: ${location.href}`;
+  const msg=`I scored ${score} on level ${lvl} in Charlie's Lawn Mowing Adventure game. Barefoot, Bud powered, EGO borrowed. Play the game and beat me: ${location.href}`;
   chText.value=msg; ovChallenge.style.display='block';
 }
 async function copyCh(){ try{ await navigator.clipboard.writeText(chText.value); alert('Copied'); }catch{ alert('Copy failed, select and copy'); } }
-function shareGame(){ if(navigator.share){ navigator.share({title:"Charlie's Lawn Service",text:"Try this hilarious lawn game",url:location.href}); }else alert("Share this link: "+location.href); }
+function shareGame(){ if(navigator.share){ navigator.share({title:"Charlie's Lawn Mowing Adventure – The Game",text:"Play this hilarious lawn mowing game",url:location.href}); }else alert("Share this game link: "+location.href); }
 async function shareShotImg(){
   try{
     const W=BASE_W,H=BASE_H,B=56, out=document.createElement('canvas'); out.width=W; out.height=H+B; const c=out.getContext('2d');
-    c.fillStyle='#fff'; c.fillRect(0,0,W,B); c.fillStyle='#2d5016'; c.font='bold 16px Segoe UI, Arial'; c.fillText("🚜 Charlie's Lawn Service - Championship",12,22);
+    c.fillStyle='#fff'; c.fillRect(0,0,W,B); c.fillStyle='#2d5016'; c.font='bold 16px Segoe UI, Arial'; c.fillText("🚜 Charlie's Lawn Mowing Adventure – The Game",12,22);
     c.font='12px Segoe UI, Arial'; c.fillText(`Player: ${name} • Level: ${lvl}/12 • Score: ${score} • Time: ${fmt(total)}`,12,42);
     c.drawImage(cvs,0,B,BASE_W,BASE_H);
-    c.fillStyle='rgba(0,0,0,.08)'; c.fillRect(0,out.height-22,W,22); c.fillStyle='#333'; c.font='11px Segoe UI, Arial'; c.fillText('🏆 Cainhoy Champions - Can you beat my run?',12,out.height-8);
+    c.fillStyle='rgba(0,0,0,.08)'; c.fillRect(0,out.height-22,W,22); c.fillStyle='#333'; c.font='11px Segoe UI, Arial'; c.fillText('🏆 Cainhoy Champions - Play the game and beat my run!',12,out.height-8);
     const blob=await new Promise(r=>out.toBlob(r,'image/png',.95)); const file=new File([blob],'charlies-championship.png',{type:'image/png'});
-    if(navigator.canShare?.({files:[file]})){ await navigator.share({title:"Charlie's Lawn Service screenshot",text:`My score: ${score}`,files:[file]}); }
+    if(navigator.canShare?.({files:[file]})){ await navigator.share({title:"Charlie's Lawn Mowing Adventure – The Game screenshot",text:`My score in the game: ${score} — play the game!`,files:[file]}); }
     else{ const url=URL.createObjectURL(blob); dl.href=url; dl.click(); setTimeout(()=>URL.revokeObjectURL(url),1500); alert('Screenshot saved'); }
   }catch(e){ console.error(e); alert('Screenshot failed'); }
 }
-function shareChamp(){ if(navigator.share){ navigator.share({title:"I am a Lawn Mowing Champion!",text:`Completed with ${score} points`,url:location.href}); } else alert(`I completed the championship with ${score} points. ${location.href}`); }
+function shareChamp(){ if(navigator.share){ navigator.share({title:"I am a Lawn Mowing Champion!",text:`Completed the game with ${score} points — play the game!`,url:location.href}); } else alert(`I completed the lawn mowing game with ${score} points. Play the game: ${location.href}`); }
 
 /* -------------------- Leaderboard (local) -------------------- */
 const KEY='clmc_runs_v1';
