@@ -332,7 +332,7 @@ const congratsByLevel=[
 
 /* -------------------- State -------------------- */
 let running=false, paused=false, lvl=1, score=0, total=0, lvlStart=0;
-let mower={x:50,y:50,w:16,h:16,spd:120,acc:350,vx:0,vy:0,boost:false,inv:false};
+let mower={x:50,y:50,w:16,h:16,spd:120,acc:350,vx:0,vy:0,boost:false,inv:false,dir:'down',frame:0,anim:0};
 let tiles=[], powerUps=[], obs=[], weather={type:"sun",t:0};
 let name=""; let loop=0, last=0;
 const keys={}; const counts={bud:0,golf:0,leaf:0};
@@ -342,6 +342,7 @@ let budTimer=null;
 /* -------------------- Canvas (DPR + responsive scaling) -------------------- */
 const BASE_W=400, BASE_H=300; // internal game world
 const cvs=document.getElementById('gameCanvas'), ctx=cvs.getContext('2d');
+const mowerSheet = new Image();
 function fitCanvas(){
   const dpr=Math.min(window.devicePixelRatio||1,2);
   // target CSS width: nearly full card width, but cap for sanity
@@ -486,10 +487,21 @@ function handle(d){
   if(tx===0) mower.vx*=0.92; if(ty===0) mower.vy*=0.92;
 }
 function move(d){
+  mower.px=mower.x; mower.py=mower.y;
   let fx=1; if(weather.type==='rain') fx=.9; if(weather.type==='wind') mower.x+=Math.sin(Date.now()/330)*8*d;
   mower.x+=mower.vx*d*fx; mower.y+=mower.vy*d*fx;
   mower.x=Math.max(0,Math.min(BASE_W-mower.w,mower.x));
   mower.y=Math.max(0,Math.min(BASE_H-mower.h,mower.y));
+
+  const mv=Math.max(Math.abs(mower.vx),Math.abs(mower.vy));
+  if(mv>1){
+    if(Math.abs(mower.vx)>Math.abs(mower.vy)) mower.dir=mower.vx>0?'right':'left';
+    else mower.dir=mower.vy>0?'down':'up';
+    mower.anim+=d;
+    if(mower.anim>0.15){ mower.frame=(mower.frame+1)%2; mower.anim=0; }
+  }else{
+    mower.frame=0; mower.anim=0;
+  }
 }
 function eatGrass(){
   for(const t of tiles){ if(!t.m && hit(mower,t)){ t.m=true; score+=10; if((t.x+t.y)%40===0) beep(520,.02,.08); } }
@@ -553,7 +565,7 @@ function spawnBud(){
 }
 function setup(level){
   tiles=[]; powerUps=[]; obs=[];
-  mower={x:50,y:50,w:16,h:16,spd:120,acc:350,vx:0,vy:0,boost:false,inv:false};
+  mower={x:50,y:50,w:16,h:16,spd:120,acc:350,vx:0,vy:0,boost:false,inv:false,dir:'down',frame:0,anim:0};
   introShown=false; clearBudTimer();
 
   const house={t:'house',i:'🏠',a:true,x:260,y:20,w:110,h:90};
@@ -639,18 +651,15 @@ function drawEmoji(e,x,y,size){
 function roundRect(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
 function drawMower(){
   const m=mower;
-  const base = m.boost ? "#78BE20" : "#FF6A13";  // EGO green vs Husqvarna orange
-  const dark = m.boost ? "#5FA61A" : "#C84E00";
-  ctx.fillStyle=dark; ctx.fillRect(m.x-2,m.y-2,m.w+4,m.h+4);
-  ctx.fillStyle=base; ctx.fillRect(m.x,m.y,m.w,m.h);
-  ctx.strokeStyle="#666"; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(m.x+m.w/2,m.y); ctx.lineTo(m.x+m.w/2,m.y-8); ctx.stroke();
-  const cx=m.x+m.w/2, cy=m.y-15;
-  ctx.fillStyle="#FFDBAC"; ctx.beginPath(); ctx.arc(cx,cy,4,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle="#0066CC"; ctx.fillRect(cx-5,cy-8,10,4);
-  ctx.strokeStyle="#4169E1"; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(cx,cy+4); ctx.lineTo(cx,cy+12); ctx.stroke(); ctx.beginPath(); ctx.moveTo(cx-3,cy+6); ctx.lineTo(cx+3,cy+6); ctx.stroke();
-  ctx.fillStyle="#333"; ctx.beginPath(); ctx.arc(m.x+3,m.y+m.h,3,0,Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(m.x+m.w-3,m.y+m.h,3,0,Math.PI*2); ctx.fill();
-  if(m.boost){ ctx.strokeStyle="#2E7D32"; ctx.lineWidth=3; ctx.strokeRect(m.x-5,m.y-20,m.w+10,m.h+25); }
-  if(m.inv){ ctx.strokeStyle="#FFD700"; ctx.lineWidth=2; ctx.setLineDash([5,5]); ctx.strokeRect(m.x-3,m.y-18,m.w+6,m.h+23); ctx.setLineDash([]); }
+  ctx.save();
+  ctx.translate(m.x+m.w/2,m.y+m.h/2);
+  let ang=0;
+  if(m.dir==='right') ang=Math.PI/2; else if(m.dir==='left') ang=-Math.PI/2; else if(m.dir==='down') ang=Math.PI;
+  ctx.rotate(ang);
+  ctx.drawImage(mowerSheet,m.frame*16,0,16,16,-m.w/2,-m.h/2,16,16);
+  ctx.restore();
+  if(m.boost){ ctx.strokeStyle="#2E7D32"; ctx.lineWidth=3; ctx.strokeRect(m.x-5,m.y-5,m.w+10,m.h+10); }
+  if(m.inv){ ctx.strokeStyle="#FFD700"; ctx.lineWidth=2; ctx.setLineDash([5,5]); ctx.strokeRect(m.x-3,m.y-3,m.w+6,m.h+6); ctx.setLineDash([]); }
 }
 
 /* -------------------- Power ups -------------------- */
@@ -875,6 +884,7 @@ function setF(active){ [fAll,fWeek,fYou].forEach(b=>b.classList.remove('active')
 
 /* -------------------- Safe Init -------------------- */
 function init(){
+  mowerSheet.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAQCAYAAAB3AH1ZAAAAV0lEQVR4nGM44cfwfyAxA5ggE8ANoUA/3AH/s4T/k4LRHUCu/lEHoDrgOgNxeNCGABkeGGRRMOqAEe0AY2Pj/8gYvdjEJo/sAHL1jzoAbgi6AvRqk1byAJK3mQ4AAkbEAAAAAElFTkSuQmCC';
   const last=localStorage.getItem('clmc_name'); if(last) playerName.value=last;
   hudBest.textContent = localStorage.getItem('clmc_best')||0;
   previewLB();
