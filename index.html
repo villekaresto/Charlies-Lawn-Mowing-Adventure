@@ -364,6 +364,7 @@ let name=""; let loop=0, last=0;
 const keys={}; const counts={bud:0,golf:0,leaf:0};
 let introShown=false;
 let budTimer=null;
+let budBoostTimeout=null, golfInvTimeout=null;
 
 function loadImg(src){
   const img = new Image();
@@ -872,10 +873,12 @@ function power(t){
     setComment("Bud boost activated. Hydration and horsepower.");
     showToast("Budweiser booster activated");
     beep(880,.05,.15); vibr(30);
-    setTimeout(()=>{mower.spd=Math.max(120,mower.spd/1.5); mower.boost=false;},5000);
+    clearTimeout(budBoostTimeout);
+    budBoostTimeout=setTimeout(()=>{mower.spd=Math.max(120,mower.spd/1.5); mower.boost=false; budBoostTimeout=null;},5000);
   }else if(t==='golf'){
     counts.golf++; score+=500; mower.inv=true; setComment("Golf cart mode. You are untouchable and oddly stylish."); chime(); vibr(40);
-    setTimeout(()=>mower.inv=false,3200);
+    clearTimeout(golfInvTimeout);
+    golfInvTimeout=setTimeout(()=>{mower.inv=false; golfInvTimeout=null;},3200);
   }else if(t==='leaf'){
     counts.leaf++; score+=200; obs=obs.filter(o=>o.t!=='rock'); setComment("Leaf blower engaged. Rocks cleared. Neighbors impressed."); beep(520,.05,.12); vibr(20);
   }
