@@ -414,7 +414,10 @@ const assetsReady = Promise.all(
       }, { once: true });
     }
   }))
-);
+).catch(err => {
+  console.error('Failed to load assets:', err);
+  return Promise.reject(err);
+});
 
 /* -------------------- Canvas (DPR + responsive scaling) -------------------- */
 const BASE_W=400, BASE_H=300; // internal game world
