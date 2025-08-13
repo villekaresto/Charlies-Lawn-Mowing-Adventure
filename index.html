@@ -1112,6 +1112,7 @@ const landing=document.getElementById('landing');
 const game=document.getElementById('game');
 const playerName=document.getElementById('playerName');
 const startGameBtn=document.getElementById('startGameBtn');
+const startForm=document.getElementById('startForm');
 const startLevelBtn=document.getElementById('startLevelBtn');
 const pauseBtn=document.getElementById('pauseBtn');
 const shareShot=document.getElementById('shareShot');
@@ -1135,6 +1136,7 @@ const introGo=document.getElementById('introGo');
 function bind(){
   console.debug('bind(): attaching start game listeners');
   startGameBtn.addEventListener('click',e=>{ e.preventDefault(); console.debug('startGameBtn click'); startGame(); });
+  startForm.addEventListener('submit', e => { e.preventDefault(); startGame(); });
   playerName.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); console.debug('playerName Enter key'); startGame(); } });
   startLevelBtn.addEventListener('click',e=>{ e.preventDefault(); handleStartLevelClick(); });
   introGo.addEventListener('click',startLevelRun);
@@ -1184,14 +1186,6 @@ function init(){
     } catch (err) { console.error('Init error:', err); }
   });
 })();
-</script>
-<script>
-  // After all DOM elements are defined
-  document.getElementById('startForm')
-    .addEventListener('submit', function (e) {
-      e.preventDefault();  // stop the default form submit
-      startGame();         // run game start logic
-    });
 </script>
 </body>
 </html>
