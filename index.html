@@ -459,6 +459,7 @@ function fitCanvas(){
   cvs.width=Math.round(BASE_W*scale*dpr);
   cvs.height=Math.round(BASE_H*scale*dpr);
   ctx.setTransform(scale*dpr,0,0,scale*dpr,0,0);
+  draw();
 }
 addEventListener('resize',fitCanvas); fitCanvas();
 
@@ -1138,6 +1139,7 @@ function init(){
   previewLB();
   setup(1);
   fitCanvas(); // in case fonts/padding shift width
+  draw();
   setComment("Press P or Space to pause. Use keys, D-pad, or drag your thumb on the grass.");
 }
 
