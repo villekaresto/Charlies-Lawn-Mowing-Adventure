@@ -432,6 +432,25 @@ function chime(){ beep(660,.07,.18); setTimeout(()=>beep(990,.07,.18),65); }
 function thud(){ beep(130,.07,.2); }
 const vibr=ms=>(navigator.vibrate&&navigator.vibrate(ms));
 
+function explode(x,y){
+  const rect=cvs.getBoundingClientRect();
+  const sx=rect.width/BASE_W, sy=rect.height/BASE_H;
+  const boom=document.createElement('div');
+  boom.textContent='💥';
+  boom.style.position='fixed';
+  boom.style.left=(rect.left+x*sx-18)+"px";
+  boom.style.top=(rect.top+y*sy-18)+"px";
+  boom.style.fontSize='36px';
+  boom.style.pointerEvents='none';
+  boom.style.transition='transform .3s, opacity .3s';
+  boom.style.transform='scale(.5)';
+  boom.style.zIndex='99';
+  document.body.appendChild(boom);
+  requestAnimationFrame(()=>{ boom.style.transform='scale(1.6)'; boom.style.opacity='0'; });
+  setTimeout(()=>boom.remove(),300);
+  beep(80,.25,.3); setTimeout(()=>beep(40,.25,.2),80);
+}
+
 /* -------------------- Toast -------------------- */
 const toastEl=document.getElementById('toast');
 let toastTimer=null;
@@ -475,16 +494,18 @@ function collide(){
   if(mower.inv) return;
   for(const o of obs){
     if(o.a && hit(mower,o)){
+      explode(o.x+o.w/2,o.y+o.h/2);
+      o.a=false;
       mower.vx=mower.vy=0; const pad=5;
       mower.x=(mower.x+mower.w/2<o.x+o.w/2)?Math.max(0,o.x-mower.w-pad):Math.min(BASE_W-mower.w,o.x+o.w+pad);
       mower.y=(mower.y+mower.h/2<o.y+o.h/2)?Math.max(0,o.y-mower.h-pad):Math.min(BASE_H-mower.h,o.y+o.h+pad);
-      setComment(`Easy there. Go around the ${o.t}.`); thud(); vibr(25); break;
+      setComment(`Easy there. Go around the ${o.t}.`); vibr(25); break;
     }
   }
 }
 function pickPower(){ for(const p of powerUps){ if(p.a&&hit(mower,p)){ p.a=false; power(p.t); } } }
 function tickPowers(d){ for(const p of powerUps){ if(p.a){ p.tt-=d; if(p.tt<=0) p.a=false; } } }
-function tickObs(d){ for(const o of obs){ if(o.t==='tree'){ o.s=(o.s||0)+d; o.off=Math.sin(o.s)*2 } if(o.t==='sprinkler') o.r=(o.r||0)+3*d; } }
+function tickObs(d){ for(const o of obs){ if(!o.a) continue; if(o.t==='tree'){ o.s=(o.s||0)+d; o.off=Math.sin(o.s)*2 } if(o.t==='sprinkler') o.r=(o.r||0)+3*d; } }
 function tickWeather(d){ weather.t-=d; if(weather.t<=0){ weather.type=rc(['sun','rain','wind']); weather.t=ri(12,22); weath(); } }
 function winCheck(){
   const totalTiles=tiles.length, mowed=tiles.reduce((n,t)=>n+(t.m?1:0),0);
@@ -506,7 +527,7 @@ function spawnBud(){
   const start={x:0,y:0,w:100,h:100};
   for(let tries=0; tries<40; tries++){
     const p={x:ri(20,BASE_W-44), y:ri(20,BASE_H-44), w:24, h:24};
-    const overlapsObs = obs.some(o=>hit(p,o)) || hit(p,start);
+    const overlapsObs = obs.some(o=>o.a && hit(p,o)) || hit(p,start);
     if(!overlapsObs){ powerUps.push({t:'bud',i:'🍺',x:p.x,y:p.y,w:24,h:24,a:true,tt:18}); return; }
   }
   powerUps.push({t:'bud',i:'🍺',x:ri(20,BASE_W-40),y:ri(20,BASE_H-40),w:24,h:24,a:true,tt:18});
@@ -571,6 +592,7 @@ function draw(){
   }
 
   for(const o of obs){
+    if(!o.a) continue;
     ctx.save();
     if(o.t==='sprinkler'){
       o.r=(o.r||0)+.04; ctx.translate(o.x+o.w/2,o.y+o.h/2); ctx.rotate(o.r);
