@@ -83,9 +83,9 @@
   @keyframes fade-out{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(.98)}}
   .overlay{display:none;position:fixed;inset:0;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);z-index:20;
            border:2px solid rgba(255,255,255,.35);border-radius:16px;max-width:min(480px,90vw);margin:auto;padding:16px;box-shadow:0 10px 40px rgba(0,0,0,.32);
-           opacity:0;transform:scale(.98);will-change:transform,opacity}
-  .overlay.show{display:block;animation:fade-in .2s forwards}
-  .overlay.hide{animation:fade-out .2s forwards}
+           opacity:0;transform:scale(.98)}
+  .overlay.show{display:block;will-change:transform,opacity;animation:fade-in 200ms forwards}
+  .overlay.hide{will-change:transform,opacity;animation:fade-out 200ms forwards}
   .overlay.crash{background:rgba(255,235,238,.96);border-color:rgba(244,67,54,.35)}
   .overlay.crash h2{color:#c62828}
   .overlay.complete{background:rgba(232,245,233,.96);border-color:rgba(76,175,80,.35)}
