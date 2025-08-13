@@ -76,6 +76,8 @@
 
   .overlay{display:none;position:fixed;inset:0;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);z-index:20;
            border:2px solid rgba(255,255,255,.35);border-radius:16px;max-width:min(720px,95vw);margin:auto;padding:20px;box-shadow:0 10px 40px rgba(0,0,0,.32)}
+  .overlay.crash{background:rgba(255,235,238,.96);border-color:rgba(244,67,54,.35)}
+  .overlay.crash h2{color:#c62828}
   .leader-filters{display:flex;gap:8px;justify-content:center;margin-bottom:8px}
   .filter{background:linear-gradient(135deg,var(--accent),#388E3C);color:#fff;border:none;border-radius:9px;padding:8px 12px;font-weight:800}
   .filter.active{background:linear-gradient(135deg,var(--brand),#F7931E)}
@@ -182,8 +184,8 @@
 </div>
 
 <div class="overlay" id="ovGameOver">
-  <h2>Time's Up! ⏰</h2>
-  <p>You ran out of time on Level <span id="ovFailed">1</span></p>
+  <h2 id="ovGameOverTitle">Time's Up! ⏰</h2>
+  <p id="ovGameOverBody"><span id="ovReason">You ran out of time on</span> Level <span id="ovFailed">1</span></p>
   <p>Final Score: <span id="ovFinalScore">0</span></p>
   <div class="row"><button id="restart" class="btn btn-primary">Try Again</button><button id="showLB" class="btn btn-green">View Leaderboard</button></div>
 </div>
@@ -514,7 +516,7 @@ function collide(){
 
       setComment(`Easy there. Go around the ${o.t}.`);
       vibr(25);
-      gameOver();
+      gameOver('obstacle');
       return;
     }
   }
@@ -734,8 +736,17 @@ function levelComplete(){
 function next(){
   ovComplete.style.display='none'; lvl++; if(lvl>12) finale(); else { setup(lvl); ui(); }
 }
-function gameOver(){
+function gameOver(reason='time'){
   running=false; cancelAnimationFrame(loop); clearBudTimer();
+  if(reason==='obstacle'){
+    ovGameOverTitle.textContent='Crash! 💥';
+    ovReason.textContent='You hit an obstacle on';
+    ovGameOver.classList.add('crash');
+  }else{
+    ovGameOverTitle.textContent="Time's Up! ⏰";
+    ovReason.textContent='You ran out of time on';
+    ovGameOver.classList.remove('crash');
+  }
   ovFailed.textContent=lvl; ovFinalScore.textContent=score; ovGameOver.style.display='block';
   thud(); vibr(80); record({n:name,s:score,t:total,l:lvl,ts:Date.now()}); previewLB();
 }
@@ -824,7 +835,7 @@ const hudName=document.getElementById('hudName'), hudLevel=document.getElementBy
 const timer=document.getElementById('timer'), levelTimer=document.getElementById('levelTimer'), weatherEl=document.getElementById('weather'), countdown=document.getElementById('countdown');
 const bar=document.getElementById('bar'); const dl=document.getElementById('dl');
 const ovComplete=document.getElementById('ovComplete'), ovGameOver=document.getElementById('ovGameOver'), ovFinalOverlay=document.getElementById('ovFinalOverlay'), ovLB=document.getElementById('ovLB'), ovPause=document.getElementById('ovPause'), ovChallenge=document.getElementById('ovChallenge');
-const ovTime=document.getElementById('ovTime'), ovScore=document.getElementById('ovScore'), ovBonus=document.getElementById('ovBonus'); const ovFailed=document.getElementById('ovFailed'); const ovFinalScore=document.getElementById('ovFinalScore');
+const ovTime=document.getElementById('ovTime'), ovScore=document.getElementById('ovScore'), ovBonus=document.getElementById('ovBonus'); const ovGameOverTitle=document.getElementById('ovGameOverTitle'); const ovReason=document.getElementById('ovReason'); const ovFailed=document.getElementById('ovFailed'); const ovFinalScore=document.getElementById('ovFinalScore');
 const nextLevelBtn=document.getElementById('nextLevel'), shareLevel=document.getElementById('shareLevel'), restart=document.getElementById('restart'), showLBbtn=document.getElementById('showLB');
 const againBtn=document.getElementById('again'), goLB=document.getElementById('goLB'); const resumeBtn=document.getElementById('resume');
 const fAll=document.getElementById('fAll'), fWeek=document.getElementById('fWeek'), fYou=document.getElementById('fYou'); const lbList=document.getElementById('lbList'); const lbBack=document.getElementById('lbBack');
