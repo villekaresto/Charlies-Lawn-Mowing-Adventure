@@ -344,6 +344,12 @@ const BASE_W=400, BASE_H=300; // internal game world
 const cvs=document.getElementById('gameCanvas'), ctx=cvs.getContext('2d');
 const staticCvs=document.createElement('canvas'), staticCtx=staticCvs.getContext('2d');
 staticCvs.width=BASE_W; staticCvs.height=BASE_H;
+// Offscreen canvases for parallax background layers
+const farCvs=document.createElement('canvas'), farCtx=farCvs.getContext('2d');
+farCvs.width=BASE_W*2; farCvs.height=BASE_H*2;
+const midCvs=document.createElement('canvas'), midCtx=midCvs.getContext('2d');
+midCvs.width=BASE_W*2; midCvs.height=BASE_H*2;
+const FAR_PAR=0.05, MID_PAR=0.15;
 const tileShadeGrad=ctx.createLinearGradient(0,0,0,20);
 tileShadeGrad.addColorStop(0,'rgba(0,0,0,0)');
 tileShadeGrad.addColorStop(1,'rgba(0,0,0,0.15)');
@@ -613,6 +619,8 @@ function setup(level){
   spawnBud(); budTimer=setInterval(spawnBud, 10000);
 
   buildStatic();
+  buildFar();
+  buildMid();
 
   limit = Math.round(70 + 25/Math.sqrt(level));
 
@@ -635,9 +643,45 @@ function buildStatic(){
   staticCtx.clearRect(0,0,BASE_W,BASE_H);
   for(const t of tiles){ drawTileStatic(t); }
 }
+function buildFar(){
+  farCtx.clearRect(0,0,farCvs.width,farCvs.height);
+  farCtx.fillStyle='#87CEEB';
+  farCtx.fillRect(0,0,farCvs.width,farCvs.height);
+  const h=farCvs.height;
+  farCtx.fillStyle='#6DBF4A';
+  farCtx.beginPath();
+  farCtx.arc(farCvs.width*0.3,h-40,180,Math.PI,Math.PI*2);
+  farCtx.fill();
+  farCtx.beginPath();
+  farCtx.arc(farCvs.width*0.7,h-60,220,Math.PI,Math.PI*2);
+  farCtx.fill();
+}
+function buildMid(){
+  midCtx.clearRect(0,0,midCvs.width,midCvs.height);
+  // fence
+  midCtx.fillStyle='#DEB887';
+  for(let x=0;x<midCvs.width;x+=40){
+    midCtx.fillRect(x,midCvs.height-110,10,80);
+    midCtx.fillRect(x,midCvs.height-110,40,10);
+    midCtx.fillRect(x,midCvs.height-60,40,10);
+  }
+  // shrubs
+  midCtx.fillStyle='#228B22';
+  for(let x=0;x<midCvs.width;x+=60){
+    midCtx.beginPath();
+    midCtx.arc(x+30,midCvs.height-30,20,0,Math.PI*2);
+    midCtx.fill();
+  }
+}
 function draw(){
   cvs.style.backgroundColor=L(lvl).c;
   ctx.clearRect(0,0,BASE_W,BASE_H);
+  const fx=-BASE_W/2 - mower.x*FAR_PAR;
+  const fy=-BASE_H/2 - mower.y*FAR_PAR;
+  ctx.drawImage(farCvs,fx,fy);
+  const mx=-BASE_W/2 - mower.x*MID_PAR;
+  const my=-BASE_H/2 - mower.y*MID_PAR;
+  ctx.drawImage(midCvs,mx,my);
   ctx.drawImage(staticCvs,0,0);
 
   for(const t of tiles){
