@@ -110,7 +110,7 @@
   }
 </style>
 </head>
-<body>
+<body tabindex="0">
 
 <div class="screen" id="app">
   <h1>🚜 Charlie's Lawn Mowing Adventure – The Game</h1>
@@ -1168,6 +1168,7 @@ function init(){
       console.debug('DOM fully loaded, running bind() and init()');
       bind();
       init();
+      document.body.focus();
     } catch (err) { console.error('Init error:', err); }
   });
 })();
