@@ -1128,11 +1128,6 @@ const introGo=document.getElementById('introGo');
 /* -------------------- Bindings -------------------- */
 function bind(){
   console.debug('bind(): attaching start game listeners');
-  document.addEventListener('click', (e) => {
-    const id = e.target?.id;
-    if(id==='startGameBtn'){ e.preventDefault(); startGame(); }
-    if(id==='startLevelBtn'){ e.preventDefault(); handleStartLevelClick(); }
-  }, { capture: true });
   startGameBtn.addEventListener('click',e=>{ e.preventDefault(); console.debug('startGameBtn click'); startGame(); });
   playerName.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); console.debug('playerName Enter key'); startGame(); } });
   startLevelBtn.addEventListener('click',e=>{ e.preventDefault(); handleStartLevelClick(); });
