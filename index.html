@@ -333,7 +333,7 @@ const congratsByLevel=[
 /* -------------------- State -------------------- */
 let running=false, paused=false, lvl=1, score=0, total=0, lvlStart=0;
 let mower={x:50,y:50,w:16,h:16,spd:120,acc:350,vx:0,vy:0,boost:false,inv:false};
-let tiles=[], powerUps=[], obs=[], weather={type:"sun",t:0};
+let tiles=[], powerUps=[], obs=[], particles=[], particlePool=[], weather={type:"sun",t:0};
 let name=""; let loop=0, last=0;
 const keys={}; const counts={bud:0,golf:0,leaf:0};
 let introShown=false;
@@ -478,7 +478,7 @@ function frame(ts){
 function step(d){
   handle(d); move(d); eatGrass(); pickPower(); collide();
   if(!running) return;
-  tickPowers(d); tickObs(d); tickWeather(d); total+=d; ui(); winCheck(); timeCheck();
+  tickParticles(d); tickPowers(d); tickObs(d); tickWeather(d); total+=d; ui(); winCheck(); timeCheck();
 }
 function handle(d){
   let tx=0,ty=0;
@@ -528,6 +528,24 @@ function collide(){
   }
 }
 function pickPower(){ for(const p of powerUps){ if(p.a&&hit(mower,p)){ p.a=false; power(p.t); } } }
+function tickParticles(d){
+  if(mower.vx||mower.vy){
+    const p=particlePool.pop()||{};
+    p.x=mower.x+mower.w/2;
+    p.y=mower.y+mower.h/2;
+    p.dx=(Math.random()-.5)*20;
+    p.dy=(Math.random()-.5)*20;
+    p.life=1;
+    particles.push(p);
+  }
+  for(let i=particles.length-1;i>=0;i--){
+    const p=particles[i];
+    p.x+=p.dx*d;
+    p.y+=p.dy*d;
+    p.life-=d*2;
+    if(p.life<=0){ particles.splice(i,1); particlePool.push(p); }
+  }
+}
 function tickPowers(d){ for(const p of powerUps){ if(p.a){ p.tt-=d; if(p.tt<=0) p.a=false; } } }
 function tickObs(d){ for(const o of obs){ if(!o.a) continue; if(o.t==='tree'){ o.s=(o.s||0)+d; o.off=Math.sin(o.s)*2 } if(o.t==='sprinkler') o.r=(o.r||0)+3*d; } }
 function tickWeather(d){ weather.t-=d; if(weather.t<=0){ weather.type=rc(['sun','rain','wind']); weather.t=ri(12,22); weath(); } }
@@ -557,7 +575,7 @@ function spawnBud(){
   powerUps.push({t:'bud',i:'🍺',x:ri(20,BASE_W-40),y:ri(20,BASE_H-40),w:24,h:24,a:true,tt:18});
 }
 function setup(level){
-  tiles=[]; powerUps=[]; obs=[];
+  tiles=[]; powerUps=[]; obs=[]; particles=[]; particlePool=[];
   mower={x:50,y:50,w:16,h:16,spd:120,acc:350,vx:0,vy:0,boost:false,inv:false};
   introShown=false; clearBudTimer();
 
@@ -645,6 +663,12 @@ function draw(){
   }
 
   for(const p of powerUps){ if(p.a){ ctx.save(); ctx.translate(p.x+12,p.y+12); ctx.rotate((Date.now()/500)%(Math.PI*2)); drawEmoji(p.i,-8,8,22); ctx.restore(); } }
+
+  for(const p of particles){
+    const size=3*p.life;
+    ctx.fillStyle=`rgba(0,128,0,${p.life})`;
+    ctx.fillRect(p.x,p.y,size,size);
+  }
 
   drawMower();
 
