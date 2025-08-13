@@ -567,7 +567,7 @@ function setup(level){
   if(Math.random()<.5){const p=rnd(); powerUps.push({t:'golf',i:'🚗',x:p.x,y:p.y,w:24,h:24,a:true,tt:18});}
   if(Math.random()<.4){const p=rnd(); powerUps.push({t:'leaf',i:'🍃',x:p.x,y:p.y,w:24,h:24,a:true,tt:18});}
 
-  // Budweiser boobster every 10s
+  // Budweiser booster every 10s
   spawnBud(); budTimer=setInterval(spawnBud, 10000);
 
   limit = Math.round(70 + 25/Math.sqrt(level));
@@ -638,8 +638,8 @@ function drawMower(){
 function power(t){
   if(t==='bud'){
     counts.bud++; mower.spd=Math.min(220,mower.spd*1.5); mower.boost=true; score+=100;
-    setComment("Bud boost activated. Hydration and horsepower.");
-    showToast("boobweiser boobster activated");
+    setComment("Bud booster activated. Hydration and horsepower.");
+    showToast("Budweiser booster activated");
     beep(880,.05,.15); vibr(30);
     setTimeout(()=>{mower.spd=Math.max(120,mower.spd/1.5); mower.boost=false;},5000);
   }else if(t==='golf'){
