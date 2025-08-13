@@ -777,7 +777,14 @@ function record(run){ const a=loadRuns(); a.unshift(run); a.sort((x,y)=>y.s-x.s 
 function previewLB(){
   const a=loadRuns(); leaderboardPreview.innerHTML = a.length? a.slice(0,3).map((r,i)=>`${i+1}. ${escapeHTML(r.n)} — ${r.s} pts — ${fmt(r.t)}`).join('<br/>') : "Be the first champion! 🌱";
 }
-function week(ts){ const d=new Date(ts), now=new Date(); const day=now.getDay(); const monday=new Date(now.getFullYear(),now.getMonth(),now.getDate()-((day+6)%7)); return d>=monday; }
+function week(ts){
+  const d=new Date(ts), now=new Date();
+  const day=now.getDay();
+  const monday=new Date(now.getFullYear(),now.getMonth(),now.getDate()-((day+6)%7));
+  const next=new Date(monday);
+  next.setDate(monday.getDate()+7);
+  return d>=monday && d<next;
+}
 function showLB(filter='all'){
   const all=loadRuns(); let list=[];
   if(filter==='all') list=all; else if(filter==='week') list=all.filter(r=>week(r.ts)); else if(filter==='you') list=all.filter(r=>r.n===name);
