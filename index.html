@@ -757,6 +757,7 @@ function setup(level){
   bar.style.width='0%'; bar.textContent='0% Mowed';
   startLevelBtn.textContent='Start: '+L(level).n; startLevelBtn.disabled=false;
   pauseBtn.disabled=true; shareShot.style.display='none';
+  draw();
 }
 function weath(){ weatherEl.textContent = weather.type==='sun'?'☀️ Perfect':weather.type==='rain'?'🌧️ Rainy':'💨 Windy'; }
 
