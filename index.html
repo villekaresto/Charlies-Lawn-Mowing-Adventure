@@ -248,7 +248,7 @@
 <div id="toast" role="status" aria-live="polite"></div>
 <a id="dl" download="charlies-championship.png" style="display:none"></a>
 
-<script>
+<script defer>
 /* -------------------- Data: levels + descriptions -------------------- */
 const levels=[
 {n:"Barefoot Boulevard",     d:"Toes out, dew cold, bottle caps everywhere.",
@@ -1083,8 +1083,9 @@ const introGo=document.getElementById('introGo');
 
 /* -------------------- Bindings -------------------- */
 function bind(){
-  startGameBtn.addEventListener('click',e=>{ e.preventDefault(); startGame(); });
-  playerName.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); startGame(); } });
+  console.debug('bind(): attaching start game listeners');
+  startGameBtn.addEventListener('click',e=>{ e.preventDefault(); console.debug('startGameBtn click'); startGame(); });
+  playerName.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); console.debug('playerName Enter key'); startGame(); } });
   startLevelBtn.addEventListener('click',e=>{ e.preventDefault(); handleStartLevelClick(); });
   introGo.addEventListener('click',startLevelRun);
   pauseBtn.addEventListener('click',togglePause);
@@ -1125,6 +1126,7 @@ function init(){
   function ready(fn){ if (document.readyState !== 'loading') fn(); else document.addEventListener('DOMContentLoaded', fn); }
   ready(() => {
     try {
+      console.debug('DOM fully loaded, running bind() and init()');
       bind();
       init();
     } catch (err) { console.error('Init error:', err); }
