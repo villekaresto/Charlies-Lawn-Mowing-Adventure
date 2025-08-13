@@ -122,7 +122,7 @@
         <div class="row" style="margin:10px 0">
           <button id="startGameBtn" class="btn btn-primary">Start Mowing!</button>
         </div>
-        <input id="playerName" type="text" maxlength="15" placeholder="Your Name" style="padding:10px 12px;border-radius:10px;border:2px solid var(--accent);font-weight:700;text-align:center;min-width:min(260px,80vw)" />
+        <input id="playerName" type="text" maxlength="15" placeholder="Your Name" required style="padding:10px 12px;border-radius:10px;border:2px solid var(--accent);font-weight:700;text-align:center;min-width:min(260px,80vw)" />
         <div class="desc" style="margin-top:8px">
         Cainhoy breeze in his hair, bare feet on the turf, Bud on ice, and a borrowed EGO he swears he hates but actually loves. Ladies' man energy, HOA precision.
       </div>
@@ -937,7 +937,13 @@ function genCongrats(player,level){
 /* -------------------- Level Flow -------------------- */
 async function startGame(){
   await assetsReady;
-  name=(playerName.value||"").trim()||"Mower Champ"; localStorage.setItem('clmc_name',name);
+  const entered=(playerName.value||"").trim();
+  if(!entered){
+    showToast('Please enter your name.');
+    playerName.focus();
+    return;
+  }
+  name=entered; localStorage.setItem('clmc_name',name);
   score=0; total=0; lvl=1; counts.bud=counts.golf=counts.leaf=0; renderCounts();
   landing.style.display='none'; game.style.display='block';
   hudName.textContent=name; hudBest.textContent=localStorage.getItem('clmc_best')||0;
