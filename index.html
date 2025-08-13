@@ -632,15 +632,29 @@ function draw(){
     if(!o.a) continue;
     ctx.save();
     if(o.t==='sprinkler'){
-      o.r=(o.r||0)+.04; ctx.translate(o.x+o.w/2,o.y+o.h/2); ctx.rotate(o.r);
-      ctx.drawImage(o.img, -o.w/2, -o.h/2, o.w, o.h); ctx.restore(); continue;
+      o.r=(o.r||0)+.04;
+      ctx.translate(o.x+o.w/2, o.y+o.h/2);
+      ctx.rotate(o.r);
+      ctx.drawImage(o.img, -o.w/2, -o.h/2, o.w, o.h);
+      ctx.restore();
+      continue;
     }
-    ctx.fillStyle="rgba(0,0,0,.14)"; roundRect(o.x-2,o.y-2,o.w+4,o.h+4,6); ctx.fill();
+    ctx.fillStyle = "rgba(0,0,0,.14)";
+    roundRect(o.x-2, o.y-2, o.w+4, o.h+4, 6);
+    ctx.fill();
     ctx.drawImage(o.img, o.x, o.y, o.w, o.h);
     ctx.restore();
   }
 
-  for(const p of powerUps){ if(p.a){ ctx.save(); ctx.translate(p.x+p.w/2,p.y+p.h/2); ctx.rotate((Date.now()/500)%(Math.PI*2)); ctx.drawImage(p.img,-p.w/2,-p.h/2,p.w,p.h); ctx.restore(); } }
+  for(const p of powerUps){
+    if(p.a){
+      ctx.save();
+      ctx.translate(p.x+p.w/2, p.y+p.h/2);
+      ctx.rotate((Date.now()/500)%(Math.PI*2));
+      ctx.drawImage(p.img, -p.w/2, -p.h/2, p.w, p.h);
+      ctx.restore();
+    }
+  }
 
   drawMower();
 
