@@ -22,6 +22,7 @@
     user-select:none; -webkit-user-select:none; /* iOS */
     -webkit-touch-callout:none;                 /* iOS long-press menu */
   }
+  input, textarea{user-select:text; -webkit-user-select:text;}
   body{
     margin:0;background:linear-gradient(135deg,var(--bg1) 0%,var(--bg2) 20%,var(--bg3) 60%,var(--sky) 100%);
     font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Arial,sans-serif;color:var(--brand);
@@ -119,10 +120,12 @@
   <div class="card row" id="landing">
     <div class="card">
         <div style="text-align:center;font-weight:800;margin-bottom:6px">Enter Your Name</div>
-        <div class="row" style="margin:10px 0">
-          <button id="startGameBtn" class="btn btn-primary">Start Mowing!</button>
-        </div>
-        <input id="playerName" type="text" maxlength="15" placeholder="Your Name" required style="padding:10px 12px;border-radius:10px;border:2px solid var(--accent);font-weight:700;text-align:center;min-width:min(260px,80vw)" />
+        <form id="startForm" style="margin:0">
+          <div class="row" style="margin:10px 0">
+            <button id="startGameBtn" class="btn btn-primary" type="submit">Start Mowing!</button>
+          </div>
+          <input id="playerName" type="text" maxlength="15" placeholder="Your Name" required style="padding:10px 12px;border-radius:10px;border:2px solid var(--accent);font-weight:700;text-align:center;min-width:min(260px,80vw)" />
+        </form>
         <div class="desc" style="margin-top:8px">
         Cainhoy breeze in his hair, bare feet on the turf, Bud on ice, and a borrowed EGO he swears he hates but actually loves. Ladies' man energy, HOA precision.
       </div>
@@ -476,8 +479,11 @@ addEventListener('keydown',e=>{
   keys[e.key]=keys[e.code]=true;
   if(e.key==='p'||e.key==='P'||e.code==='Space') togglePause();
   if(e.key==='Enter'&&!running){
-    if(document.activeElement===playerName||landing.style.display!=='none') return;
-    handleStartLevelClick();
+    if(landing.style.display!=='none'){
+      startGame();
+    }else if(document.activeElement!==playerName){
+      handleStartLevelClick();
+    }
   }
 });
 addEventListener('keyup',e=>{
@@ -1122,9 +1128,18 @@ const introGo=document.getElementById('introGo');
 /* -------------------- Bindings -------------------- */
 function bind(){
   console.debug('bind(): attaching start game listeners');
+  document.addEventListener('click', (e) => {
+    const id = e.target?.id;
+    if(id==='startGameBtn'){ e.preventDefault(); startGame(); }
+    if(id==='startLevelBtn'){ e.preventDefault(); handleStartLevelClick(); }
+  }, { capture: true });
   startGameBtn.addEventListener('click',e=>{ e.preventDefault(); console.debug('startGameBtn click'); startGame(); });
   playerName.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); console.debug('playerName Enter key'); startGame(); } });
   startLevelBtn.addEventListener('click',e=>{ e.preventDefault(); handleStartLevelClick(); });
+  const startForm=document.getElementById('startForm');
+  if(startForm){
+    startForm.addEventListener('submit',e=>{ e.preventDefault(); startGame(); });
+  }
   introGo.addEventListener('click',startLevelRun);
   pauseBtn.addEventListener('click',togglePause);
   resumeBtn.addEventListener('click',togglePause);
