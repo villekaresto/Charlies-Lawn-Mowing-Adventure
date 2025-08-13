@@ -242,18 +242,30 @@
 <script>
 /* -------------------- Data: levels + descriptions -------------------- */
 const levels=[
-  {n:"Barefoot Boulevard",     c:"#7CFC00", d:"Toes out, dew cold, bottle caps everywhere."},
-  {n:"RAM Yard Test Track",    c:"#32CD32", d:"The Dodge RAM is blocking your line. Work around it."},
-  {n:"Golf Cart Grand Prix",   c:"#98FB98", d:"Shortcuts allowed. Avoid the welcome mat pothole."},
-  {n:"Trampoline Tangle",      c:"#9AFF9A", d:"Orbit the trampoline legs. No flips, all stripes."},
-  {n:"Edging Invitational",    c:"#90EE90", d:"Driveway, beds, sidewalk. Sharp lines only."},
-  {n:"Blower Showdown",        c:"#8FBC8F", d:"Blast corners clean. Leave no crumb behind."},
-  {n:"EGO vs Husky Derby",     c:"#ADFF2F", d:"Talks smack about electric, borrows EGO anyway."},
-  {n:"Budweiser Yard Party",   c:"#228B22", d:"Mow around the coolers. Cans are not power ups."},
-  {n:"Cainhoy Dollar Tree HOA Finals",  c:"#7CFC00", d:"Every neighbor is judging the stripes."},
-  {n:"Lowcountry Crosswind",   c:"#6B8E23", d:"Cainhoy gusts push your deck. Hold the line."},
-  {n:"Overtime Overgrowth",    c:"#556B2F", d:"Bonus jungle. The clippings will tell your story."},
-  {n:"Golden Grass Champion",  c:"#FFD700", d:"Perfect pass, perfect blow, perfect edge."}
+{n:"Barefoot Boulevard",     d:"Toes out, dew cold, bottle caps everywhere.",
+ palette:{grassColor:"#7CFC00", mowedColor:"#90EE90", skyColor:"#87CEEB", texture:"spring"}},
+{n:"RAM Yard Test Track",    d:"The Dodge RAM is blocking your line. Work around it.",
+ palette:{grassColor:"#7CFC00", mowedColor:"#90EE90", skyColor:"#87CEEB", texture:"spring"}},
+{n:"Golf Cart Grand Prix",   d:"Shortcuts allowed. Avoid the welcome mat pothole.",
+ palette:{grassColor:"#7CFC00", mowedColor:"#90EE90", skyColor:"#87CEEB", texture:"spring"}},
+{n:"Trampoline Tangle",      d:"Orbit the trampoline legs. No flips, all stripes.",
+ palette:{grassColor:"#7CFC00", mowedColor:"#90EE90", skyColor:"#87CEEB", texture:"spring"}},
+{n:"Edging Invitational",    d:"Driveway, beds, sidewalk. Sharp lines only.",
+ palette:{grassColor:"#C2B280", mowedColor:"#DEB887", skyColor:"#FFDAB9", texture:"autumn"}},
+{n:"Blower Showdown",        d:"Blast corners clean. Leave no crumb behind.",
+ palette:{grassColor:"#C2B280", mowedColor:"#DEB887", skyColor:"#FFDAB9", texture:"autumn"}},
+{n:"EGO vs Husky Derby",     d:"Talks smack about electric, borrows EGO anyway.",
+ palette:{grassColor:"#C2B280", mowedColor:"#DEB887", skyColor:"#FFDAB9", texture:"autumn"}},
+{n:"Budweiser Yard Party",   d:"Mow around the coolers. Cans are not power ups.",
+ palette:{grassColor:"#C2B280", mowedColor:"#DEB887", skyColor:"#FFDAB9", texture:"autumn"}},
+{n:"Cainhoy Dollar Tree HOA Finals",  d:"Every neighbor is judging the stripes.",
+ palette:{grassColor:"#E0F8FF", mowedColor:"#F8FFF8", skyColor:"#B0E0E6", texture:"winter"}},
+{n:"Lowcountry Crosswind",   d:"Cainhoy gusts push your deck. Hold the line.",
+ palette:{grassColor:"#E0F8FF", mowedColor:"#F8FFF8", skyColor:"#B0E0E6", texture:"winter"}},
+{n:"Overtime Overgrowth",    d:"Bonus jungle. The clippings will tell your story.",
+ palette:{grassColor:"#E0F8FF", mowedColor:"#F8FFF8", skyColor:"#B0E0E6", texture:"winter"}},
+{n:"Golden Grass Champion",  d:"Perfect pass, perfect blow, perfect edge.",
+ palette:{grassColor:"#E0F8FF", mowedColor:"#F8FFF8", skyColor:"#B0E0E6", texture:"winter"}}
 ];
 const L=idx=>levels[Math.min(idx-1,levels.length-1)];
 
@@ -358,6 +370,23 @@ const FAR_PAR=0.05, MID_PAR=0.15;
 const tileShadeGrad=ctx.createLinearGradient(0,0,0,20);
 tileShadeGrad.addColorStop(0,'rgba(0,0,0,0)');
 tileShadeGrad.addColorStop(1,'rgba(0,0,0,0.15)');
+let pal, grassPattern;
+function makeGrassTexture(type,color){
+  const cn=document.createElement('canvas'); cn.width=20; cn.height=20;
+  const g=cn.getContext('2d');
+  g.fillStyle=color; g.fillRect(0,0,20,20);
+  if(type==='autumn'){
+    g.fillStyle='rgba(139,69,19,0.3)';
+    g.fillRect(0,0,20,10); g.fillRect(10,10,20,10);
+  }else if(type==='winter'){
+    g.fillStyle='rgba(255,255,255,0.6)';
+    for(let i=0;i<20;i+=5){ g.fillRect(i,i,2,2); }
+  }else{
+    g.fillStyle='rgba(0,100,0,0.2)';
+    g.fillRect(0,0,20,10); g.fillRect(10,10,20,10);
+  }
+  return ctx.createPattern(cn,'repeat');
+}
 function fitCanvas(){
   const dpr=Math.min(window.devicePixelRatio||1,2);
   // target CSS width: nearly full card width, but cap for sanity
@@ -589,6 +618,8 @@ function setup(level){
   tiles=[]; powerUps=[]; obs=[]; particles=[]; particlePool=[];
   mower={x:50,y:50,w:16,h:16,spd:120,acc:350,vx:0,vy:0,boost:false,inv:false};
   introShown=false; clearBudTimer();
+  pal=L(level).palette;
+  grassPattern=makeGrassTexture(pal.texture, pal.grassColor);
 
   const house={t:'house',i:'🏠',a:true,x:260,y:20,w:110,h:90};
   obs.push(house);
@@ -640,8 +671,8 @@ function weath(){ weatherEl.textContent = weather.type==='sun'?'☀️ Perfect':
 
 /* -------------------- Drawing -------------------- */
 function drawTileStatic(t){
-  staticCtx.fillStyle="#228B22"; staticCtx.fillRect(t.x,t.y,t.w,t.h);
-  staticCtx.fillStyle="#32CD32"; staticCtx.fillRect(t.x+2,t.y+2,t.w-4,t.h-4);
+  staticCtx.fillStyle=grassPattern;
+  staticCtx.fillRect(t.x,t.y,t.w,t.h);
   staticCtx.fillStyle=tileShadeGrad; staticCtx.fillRect(t.x,t.y,t.w,t.h);
 }
 function buildStatic(){
@@ -650,10 +681,10 @@ function buildStatic(){
 }
 function buildFar(){
   farCtx.clearRect(0,0,farCvs.width,farCvs.height);
-  farCtx.fillStyle='#87CEEB';
+  farCtx.fillStyle=pal.skyColor;
   farCtx.fillRect(0,0,farCvs.width,farCvs.height);
   const h=farCvs.height;
-  farCtx.fillStyle='#6DBF4A';
+  farCtx.fillStyle=pal.grassColor;
   farCtx.beginPath();
   farCtx.arc(farCvs.width*0.3,h-40,180,Math.PI,Math.PI*2);
   farCtx.fill();
@@ -679,7 +710,7 @@ function buildMid(){
   }
 }
 function draw(){
-  cvs.style.backgroundColor=L(lvl).c;
+  cvs.style.backgroundColor=pal.grassColor;
   ctx.clearRect(0,0,BASE_W,BASE_H);
   const fx=-BASE_W/2 - mower.x*FAR_PAR;
   const fy=-BASE_H/2 - mower.y*FAR_PAR;
@@ -691,7 +722,7 @@ function draw(){
 
   for(const t of tiles){
     if(t.m){
-      ctx.fillStyle="#90EE90"; ctx.fillRect(t.x,t.y,t.w,t.h);
+      ctx.fillStyle=pal.mowedColor; ctx.fillRect(t.x,t.y,t.w,t.h);
       ctx.save(); ctx.translate(t.x,t.y); ctx.fillStyle=tileShadeGrad; ctx.fillRect(0,0,t.w,t.h); ctx.restore();
     }
   }
