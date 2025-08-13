@@ -639,7 +639,7 @@ function power(t){
   if(t==='bud'){
     counts.bud++; mower.spd=Math.min(220,mower.spd*1.5); mower.boost=true; score+=100;
     setComment("Bud boost activated. Hydration and horsepower.");
-    showToast("boobweiser boobster activated");
+    showToast("Budweiser booster activated");
     beep(880,.05,.15); vibr(30);
     setTimeout(()=>{mower.spd=Math.max(120,mower.spd/1.5); mower.boost=false;},5000);
   }else if(t==='golf'){
