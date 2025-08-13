@@ -566,6 +566,8 @@ function frame(ts){
   step(dt); draw(); loop=requestAnimationFrame(frame);
 }
 function step(d){
+  // store previous position before any movement so collisions can restore it
+  mower.px = mower.x; mower.py = mower.y;
   handle(d); move(d); eatGrass(); pickPower(); collide();
   if(!running) return;
   tickParticles(d); tickPowers(d); tickObs(d); tickWeather(d); total+=d; ui(); winCheck(); timeCheck();
@@ -581,7 +583,6 @@ function handle(d){
   if(tx===0) mower.vx*=0.92; if(ty===0) mower.vy*=0.92;
 }
 function move(d){
-  mower.px = mower.x; mower.py = mower.y;
   let fx=1; if(weather.type==='rain') fx=.9; if(weather.type==='wind') mower.x+=Math.sin(Date.now()/330)*8*d;
   mower.x+=mower.vx*d*fx; mower.y+=mower.vy*d*fx;
   mower.x=Math.max(0,Math.min(BASE_W-mower.w,mower.x));
@@ -597,6 +598,7 @@ function collide(){
       explode(o.x + o.w / 2, o.y + o.h / 2);
       o.a = false;
 
+      // revert to prior safe position when hitting an obstacle
       mower.vx = mower.vy = 0;
       mower.x = mower.px; mower.y = mower.py;
 
