@@ -367,6 +367,7 @@ addEventListener('keydown',e=>{
   if(block.includes(e.code)) e.preventDefault();
   keys[e.key]=keys[e.code]=true;
   if(e.key==='p'||e.key==='P'||e.code==='Space') togglePause();
+  if(e.key==='r'||e.key==='R') resetMower();
   if(e.key==='Enter'&&!running) handleStartLevelClick();
 });
 addEventListener('keyup',e=>{
@@ -461,6 +462,7 @@ function handle(d){
   if(tx===0) mower.vx*=0.92; if(ty===0) mower.vy*=0.92;
 }
 function move(d){
+  mower.px=mower.x; mower.py=mower.y;
   let fx=1; if(weather.type==='rain') fx=.9; if(weather.type==='wind') mower.x+=Math.sin(Date.now()/330)*8*d;
   mower.x+=mower.vx*d*fx; mower.y+=mower.vy*d*fx;
   mower.x=Math.max(0,Math.min(BASE_W-mower.w,mower.x));
@@ -473,12 +475,23 @@ function collide(){
   if(mower.inv) return;
   for(const o of obs){
     if(o.a && hit(mower,o)){
-      mower.vx=mower.vy=0; const pad=5;
-      mower.x=(mower.x+mower.w/2<o.x+o.w/2)?Math.max(0,o.x-mower.w-pad):Math.min(BASE_W-mower.w,o.x+o.w+pad);
-      mower.y=(mower.y+mower.h/2<o.y+o.h/2)?Math.max(0,o.y-mower.h-pad):Math.min(BASE_H-mower.h,o.y+o.h+pad);
+      mower.vx=mower.vy=0;
+      mower.x=mower.px; mower.y=mower.py;
+      const cx=mower.x+mower.w/2, cy=mower.y+mower.h/2;
+      const ox=o.x+o.w/2, oy=o.y+o.h/2;
+      let dx=cx-ox, dy=cy-oy; const mag=Math.hypot(dx,dy)||1;
+      dx/=mag; dy/=mag; const push=4;
+      mower.x+=dx*push; mower.y+=dy*push;
+      mower.x=Math.max(0,Math.min(BASE_W-mower.w,mower.x));
+      mower.y=Math.max(0,Math.min(BASE_H-mower.h,mower.y));
       setComment(`Easy there. Go around the ${o.t}.`); thud(); vibr(25); break;
     }
   }
+}
+function resetMower(){
+  mower.x=mower.sx; mower.y=mower.sy;
+  mower.vx=mower.vy=0; mower.px=mower.x; mower.py=mower.y;
+  setComment("Back to start.");
 }
 function pickPower(){ for(const p of powerUps){ if(p.a&&hit(mower,p)){ p.a=false; power(p.t); } } }
 function tickPowers(d){ for(const p of powerUps){ if(p.a){ p.tt-=d; if(p.tt<=0) p.a=false; } } }
@@ -511,7 +524,7 @@ function spawnBud(){
 }
 function setup(level){
   tiles=[]; powerUps=[]; obs=[];
-  mower={x:50,y:50,w:16,h:16,spd:120,acc:350,vx:0,vy:0,boost:false,inv:false};
+  mower={x:50,y:50,px:50,py:50,sx:50,sy:50,w:16,h:16,spd:120,acc:350,vx:0,vy:0,boost:false,inv:false};
   introShown=false; clearBudTimer();
 
   const house={t:'house',i:'🏠',a:true,x:260,y:20,w:110,h:90};
@@ -821,7 +834,7 @@ function init(){
   previewLB();
   setup(1);
   fitCanvas(); // in case fonts/padding shift width
-  setComment("Press P or Space to pause. Use keys, D-pad, or drag your thumb on the grass.");
+  setComment("Press P or Space to pause. Use keys, D-pad, or drag your thumb on the grass. Press R if stuck to reset.");
 }
 
 /* Run after DOM is ready */
