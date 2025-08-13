@@ -18,7 +18,6 @@ function extractHandler(source, startPattern, name) {
 
 // Build handlers
 const clickHandlerSrc = extractHandler(html, "startGameBtn.addEventListener('click',e=>{", 'btnHandler');
-const submitHandlerSrc = extractHandler(html, "startForm.addEventListener('submit',e=>{", 'submitHandler');
 
 const context = {
   startCalls: 0,
@@ -28,17 +27,11 @@ const context = {
 
 vm.createContext(context);
 vm.runInContext(clickHandlerSrc, context);
-vm.runInContext(submitHandlerSrc, context);
 
 // Simulate button click
 let defaultPrevented = false;
 const clickEvent = { preventDefault: () => { defaultPrevented = true; } };
 context.btnHandler(clickEvent);
-
-// Form submit should not fire when click prevented default
-if(!defaultPrevented) {
-  context.submitHandler({ preventDefault: () => {} });
-}
 
 assert.strictEqual(context.startCalls, 1, 'startGame should be called once');
 assert.strictEqual(defaultPrevented, true, 'form submission should be prevented');
