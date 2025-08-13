@@ -467,7 +467,10 @@ addEventListener('keydown',e=>{
   if(block.includes(e.code)) e.preventDefault();
   keys[e.key]=keys[e.code]=true;
   if(e.key==='p'||e.key==='P'||e.code==='Space') togglePause();
-  if(e.key==='Enter'&&!running) handleStartLevelClick();
+  if(e.key==='Enter'&&!running){
+    if(document.activeElement===playerName||landing.style.display!=='none') return;
+    handleStartLevelClick();
+  }
 });
 addEventListener('keyup',e=>{
   const block=['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','KeyW','KeyA','KeyS','KeyD'];
