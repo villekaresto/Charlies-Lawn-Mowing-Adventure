@@ -818,16 +818,22 @@ function draw(){
     ctx.shadowOffsetY=2;
     if(o.t==='sprinkler'){
       ctx.translate(o.x+o.w/2,o.y+o.h/2); ctx.rotate(o.r||0);
-      if(o.img) ctx.drawImage(o.img,-o.w/2,-o.h/2,o.w,o.h); else drawEmoji('💦',-12,10,28);
-    }else if(o.img){
+      ctx.drawImage(o.img,-o.w/2,-o.h/2,o.w,o.h);
+    }else{
       ctx.drawImage(o.img,o.x+(o.off||0),o.y,o.w,o.h);
-    }else if(o.i){
-      drawEmoji(o.i, o.x+o.w*0.14, o.y+o.h*0.78, Math.max(o.w,o.h));
     }
     ctx.restore();
   }
 
-  for(const p of powerUps){ if(p.a){ ctx.save(); ctx.translate(p.x+12,p.y+12); ctx.rotate((Date.now()/500)%(Math.PI*2)); if(p.img) ctx.drawImage(p.img,-12,-12,24,24); else drawEmoji(p.i,-8,8,22); ctx.restore(); } }
+  for(const p of powerUps){
+    if(p.a){
+      ctx.save();
+      ctx.translate(p.x+p.w/2,p.y+p.h/2);
+      ctx.rotate((Date.now()/500)%(Math.PI*2));
+      ctx.drawImage(p.img,-p.w/2,-p.h/2,p.w,p.h);
+      ctx.restore();
+    }
+  }
 
   for(const p of particles){
     const size=3*p.life;
@@ -841,11 +847,6 @@ function draw(){
     ctx.fillStyle="rgba(0,0,255,.08)"; ctx.fillRect(0,0,BASE_W,BASE_H);
     for(let i=0;i<14;i++){ const x=(Date.now()/10+i*50)%BASE_W, y=(Date.now()/5+i*30)%BASE_H; ctx.fillStyle="rgba(173,216,230,.7)"; ctx.fillRect(x,y,2,8) }
   }else if(weather.type==="wind"){ ctx.fillStyle="rgba(200,200,200,.08)"; ctx.fillRect(0,0,BASE_W,BASE_H); }
-}
-function drawEmoji(e,x,y,size){
-  ctx.font=`${Math.floor(size)}px "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",system-ui,Arial`;
-  ctx.lineWidth=3; ctx.strokeStyle='rgba(255,255,255,.85)';
-  ctx.strokeText(e,x,y); ctx.fillText(e,x,y);
 }
 function drawMower(){
   const m=mower;
