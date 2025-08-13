@@ -967,6 +967,7 @@ function genCongrats(player,level){
 
 /* -------------------- Level Flow -------------------- */
 async function startGame(){
+  if(running) return;
   const ASSET_TIMEOUT = 4000;
   const assetLoad = assetsReady
     .then(() => 'loaded')
@@ -1136,7 +1137,6 @@ const introGo=document.getElementById('introGo');
 function bind(){
   console.debug('bind(): attaching start game listeners');
   startGameBtn.addEventListener('click',e=>{ e.preventDefault(); console.debug('startGameBtn click'); startGame(); });
-  startForm.addEventListener('submit', e => { e.preventDefault(); startGame(); });
   playerName.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); console.debug('playerName Enter key'); startGame(); } });
   startLevelBtn.addEventListener('click',e=>{ e.preventDefault(); handleStartLevelClick(); });
   introGo.addEventListener('click',startLevelRun);
