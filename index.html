@@ -929,6 +929,7 @@ function handleStartLevelClick(){
     introBody.textContent = rc(jokes);
     showOverlay(ovIntro);
     introShown=true;
+    setTimeout(()=>{ startLevelRun(); },400);
     return;
   }
   startLevelRun();
