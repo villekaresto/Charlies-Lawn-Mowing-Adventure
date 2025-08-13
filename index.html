@@ -1041,7 +1041,15 @@ function showLB(filter='all'){
   lbList.innerHTML = list.length? list.slice(0,30).map((r,i)=>`${i+1}. ${escapeHTML(r.n)} - ${r.s} pts - ${fmt(r.t)}`).join('<br/>') : "No entries yet.";
   showOverlay(ovLB);
 }
-const escapeHTML=s=>s.replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+const escapeHTML = s =>
+  s.replace(/[&<>"']/g, m => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }[m]));
+
 
 /* -------------------- DOM refs -------------------- */
 const landing=document.getElementById('landing');
