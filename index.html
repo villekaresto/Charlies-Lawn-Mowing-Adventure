@@ -79,8 +79,13 @@
   .btn-blue{background:linear-gradient(135deg,#2196F3,#1976D2);color:#fff}
   .comment{background:rgba(255,248,220,.95);border:2px solid rgba(255,215,0,.35);border-radius:10px;padding:8px;font-style:italic}
 
+  @keyframes fade-in{from{opacity:0;transform:scale(.98)}to{opacity:1;transform:scale(1)}}
+  @keyframes fade-out{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(.98)}}
   .overlay{display:none;position:fixed;inset:0;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);z-index:20;
-           border:2px solid rgba(255,255,255,.35);border-radius:16px;max-width:min(480px,90vw);margin:auto;padding:16px;box-shadow:0 10px 40px rgba(0,0,0,.32)}
+           border:2px solid rgba(255,255,255,.35);border-radius:16px;max-width:min(480px,90vw);margin:auto;padding:16px;box-shadow:0 10px 40px rgba(0,0,0,.32);
+           opacity:0;transform:scale(.98);will-change:transform,opacity}
+  .overlay.show{display:block;animation:fade-in .2s forwards}
+  .overlay.hide{animation:fade-out .2s forwards}
   .overlay.crash{background:rgba(255,235,238,.96);border-color:rgba(244,67,54,.35)}
   .overlay.crash h2{color:#c62828}
   .overlay.complete{background:rgba(232,245,233,.96);border-color:rgba(76,175,80,.35)}
@@ -827,7 +832,7 @@ function handleStartLevelClick(){
     introDesc.textContent=L(lvl).d;
     const jokes = introsByLevel[Math.min(lvl-1,introsByLevel.length-1)];
     introBody.textContent = rc(jokes);
-    ovIntro.style.display='block';
+    showOverlay(ovIntro);
     introShown=true;
     return;
   }
@@ -835,8 +840,8 @@ function handleStartLevelClick(){
 }
 function startLevelRun(){
   if(running) return;
-  ovIntro.style.display='none';
-  running=true; paused=false; ovPause.style.display='none';
+  hideOverlay(ovIntro);
+  running=true; paused=false; hideOverlay(ovPause);
   lvlStart=total; startLevelBtn.textContent='Level in Progress'; startLevelBtn.disabled=true; pauseBtn.disabled=false;
   last=performance.now(); requestAnimationFrame(frame);
 }
@@ -860,12 +865,12 @@ function levelComplete(){
   const lt=total-lvlStart, bonus=Math.round(Math.max(0,(limit-lt)*50)); score=Math.round((score+bonus)/10)*10;
   ovTime.textContent=fmt(lt); ovScore.textContent=score; ovBonus.textContent=bonus;
   document.getElementById('ovCongrats').textContent = genCongrats(name,lvl);
-  ovComplete.style.display='block';
+  showOverlay(ovComplete);
   chime(); vibr(60); record({n:name,s:score,t:total,l:lvl,ts:Date.now()}); previewLB();
   shareShot.style.display='inline-block';
 }
 function next(){
-  ovComplete.style.display='none'; lvl++; if(lvl>12) finale(); else { setup(lvl); ui(); }
+  hideOverlay(ovComplete); lvl++; if(lvl>12) finale(); else { setup(lvl); ui(); }
 }
 function gameOver(reason='time'){
   running=false; cancelAnimationFrame(loop); clearBudTimer();
@@ -878,17 +883,17 @@ function gameOver(reason='time'){
     ovReason.textContent='You ran out of time on';
     ovGameOver.classList.remove('crash');
   }
-  ovFailed.textContent=lvl; ovFinalScore.textContent=score; ovGameOver.style.display='block';
+  ovFailed.textContent=lvl; ovFinalScore.textContent=score; showOverlay(ovGameOver);
   thud(); vibr(80); record({n:name,s:score,t:total,l:lvl,ts:Date.now()}); previewLB();
 }
 function finale(){
   clearBudTimer();
-  ovWinner.textContent=name; ovTotal.textContent=fmt(total); ovChamp.textContent=score; ovFinalOverlay.style.display='block';
+  ovWinner.textContent=name; ovTotal.textContent=fmt(total); ovChamp.textContent=score; showOverlay(ovFinalOverlay);
   const best=Math.max(score, parseInt(localStorage.getItem('clmc_best')||'0',10)); localStorage.setItem('clmc_best',best);
   chime(); setTimeout(chime,100); record({n:name,s:score,t:total,l:lvl,ts:Date.now()}); previewLB();
 }
 function again(){
-  [ovGameOver,ovFinalOverlay,ovComplete,ovLB,ovPause,ovChallenge,ovIntro].forEach(el=>el.style.display='none');
+  [ovGameOver,ovFinalOverlay,ovComplete,ovLB,ovPause,ovChallenge,ovIntro].forEach(hideOverlay);
   running=false; paused=false; cancelAnimationFrame(loop); clearBudTimer();
   game.style.display='none'; landing.style.display='flex';
   counts.bud=counts.golf=counts.leaf=0; renderCounts();
@@ -902,14 +907,14 @@ function ui(){
 function togglePause(){
   if(!running) return;
   paused=!paused; pauseBtn.textContent=paused?'Resume':'Pause';
-  ovPause.style.display=paused?'block':'none';
+  paused?showOverlay(ovPause):hideOverlay(ovPause);
   if(!paused){ last=performance.now(); requestAnimationFrame(frame); }
 }
 
 /* -------------------- Social & Share -------------------- */
 function challenge(){
   const msg=`I scored ${score} on level ${lvl} in Charlie's Lawn Mowing Adventure game. Barefoot, Bud powered, EGO borrowed. Play the game and beat me: ${location.href}`;
-  chText.value=msg; ovChallenge.style.display='block';
+  chText.value=msg; showOverlay(ovChallenge);
 }
 async function copyCh(){ try{ await navigator.clipboard.writeText(chText.value); alert('Copied'); }catch{ alert('Copy failed, select and copy'); } }
 function shareGame(){ if(navigator.share){ navigator.share({title:"Charlie's Lawn Mowing Adventure – The Game",text:"Play this hilarious lawn mowing game",url:location.href}); }else alert("Share this game link: "+location.href); }
@@ -943,11 +948,22 @@ function week(ts){
   next.setDate(monday.getDate()+7);
   return d>=monday && d<next;
 }
+function showOverlay(el){
+  el.style.display='block';
+  el.classList.remove('hide');
+  void el.offsetWidth;
+  el.classList.add('show');
+}
+function hideOverlay(el){
+  el.classList.remove('show');
+  el.classList.add('hide');
+  setTimeout(()=>{ el.style.display='none'; el.classList.remove('hide'); },200);
+}
 function showLB(filter='all'){
   const all=loadRuns(); let list=[];
   if(filter==='all') list=all; else if(filter==='week') list=all.filter(r=>week(r.ts)); else if(filter==='you') list=all.filter(r=>r.n===name);
   lbList.innerHTML = list.length? list.slice(0,30).map((r,i)=>`${i+1}. ${escapeHTML(r.n)} - ${r.s} pts - ${fmt(r.t)}`).join('<br/>') : "No entries yet.";
-  ovLB.style.display='block';
+  showOverlay(ovLB);
 }
 const escapeHTML=s=>s.replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
 
@@ -986,17 +1002,17 @@ function bind(){
   nextLevelBtn.addEventListener('click',next);
   shareLevel.addEventListener('click',shareShotImg);
   restart.addEventListener('click',again);
-  showLBbtn.addEventListener('click',()=>{ ovGameOver.style.display='none'; showLB('all'); });
+  showLBbtn.addEventListener('click',()=>{ hideOverlay(ovGameOver); showLB('all'); });
   againBtn.addEventListener('click',again);
   goLB.addEventListener('click',()=>showLB('all'));
   fAll.addEventListener('click',()=>{ setF(fAll); showLB('all'); });
   fWeek.addEventListener('click',()=>{ setF(fWeek); showLB('week'); });
   fYou.addEventListener('click',()=>{ setF(fYou); showLB('you'); });
-  lbBack.addEventListener('click',()=>ovLB.style.display='none');
+  lbBack.addEventListener('click',()=>hideOverlay(ovLB));
   challengeBtn.addEventListener('click',challenge);
   shareGameBtn.addEventListener('click',shareGame);
   copyChBtn.addEventListener('click',copyCh);
-  closeCh.addEventListener('click',()=>ovChallenge.style.display='none');
+  closeCh.addEventListener('click',()=>hideOverlay(ovChallenge));
   soundBtn.addEventListener('click',()=>{ snd=!snd; soundBtn.textContent=snd?'🔊':'🔇'; soundBtn.setAttribute('aria-pressed',String(snd)); });
   musicBtn.addEventListener('click',()=>{ music=!music; musicBtn.textContent=music?'🎵':'🔇'; musicBtn.setAttribute('aria-pressed',String(music)); });
   document.getElementById('shareChamp').addEventListener('click',shareChamp);
