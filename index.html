@@ -826,11 +826,22 @@ function draw(){
     ctx.shadowColor="rgba(0,0,0,0.25)";
     ctx.shadowBlur=6;
     ctx.shadowOffsetY=2;
+    const ready=o.img&&o.img.complete&&o.img.naturalWidth>0;
     if(o.t==='sprinkler'){
       ctx.translate(o.x+o.w/2,o.y+o.h/2); ctx.rotate(o.r||0);
-      ctx.drawImage(o.img,-o.w/2,-o.h/2,o.w,o.h);
+      if(ready){
+        ctx.drawImage(o.img,-o.w/2,-o.h/2,o.w,o.h);
+      }else{
+        ctx.fillStyle='#888';
+        ctx.fillRect(-o.w/2,-o.h/2,o.w,o.h);
+      }
     }else{
-      ctx.drawImage(o.img,o.x+(o.off||0),o.y,o.w,o.h);
+      if(ready){
+        ctx.drawImage(o.img,o.x+(o.off||0),o.y,o.w,o.h);
+      }else{
+        ctx.fillStyle='#888';
+        ctx.fillRect(o.x+(o.off||0),o.y,o.w,o.h);
+      }
     }
     ctx.restore();
   }
