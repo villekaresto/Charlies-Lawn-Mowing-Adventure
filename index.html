@@ -361,6 +361,25 @@ const keys={}; const counts={bud:0,golf:0,leaf:0};
 let introShown=false;
 let budTimer=null;
 
+function loadImg(src){ const img=new Image(); img.src=src; return img; }
+const IMG={
+  rock: loadImg('assets/obstacles/rock.svg'),
+  tree: loadImg('assets/obstacles/tree.svg'),
+  sprinkler: loadImg('assets/obstacles/sprinkler.svg'),
+  gnome: loadImg('assets/obstacles/gnome.svg'),
+  flamingo: loadImg('assets/obstacles/flamingo.svg'),
+  grill: loadImg('assets/obstacles/grill.svg'),
+  chair: loadImg('assets/obstacles/chair.svg'),
+  bucket: loadImg('assets/obstacles/bucket.svg'),
+  bike: loadImg('assets/obstacles/bike.svg'),
+  barrel: loadImg('assets/obstacles/barrel.svg'),
+  shed: loadImg('assets/obstacles/shed.svg'),
+  fountain: loadImg('assets/obstacles/fountain.svg'),
+  bud: loadImg('assets/powerups/bud.svg'),
+  golf: loadImg('assets/powerups/golf-cart.svg'),
+  leaf: loadImg('assets/powerups/leaf.svg')
+};
+
 /* -------------------- Canvas (DPR + responsive scaling) -------------------- */
 const BASE_W=400, BASE_H=300; // internal game world
 const cvs=document.getElementById('gameCanvas'), ctx=cvs.getContext('2d');
@@ -592,7 +611,22 @@ function tickParticles(d){
   }
 }
 function tickPowers(d){ for(const p of powerUps){ if(p.a){ p.tt-=d; if(p.tt<=0) p.a=false; } } }
-function tickObs(d){ for(const o of obs){ if(!o.a) continue; if(o.t==='tree'){ o.s=(o.s||0)+d; o.off=Math.sin(o.s)*2 } if(o.t==='sprinkler') o.r=(o.r||0)+3*d; } }
+function tickObs(d){
+  for(let i=0;i<obs.length;i++){
+    const o=obs[i];
+    if(!o.a) continue;
+    const anim={};
+    if(o.t==='tree'){
+      const s=(o.s||0)+d;
+      anim.s=s;
+      anim.off=Math.sin(s)*2;
+    }
+    if(o.t==='sprinkler'){
+      anim.r=(o.r||0)+3*d;
+    }
+    if(Object.keys(anim).length) obs[i]={...o, ...anim};
+  }
+}
 function tickWeather(d){ weather.t-=d; if(weather.t<=0){ weather.type=rc(['sun','rain','wind']); weather.t=ri(12,22); weath(); } }
 function winCheck(){
   const totalTiles=tiles.length, mowed=tiles.reduce((n,t)=>n+(t.m?1:0),0);
@@ -615,9 +649,9 @@ function spawnBud(){
   for(let tries=0; tries<40; tries++){
     const p={x:ri(20,BASE_W-44), y:ri(20,BASE_H-44), w:24, h:24};
     const overlapsObs = obs.some(o=>o.a && hit(p,o)) || hit(p,start);
-    if(!overlapsObs){ powerUps.push({t:'bud',i:'🍺',x:p.x,y:p.y,w:24,h:24,a:true,tt:18}); return; }
+    if(!overlapsObs){ powerUps.push({t:'bud',img:IMG.bud,x:p.x,y:p.y,w:24,h:24,a:true,tt:18}); return; }
   }
-  powerUps.push({t:'bud',i:'🍺',x:ri(20,BASE_W-40),y:ri(20,BASE_H-40),w:24,h:24,a:true,tt:18});
+  powerUps.push({t:'bud',img:IMG.bud,x:ri(20,BASE_W-40),y:ri(20,BASE_H-40),w:24,h:24,a:true,tt:18});
 }
 function setup(level){
   tiles=[]; powerUps=[]; obs=[]; particles=[]; particlePool=[];
@@ -637,7 +671,20 @@ function setup(level){
     tiles.push(tile);
   }
 
-  const kinds=[['rock','🪨',26,26],['tree','🌳',30,30],['sprinkler','💦',26,26],['gnome','🧙‍♂️',26,26],['flamingo','🦩',28,28],['grill','🔥',26,26],['chair','🪑',26,26],['bucket','🪣',26,26],['bike','🚲',32,24],['barrel','🛢️',26,26],['shed','🏚️',34,28],['fountain','⛲',28,28]];
+  const kinds=[
+    ['rock',IMG.rock,26,26],
+    ['tree',IMG.tree,30,30],
+    ['sprinkler',IMG.sprinkler,26,26],
+    ['gnome',IMG.gnome,26,26],
+    ['flamingo',IMG.flamingo,28,28],
+    ['grill',IMG.grill,26,26],
+    ['chair',IMG.chair,26,26],
+    ['bucket',IMG.bucket,26,26],
+    ['bike',IMG.bike,32,24],
+    ['barrel',IMG.barrel,26,26],
+    ['shed',IMG.shed,34,28],
+    ['fountain',IMG.fountain,28,28]
+  ];
   const n=6+Math.min(level,4);
   for(let i=0;i<n;i++){
     const k=rc(kinds); let tries=0, placed=false;
@@ -645,7 +692,7 @@ function setup(level){
       const x=ri(40,BASE_W-60), y=ri(50,BASE_H-60);
       const cand={x,y,w:k[2],h:k[3]}; const start={x:0,y:0,w:100,h:100};
       if(hit(cand,start) || hit(cand,house)) {tries++; continue;}
-      obs.push({t:k[0],i:k[1],a:true,x,y,w:cand.w,h:cand.h});
+      obs.push({t:k[0],img:k[1],a:true,x,y,w:cand.w,h:cand.h});
       tiles=tiles.filter(t=>!hit(t,cand));
       placed=true;
     }
@@ -653,8 +700,8 @@ function setup(level){
 
   // Other powerups
   const rnd=()=>({x:ri(60,BASE_W-60),y:ri(70,BASE_H-80)});
-  if(Math.random()<.5){const p=rnd(); powerUps.push({t:'golf',i:'🚗',x:p.x,y:p.y,w:24,h:24,a:true,tt:18});}
-  if(Math.random()<.4){const p=rnd(); powerUps.push({t:'leaf',i:'🍃',x:p.x,y:p.y,w:24,h:24,a:true,tt:18});}
+  if(Math.random()<.5){const p=rnd(); powerUps.push({t:'golf',img:IMG.golf,x:p.x,y:p.y,w:24,h:24,a:true,tt:18});}
+  if(Math.random()<.4){const p=rnd(); powerUps.push({t:'leaf',img:IMG.leaf,x:p.x,y:p.y,w:24,h:24,a:true,tt:18});}
 
   // Budweiser boobster every 10s
   spawnBud(); budTimer=setInterval(spawnBud, 10000);
@@ -739,15 +786,17 @@ function draw(){
     ctx.shadowBlur=6;
     ctx.shadowOffsetY=2;
     if(o.t==='sprinkler'){
-      o.r=(o.r||0)+.04; ctx.translate(o.x+o.w/2,o.y+o.h/2); ctx.rotate(o.r);
-      drawEmoji('💦',-12,10,28);
-    }else{
+      ctx.translate(o.x+o.w/2,o.y+o.h/2); ctx.rotate(o.r||0);
+      if(o.img) ctx.drawImage(o.img,-o.w/2,-o.h/2,o.w,o.h); else drawEmoji('💦',-12,10,28);
+    }else if(o.img){
+      ctx.drawImage(o.img,o.x+(o.off||0),o.y,o.w,o.h);
+    }else if(o.i){
       drawEmoji(o.i, o.x+o.w*0.14, o.y+o.h*0.78, Math.max(o.w,o.h));
     }
     ctx.restore();
   }
 
-  for(const p of powerUps){ if(p.a){ ctx.save(); ctx.translate(p.x+12,p.y+12); ctx.rotate((Date.now()/500)%(Math.PI*2)); drawEmoji(p.i,-8,8,22); ctx.restore(); } }
+  for(const p of powerUps){ if(p.a){ ctx.save(); ctx.translate(p.x+12,p.y+12); ctx.rotate((Date.now()/500)%(Math.PI*2)); if(p.img) ctx.drawImage(p.img,-12,-12,24,24); else drawEmoji(p.i,-8,8,22); ctx.restore(); } }
 
   for(const p of particles){
     const size=3*p.life;
