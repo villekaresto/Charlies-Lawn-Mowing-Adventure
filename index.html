@@ -9,8 +9,8 @@
 <meta property="og:description" content="Play this mobile-friendly lawn mowing game with 12 levels, power ups, obstacles, and a local leaderboard." />
 <style>
   :root{
-    --bg1:#1a2332; --bg2:#2d5016; --bg3:#4a7c4a; --sky:#87CEEB;
-    --brand:#FF6B35; --accent:#4CAF50; --accent2:#8BC34A;
+    --bg1:#0C2340; --bg2:#1F3B73; --bg3:#B9975B; --sky:#87CEEB;
+    --brand:#0C2340; --accent:#B9975B; --accent2:#E0CFA9; --accent-dark:#8A6D2A;
     --card:rgba(255,255,255,.95); --glass:rgba(255,255,255,.85);
   }
   html,body{height:100%}
@@ -21,7 +21,7 @@
   }
   body{
     margin:0;background:linear-gradient(135deg,var(--bg1) 0%,var(--bg2) 20%,var(--bg3) 60%,var(--sky) 100%);
-    font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Arial,sans-serif;color:#2d5016;
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Arial,sans-serif;color:var(--brand);
     display:flex;align-items:center;justify-content:center;padding:16px;
   }
   body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;
@@ -35,7 +35,7 @@
     box-shadow:0 10px 40px rgba(0,0,0,.28);display:flex;flex-direction:column;gap:12px;
   }
   h1{margin:0;text-align:center;font-weight:900;font-size:1.9rem;
-     background:linear-gradient(135deg,#2d5016,#4a7c4a,#87CEEB);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+     background:linear-gradient(135deg,var(--brand),var(--accent),var(--sky));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
   h1::after{content:"🏡 WW Neighborhood";display:block;color:#667;font-size:.9rem;margin-top:4px;font-weight:600;opacity:.85}
   .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center}
   .card{background:var(--glass);border:2px solid rgba(255,255,255,.45);border-radius:16px;padding:14px}
@@ -64,13 +64,13 @@
     background:linear-gradient(135deg,#f4f4f4,#dadada);font-size:1.6rem;font-weight:900;box-shadow:0 4px 10px rgba(0,0,0,.1);
     -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; -webkit-tap-highlight-color:transparent;
   }
-  .pad-btn:active{background:linear-gradient(135deg,var(--accent),#2f7a35);color:#fff;transform:scale(.97)}
+  .pad-btn:active{background:linear-gradient(135deg,var(--accent),var(--accent-dark));color:#fff;transform:scale(.97)}
   .pad-up{grid-column:2;grid-row:1} .pad-left{grid-column:1;grid-row:2}
   .pad-right{grid-column:3;grid-row:2} .pad-down{grid-column:2;grid-row:2}
 
   .btn{cursor:pointer;border:none;font-weight:900;border-radius:10px;padding:10px 16px}
-  .btn-primary{background:linear-gradient(135deg,var(--brand),#F7931E);color:#fff}
-  .btn-green{background:linear-gradient(135deg,var(--accent),#388E3C);color:#fff}
+  .btn-primary{background:linear-gradient(135deg,var(--brand),var(--accent));color:#fff}
+  .btn-green{background:linear-gradient(135deg,var(--accent),var(--accent-dark));color:#fff}
   .btn-blue{background:linear-gradient(135deg,#2196F3,#1976D2);color:#fff}
   .comment{background:rgba(255,248,220,.95);border:2px solid rgba(255,215,0,.35);border-radius:10px;padding:8px;font-style:italic}
 
@@ -80,8 +80,8 @@
   .overlay.crash h2{color:#c62828}
   .overlay.complete{background:rgba(232,245,233,.96);border-color:rgba(76,175,80,.35)}
   .leader-filters{display:flex;gap:8px;justify-content:center;margin-bottom:8px}
-  .filter{background:linear-gradient(135deg,var(--accent),#388E3C);color:#fff;border:none;border-radius:9px;padding:8px 12px;font-weight:800}
-  .filter.active{background:linear-gradient(135deg,var(--brand),#F7931E)}
+  .filter{background:linear-gradient(135deg,var(--accent),var(--accent-dark));color:#fff;border:none;border-radius:9px;padding:8px 12px;font-weight:800}
+  .filter.active{background:linear-gradient(135deg,var(--brand),var(--accent))}
   .power-slots{display:flex;gap:10px;justify-content:center}
   .slot{background:#fff;border:2px solid rgba(0,0,0,.08);border-radius:10px;padding:6px 10px;font-weight:900}
   .timers{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
@@ -786,7 +786,7 @@ function shareGame(){ if(navigator.share){ navigator.share({title:"Charlie's Law
 async function shareShotImg(){
   try{
     const W=BASE_W,H=BASE_H,B=56, out=document.createElement('canvas'); out.width=W; out.height=H+B; const c=out.getContext('2d');
-    c.fillStyle='#fff'; c.fillRect(0,0,W,B); c.fillStyle='#2d5016'; c.font='bold 16px Segoe UI, Arial'; c.fillText("🚜 Charlie's Lawn Mowing Adventure – The Game",12,22);
+    c.fillStyle='#fff'; c.fillRect(0,0,W,B); c.fillStyle='#0C2340'; c.font='bold 16px Segoe UI, Arial'; c.fillText("🚜 Charlie's Lawn Mowing Adventure – The Game",12,22);
     c.font='12px Segoe UI, Arial'; c.fillText(`Player: ${name} • Level: ${lvl}/12 • Score: ${score} • Time: ${fmt(total)}`,12,42);
     c.drawImage(cvs,0,B,BASE_W,BASE_H);
     c.fillStyle='rgba(0,0,0,.08)'; c.fillRect(0,out.height-22,W,22); c.fillStyle='#333'; c.font='11px Segoe UI, Arial'; c.fillText('🏆 Cainhoy Champions - Play the game and beat my run!',12,out.height-8);
