@@ -787,9 +787,9 @@ const introGo=document.getElementById('introGo');
 
 /* -------------------- Bindings -------------------- */
 function bind(){
-  startGameBtn.addEventListener('click',startGame);
-  playerName.addEventListener('keydown',e=>{ if(e.key==='Enter') startGame(); });
-  startLevelBtn.addEventListener('click',handleStartLevelClick);
+  startGameBtn.addEventListener('click',e=>{ e.preventDefault(); startGame(); });
+  playerName.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); startGame(); } });
+  startLevelBtn.addEventListener('click',e=>{ e.preventDefault(); handleStartLevelClick(); });
   introGo.addEventListener('click',startLevelRun);
   pauseBtn.addEventListener('click',togglePause);
   resumeBtn.addEventListener('click',togglePause);
@@ -831,12 +831,6 @@ function init(){
     try {
       bind();
       init();
-      document.addEventListener('click', (e) => {
-        const t = e.target;
-        if (!t) return;
-        if (t.id === 'startGameBtn') { e.preventDefault(); startGame(); }
-        if (t.id === 'startLevelBtn') { e.preventDefault(); handleStartLevelClick(); }
-      }, { capture: true });
     } catch (err) { console.error('Init error:', err); }
   });
 })();
