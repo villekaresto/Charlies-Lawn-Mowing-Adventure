@@ -361,6 +361,32 @@ const keys={}; const counts={bud:0,golf:0,leaf:0};
 let introShown=false;
 let budTimer=null;
 
+function loadImg(src){
+  const img=new Image();
+  img.src=src;
+  return img;
+}
+const obstacleImgs={
+  rock:loadImg('assets/obstacles/rock.svg'),
+  tree:loadImg('assets/obstacles/tree.svg'),
+  sprinkler:loadImg('assets/obstacles/sprinkler.svg'),
+  gnome:loadImg('assets/obstacles/gnome.svg'),
+  flamingo:loadImg('assets/obstacles/flamingo.svg'),
+  grill:loadImg('assets/obstacles/grill.svg'),
+  chair:loadImg('assets/obstacles/chair.svg'),
+  bucket:loadImg('assets/obstacles/bucket.svg'),
+  bike:loadImg('assets/obstacles/bike.svg'),
+  barrel:loadImg('assets/obstacles/barrel.svg'),
+  shed:loadImg('assets/obstacles/shed.svg'),
+  fountain:loadImg('assets/obstacles/fountain.svg'),
+  house:loadImg('assets/obstacles/house.svg')
+};
+const powerImgs={
+  bud:loadImg('assets/powerups/bud.svg'),
+  golf:loadImg('assets/powerups/golf-cart.svg'),
+  leaf:loadImg('assets/powerups/leaf.svg')
+};
+
 /* -------------------- Canvas (DPR + responsive scaling) -------------------- */
 const BASE_W=400, BASE_H=300; // internal game world
 const cvs=document.getElementById('gameCanvas'), ctx=cvs.getContext('2d');
@@ -615,9 +641,9 @@ function spawnBud(){
   for(let tries=0; tries<40; tries++){
     const p={x:ri(20,BASE_W-44), y:ri(20,BASE_H-44), w:24, h:24};
     const overlapsObs = obs.some(o=>o.a && hit(p,o)) || hit(p,start);
-    if(!overlapsObs){ powerUps.push({t:'bud',i:'🍺',x:p.x,y:p.y,w:24,h:24,a:true,tt:18}); return; }
+    if(!overlapsObs){ powerUps.push({t:'bud',img:powerImgs.bud,x:p.x,y:p.y,w:24,h:24,a:true,tt:18}); return; }
   }
-  powerUps.push({t:'bud',i:'🍺',x:ri(20,BASE_W-40),y:ri(20,BASE_H-40),w:24,h:24,a:true,tt:18});
+  powerUps.push({t:'bud',img:powerImgs.bud,x:ri(20,BASE_W-40),y:ri(20,BASE_H-40),w:24,h:24,a:true,tt:18});
 }
 function setup(level){
   tiles=[]; powerUps=[]; obs=[]; particles=[]; particlePool=[];
@@ -626,7 +652,7 @@ function setup(level){
   pal=L(level).palette;
   grassPattern=makeGrassTexture(pal.texture, pal.grassColor);
 
-  const house={t:'house',i:'🏠',a:true,x:260,y:20,w:110,h:90};
+  const house={t:'house',img:obstacleImgs.house,a:true,x:260,y:20,w:110,h:90};
   obs.push(house);
 
   const ts=20, cols=Math.floor(BASE_W/ts), rows=Math.floor(BASE_H/ts);
@@ -637,7 +663,7 @@ function setup(level){
     tiles.push(tile);
   }
 
-  const kinds=[['rock','🪨',26,26],['tree','🌳',30,30],['sprinkler','💦',26,26],['gnome','🧙‍♂️',26,26],['flamingo','🦩',28,28],['grill','🔥',26,26],['chair','🪑',26,26],['bucket','🪣',26,26],['bike','🚲',32,24],['barrel','🛢️',26,26],['shed','🏚️',34,28],['fountain','⛲',28,28]];
+  const kinds=[['rock',26,26],['tree',30,30],['sprinkler',26,26],['gnome',26,26],['flamingo',28,28],['grill',26,26],['chair',26,26],['bucket',26,26],['bike',32,24],['barrel',26,26],['shed',34,28],['fountain',28,28]];
   const n=6+Math.min(level,4);
   for(let i=0;i<n;i++){
     const k=rc(kinds); let tries=0, placed=false;
@@ -645,16 +671,16 @@ function setup(level){
       const x=ri(40,BASE_W-60), y=ri(50,BASE_H-60);
       const cand={x,y,w:k[2],h:k[3]}; const start={x:0,y:0,w:100,h:100};
       if(hit(cand,start) || hit(cand,house)) {tries++; continue;}
-      obs.push({t:k[0],i:k[1],a:true,x,y,w:cand.w,h:cand.h});
+        obs.push({t:k[0],img:obstacleImgs[k[0]],a:true,x,y,w:cand.w,h:cand.h});
       tiles=tiles.filter(t=>!hit(t,cand));
       placed=true;
     }
   }
 
   // Other powerups
-  const rnd=()=>({x:ri(60,BASE_W-60),y:ri(70,BASE_H-80)});
-  if(Math.random()<.5){const p=rnd(); powerUps.push({t:'golf',i:'🚗',x:p.x,y:p.y,w:24,h:24,a:true,tt:18});}
-  if(Math.random()<.4){const p=rnd(); powerUps.push({t:'leaf',i:'🍃',x:p.x,y:p.y,w:24,h:24,a:true,tt:18});}
+    const rnd=()=>({x:ri(60,BASE_W-60),y:ri(70,BASE_H-80)});
+    if(Math.random()<.5){const p=rnd(); powerUps.push({t:'golf',img:powerImgs.golf,x:p.x,y:p.y,w:24,h:24,a:true,tt:18});}
+    if(Math.random()<.4){const p=rnd(); powerUps.push({t:'leaf',img:powerImgs.leaf,x:p.x,y:p.y,w:24,h:24,a:true,tt:18});}
 
   // Budweiser boobster every 10s
   spawnBud(); budTimer=setInterval(spawnBud, 10000);
@@ -740,14 +766,22 @@ function draw(){
     ctx.shadowOffsetY=2;
     if(o.t==='sprinkler'){
       o.r=(o.r||0)+.04; ctx.translate(o.x+o.w/2,o.y+o.h/2); ctx.rotate(o.r);
-      drawEmoji('💦',-12,10,28);
+      ctx.drawImage(o.img,-o.w/2,-o.h/2,o.w,o.h);
     }else{
-      drawEmoji(o.i, o.x+o.w*0.14, o.y+o.h*0.78, Math.max(o.w,o.h));
+      ctx.drawImage(o.img,o.x,o.y,o.w,o.h);
     }
     ctx.restore();
   }
 
-  for(const p of powerUps){ if(p.a){ ctx.save(); ctx.translate(p.x+12,p.y+12); ctx.rotate((Date.now()/500)%(Math.PI*2)); drawEmoji(p.i,-8,8,22); ctx.restore(); } }
+  for(const p of powerUps){
+    if(p.a){
+      ctx.save();
+      ctx.translate(p.x+p.w/2,p.y+p.h/2);
+      ctx.rotate((Date.now()/500)%(Math.PI*2));
+      ctx.drawImage(p.img,-p.w/2,-p.h/2,p.w,p.h);
+      ctx.restore();
+    }
+  }
 
   for(const p of particles){
     const size=3*p.life;
@@ -761,11 +795,6 @@ function draw(){
     ctx.fillStyle="rgba(0,0,255,.08)"; ctx.fillRect(0,0,BASE_W,BASE_H);
     for(let i=0;i<14;i++){ const x=(Date.now()/10+i*50)%BASE_W, y=(Date.now()/5+i*30)%BASE_H; ctx.fillStyle="rgba(173,216,230,.7)"; ctx.fillRect(x,y,2,8) }
   }else if(weather.type==="wind"){ ctx.fillStyle="rgba(200,200,200,.08)"; ctx.fillRect(0,0,BASE_W,BASE_H); }
-}
-function drawEmoji(e,x,y,size){
-  ctx.font=`${Math.floor(size)}px "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",system-ui,Arial`;
-  ctx.lineWidth=3; ctx.strokeStyle='rgba(255,255,255,.85)';
-  ctx.strokeText(e,x,y); ctx.fillText(e,x,y);
 }
 function drawMower(){
   const m=mower;
