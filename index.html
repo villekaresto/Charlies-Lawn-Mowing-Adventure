@@ -483,7 +483,7 @@ addEventListener('keydown',e=>{
   if(e.key==='p'||e.key==='P'||e.code==='Space') togglePause();
   if(e.key==='Enter'&&!running){
     if(landing.style.display!=='none'){
-      startGame();
+      if(!startForm.contains(document.activeElement)) startGame();
     }else if(document.activeElement!==playerName){
       handleStartLevelClick();
     }
@@ -1114,7 +1114,6 @@ const escapeHTML = s =>
 const landing=document.getElementById('landing');
 const game=document.getElementById('game');
 const playerName=document.getElementById('playerName');
-const startGameBtn=document.getElementById('startGameBtn');
 const startForm=document.getElementById('startForm');
 const startLevelBtn=document.getElementById('startLevelBtn');
 const pauseBtn=document.getElementById('pauseBtn');
@@ -1138,8 +1137,7 @@ const introGo=document.getElementById('introGo');
 /* -------------------- Bindings -------------------- */
 function bind(){
   console.debug('bind(): attaching start game listeners');
-  startGameBtn.addEventListener('click',e=>{ e.preventDefault(); console.debug('startGameBtn click'); startGame(); });
-  playerName.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); console.debug('playerName Enter key'); startGame(); } });
+  startForm.addEventListener('submit', e => { e.preventDefault(); startGame(); });
   startLevelBtn.addEventListener('click',e=>{ e.preventDefault(); handleStartLevelClick(); });
   introGo.addEventListener('click',startLevelRun);
   pauseBtn.addEventListener('click',togglePause);
