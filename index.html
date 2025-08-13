@@ -343,6 +343,9 @@ let budTimer=null;
 const BASE_W=400, BASE_H=300; // internal game world
 const cvs=document.getElementById('gameCanvas'), ctx=cvs.getContext('2d');
 const mowerSheet = new Image();
+const tileShadeGrad=ctx.createLinearGradient(0,0,0,20);
+tileShadeGrad.addColorStop(0,'rgba(0,0,0,0)');
+tileShadeGrad.addColorStop(1,'rgba(0,0,0,0.15)');
 function fitCanvas(){
   const dpr=Math.min(window.devicePixelRatio||1,2);
   // target CSS width: nearly full card width, but cap for sanity
