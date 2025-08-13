@@ -1137,10 +1137,6 @@ function bind(){
   startGameBtn.addEventListener('click',e=>{ e.preventDefault(); console.debug('startGameBtn click'); startGame(); });
   playerName.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); console.debug('playerName Enter key'); startGame(); } });
   startLevelBtn.addEventListener('click',e=>{ e.preventDefault(); handleStartLevelClick(); });
-  const startForm=document.getElementById('startForm');
-  if(startForm){
-    startForm.addEventListener('submit',e=>{ e.preventDefault(); startGame(); });
-  }
   introGo.addEventListener('click',startLevelRun);
   pauseBtn.addEventListener('click',togglePause);
   resumeBtn.addEventListener('click',togglePause);
@@ -1188,6 +1184,14 @@ function init(){
     } catch (err) { console.error('Init error:', err); }
   });
 })();
+</script>
+<script>
+  // After all DOM elements are defined
+  document.getElementById('startForm')
+    .addEventListener('submit', function (e) {
+      e.preventDefault();  // stop the default form submit
+      startGame();         // run game start logic
+    });
 </script>
 </body>
 </html>
