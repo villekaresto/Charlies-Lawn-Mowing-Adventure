@@ -102,6 +102,10 @@
   .timers{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
   .mute{font-size:1.4rem;background:none;border:none}
 
+  #loadingIndicator{margin-top:8px;font-weight:700;}
+  .spinner{display:inline-block;width:16px;height:16px;border:2px solid #ccc;border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;margin-right:6px}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
   /* Toast */
   #toast{position:fixed;left:50%;top:16px;transform:translateX(-50%);background:#111;color:#fff;padding:10px 14px;border-radius:12px;font-weight:900;letter-spacing:.3px;opacity:0;pointer-events:none;transition:opacity .2s, transform .2s; z-index:99}
   #toast.show{opacity:1;transform:translateX(-50%) scale(1.02)}
@@ -124,6 +128,7 @@
           <div class="row" style="margin:10px 0">
             <button id="startGameBtn" class="btn btn-primary" type="submit">Start Mowing!</button>
           </div>
+          <div id="loadingIndicator" style="display:none" aria-live="polite"><span class="spinner"></span>Loading assets...</div>
           <input id="playerName" type="text" maxlength="15" placeholder="Your Name" required style="padding:10px 12px;border-radius:10px;border:2px solid var(--accent);font-weight:700;text-align:center;min-width:min(260px,80vw)" />
         </form>
         <div class="desc" style="margin-top:8px">
@@ -418,6 +423,11 @@ const assetsReady = Promise.all(
   console.error('Failed to load assets:', err);
   return Promise.reject(err);
 });
+
+function usePlaceholders(){
+  const placeholder='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><rect width="100%" height="100%" fill="%23ccc"/></svg>';
+  Object.values(IMG).forEach(img=>{ img.src=placeholder; });
+}
 
 /* -------------------- Canvas (DPR + responsive scaling) -------------------- */
 const BASE_W=400, BASE_H=300; // internal game world
@@ -971,6 +981,8 @@ function genCongrats(player,level){
 /* -------------------- Level Flow -------------------- */
 async function startGame(){
   if(running) return;
+  if(loadingIndicator) loadingIndicator.style.display='block';
+  if(startGameBtn) startGameBtn.disabled=true;
   const ASSET_TIMEOUT = 4000;
   const assetLoad = assetsReady
     .then(() => 'loaded')
@@ -979,8 +991,12 @@ async function startGame(){
     assetLoad,
     new Promise(resolve => setTimeout(() => resolve('timeout'), ASSET_TIMEOUT))
   ]);
+  if(loadingIndicator) loadingIndicator.style.display='none';
+  if(startGameBtn) startGameBtn.disabled=false;
   if(result !== 'loaded'){
     console.warn('Continuing despite asset load issue:', result);
+    usePlaceholders();
+    showToast('Assets failed to load. Using placeholders.',4000);
   }
   const entered=(playerName.value||"").trim();
   if(!entered){
@@ -1116,6 +1132,7 @@ const landing=document.getElementById('landing');
 const game=document.getElementById('game');
 const playerName=document.getElementById('playerName');
 const startForm=document.getElementById('startForm');
+const startGameBtn=document.getElementById('startGameBtn');
 const startLevelBtn=document.getElementById('startLevelBtn');
 const pauseBtn=document.getElementById('pauseBtn');
 const shareShot=document.getElementById('shareShot');
@@ -1134,6 +1151,7 @@ const leaderboardPreview=document.getElementById('leaderboardPreview');
 const challengeBtn=document.getElementById('challengeBtn'), shareGameBtn=document.getElementById('shareGameBtn'); const chText=document.getElementById('chText'), copyChBtn=document.getElementById('copyCh'), closeCh=document.getElementById('closeCh');
 const soundBtn=document.getElementById('soundBtn'), musicBtn=document.getElementById('musicBtn');
 const introGo=document.getElementById('introGo');
+const loadingIndicator=document.getElementById('loadingIndicator');
 
 /* -------------------- Bindings -------------------- */
 function bind(){
