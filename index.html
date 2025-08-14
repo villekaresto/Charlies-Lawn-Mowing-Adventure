@@ -38,6 +38,8 @@
     box-shadow:0 10px 40px rgba(0,0,0,.28);display:flex;flex-direction:column;gap:12px;
     max-height:100vh;overflow-y:auto;
   }
+  body.playing{padding:0}
+  body.playing .screen{width:100vw;height:100vh;border:none;border-radius:0}
   h1{margin:0;text-align:center;font-weight:900;font-size:1.9rem;
      background:linear-gradient(135deg,var(--brand),var(--accent),var(--sky));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
   h1::after{content:"🏡 WW Neighborhood";display:block;color:#667;font-size:.9rem;margin-top:4px;font-weight:600;opacity:.85}
@@ -1032,7 +1034,9 @@ function startGame() {
   localStorage.setItem('clmc_name', gameState.name);
   
   document.getElementById('landing').style.display = 'none';
+  document.body.classList.add('playing');
   document.getElementById('game').style.display = 'block';
+  fitCanvas();
   document.getElementById('hudName').textContent = gameState.name;
   document.getElementById('hudBest').textContent = localStorage.getItem('clmc_best') || 0;
   
