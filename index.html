@@ -720,7 +720,7 @@ function setup(level) {
     for(let c = 0; c < 20; c++) {
       const x = c * ts, y = r * ts;
       if(r < 3 && c < 3) continue;
-      const tile = {x,y,w:ts,h:ts,m:false};
+      const tile = {x,y,w:ts,h:ts,m:false,c:false};
       if(!hit(tile, {x:260,y:20,w:110,h:90})) {
         tiles.push(tile);
       }
@@ -813,7 +813,20 @@ function draw() {
   for(const t of tiles) {
     ctx.fillStyle = t.m ? pal.mowedColor : pal.grassColor;
     ctx.fillRect(t.x, t.y, t.w, t.h);
-    
+
+    if(t.m && !t.c) {
+      t.c = true;
+      for(let i = 0; i < 4; i++) {
+        particles.push({
+          x: t.x + Math.random() * t.w,
+          y: t.y + Math.random() * t.h,
+          dx: (Math.random() - 0.5) * 40,
+          dy: (Math.random() - 0.5) * 40,
+          life: 0.6
+        });
+      }
+    }
+
     // Tile border
     ctx.strokeStyle = 'rgba(0,0,0,0.1)';
     ctx.lineWidth = 1;
@@ -853,7 +866,7 @@ function draw() {
   
   // Draw particles
   for(const p of particles) {
-    ctx.fillStyle = `rgba(0,128,0,${p.life})`;
+    ctx.fillStyle = `rgba(144,238,144,${p.life})`;
     const size = 3 * p.life;
     ctx.fillRect(p.x, p.y, size, size);
   }
