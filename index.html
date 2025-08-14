@@ -1250,7 +1250,8 @@ function escapeHTML(s) {
 }
 
 /* -------------------- Event Bindings -------------------- */
-document.getElementById('startForm').addEventListener('submit', e => {
+const startForm = document.getElementById('startForm');
+startForm.addEventListener('submit', e => {
   e.preventDefault();
   startGame();
 });
