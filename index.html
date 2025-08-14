@@ -707,6 +707,32 @@ function setup(level) {
   particles = [];
   mower = {x:50,y:50,w:16,h:16,spd:120,vx:0,vy:0,boost:false,inv:false};
   gameState.introShown = false;
+
+  // boundary zones to exclude from mowing/obstacles (e.g., flowerbeds)
+  const boundaryShapes = [
+    {type:'circle', x:120, y:160, r:40},
+    {type:'polygon', pts:[{x:300,y:220},{x:350,y:250},{x:320,y:280},{x:270,y:250}]}
+  ];
+
+  function inBoundary(px, py){
+    for(const b of boundaryShapes){
+      if(b.type === 'circle'){
+        const dx = px - b.x, dy = py - b.y;
+        if(dx*dx + dy*dy <= b.r*b.r) return true;
+      } else if(b.type === 'polygon'){
+        let inside = false;
+        const pts = b.pts;
+        for(let i=0,j=pts.length-1;i<pts.length;j=i++){
+          const xi=pts[i].x, yi=pts[i].y;
+          const xj=pts[j].x, yj=pts[j].y;
+          const intersect = ((yi>py)!=(yj>py)) && (px < (xj-xi)*(py-yi)/(yj-yi)+xi);
+          if(intersect) inside = !inside;
+        }
+        if(inside) return true;
+      }
+    }
+    return false;
+  }
   
   const lvlData = levels[Math.min(level - 1, levels.length - 1)];
   pal = lvlData.palette;
@@ -721,7 +747,8 @@ function setup(level) {
       const x = c * ts, y = r * ts;
       if(r < 3 && c < 3) continue;
       const tile = {x,y,w:ts,h:ts,m:false};
-      if(!hit(tile, {x:260,y:20,w:110,h:90})) {
+      const cx = x + ts/2, cy = y + ts/2;
+      if(!hit(tile, {x:260,y:20,w:110,h:90}) && !inBoundary(cx, cy)) {
         tiles.push(tile);
       }
     }
@@ -742,8 +769,10 @@ function setup(level) {
         w: 26,
         h: 26
       };
-      
-      const safe = !hit(o, {x:0,y:0,w:100,h:100}) && 
+
+      const ox = o.x + o.w/2, oy = o.y + o.h/2;
+      const safe = !inBoundary(ox, oy) &&
+                   !hit(o, {x:0,y:0,w:100,h:100}) &&
                    !hit(o, {x:260,y:20,w:110,h:90}) &&
                    !obs.some(existing => hit(o, existing));
       
