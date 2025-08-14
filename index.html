@@ -4,6 +4,9 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <title>Charlie's Lawn Mowing Adventure – The Game</title>
+<meta name="description" content="Help Charlie mow lawns in this mobile-friendly comedy game. 12 levels, power ups, obstacles, and a local leaderboard." />
+<meta property="og:title" content="Charlie's Lawn Mowing Adventure – The Game" />
+<meta property="og:description" content="Play this mobile-friendly lawn mowing game with 12 levels, power ups, obstacles, and a local leaderboard." />
 <style>
   :root{
     --bg1:#0C2340; --bg2:#1F3B73; --bg3:#B9975B; --sky:#87CEEB;
@@ -21,6 +24,11 @@
     margin:0;background:linear-gradient(135deg,var(--bg1) 0%,var(--bg2) 20%,var(--bg3) 60%,var(--sky) 100%);
     font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Arial,sans-serif;color:var(--brand);
     display:flex;align-items:center;justify-content:center;padding:16px;
+  }
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;
+    background:
+      radial-gradient(circle at 20% 80%,rgba(255,255,255,.12),transparent 50%),
+      radial-gradient(circle at 80% 20%,rgba(255,255,255,.06),transparent 50%);
   }
   .screen{
     width:min(920px,95vw);min-height:min(86vh,960px);background:var(--card);
@@ -109,11 +117,9 @@
         <div style="text-align:center;font-weight:800;margin-bottom:6px">Enter Your Name</div>
         <form id="startForm" style="margin:0">
           <div class="row" style="margin:10px 0">
-            <input id="playerName" type="text" maxlength="15" placeholder="Your Name" style="padding:10px 12px;border-radius:10px;border:2px solid var(--accent);font-weight:700;text-align:center;min-width:min(260px,80vw)" />
-          </div>
-          <div class="row" style="margin:10px 0">
             <button id="startGameBtn" class="btn btn-primary" type="submit">Start Mowing!</button>
           </div>
+          <input id="playerName" type="text" maxlength="15" placeholder="Your Name" required style="padding:10px 12px;border-radius:10px;border:2px solid var(--accent);font-weight:700;text-align:center;min-width:min(260px,80vw)" />
         </form>
         <div class="desc" style="margin-top:8px">
         Cainhoy breeze in his hair, bare feet on the turf, Bud on ice, and a borrowed EGO he swears he hates but actually loves. Ladies' man energy, HOA precision.
@@ -158,13 +164,13 @@
 
     <div class="power-slots">
       <div class="slot">
-        <span id="c-bud" class="icon">🍺</span><span>0</span>
+        <span class="icon">🍺</span><span id="budCount">0</span>
       </div>
       <div class="slot">
-        <span id="c-golf" class="icon">🏌️</span><span>0</span>
+        <span class="icon">🚗</span><span id="golfCount">0</span>
       </div>
       <div class="slot">
-        <span id="c-leaf" class="icon">🍃</span><span>0</span>
+        <span class="icon">🍃</span><span id="leafCount">0</span>
       </div>
     </div>
 
@@ -243,281 +249,334 @@
 </div>
 
 <div id="toast" role="status" aria-live="polite"></div>
+<a id="dl" download="charlies-championship.png" style="display:none"></a>
 
 <script>
-// Wrap everything in a try-catch to handle errors gracefully
-try {
+/* -------------------- Data: levels + descriptions -------------------- */
+const levels=[
+{n:"Barefoot Boulevard",     d:"Toes out, dew cold, bottle caps everywhere.",
+ palette:{grassColor:"#7CFC00", mowedColor:"#90EE90", skyColor:"#87CEEB", texture:"spring"}},
+{n:"RAM Yard Test Track",    d:"The Dodge RAM is blocking your line. Work around it.",
+ palette:{grassColor:"#7CFC00", mowedColor:"#90EE90", skyColor:"#87CEEB", texture:"spring"}},
+{n:"Golf Cart Grand Prix",   d:"Shortcuts allowed. Avoid the welcome mat pothole.",
+ palette:{grassColor:"#7CFC00", mowedColor:"#90EE90", skyColor:"#87CEEB", texture:"spring"}},
+{n:"Trampoline Tangle",      d:"Orbit the trampoline legs. No flips, all stripes.",
+ palette:{grassColor:"#7CFC00", mowedColor:"#90EE90", skyColor:"#87CEEB", texture:"spring"}},
+{n:"Edging Invitational",    d:"Driveway, beds, sidewalk. Sharp lines only.",
+ palette:{grassColor:"#C2B280", mowedColor:"#DEB887", skyColor:"#FFDAB9", texture:"autumn"}},
+{n:"Blower Showdown",        d:"Blast corners clean. Leave no crumb behind.",
+ palette:{grassColor:"#C2B280", mowedColor:"#DEB887", skyColor:"#FFDAB9", texture:"autumn"}},
+{n:"EGO vs Husky Derby",     d:"Talks smack about electric, borrows EGO anyway.",
+ palette:{grassColor:"#C2B280", mowedColor:"#DEB887", skyColor:"#FFDAB9", texture:"autumn"}},
+{n:"Budweiser Yard Party",   d:"Mow around the coolers. Cans are not power ups.",
+ palette:{grassColor:"#C2B280", mowedColor:"#DEB887", skyColor:"#FFDAB9", texture:"autumn"}},
+{n:"Cainhoy Dollar Tree HOA Finals",  d:"Every neighbor is judging the stripes.",
+ palette:{grassColor:"#E0F8FF", mowedColor:"#F8FFF8", skyColor:"#B0E0E6", texture:"winter"}},
+{n:"Lowcountry Crosswind",   d:"Cainhoy gusts push your deck. Hold the line.",
+ palette:{grassColor:"#E0F8FF", mowedColor:"#F8FFF8", skyColor:"#B0E0E6", texture:"winter"}},
+{n:"Overtime Overgrowth",    d:"Bonus jungle. The clippings will tell your story.",
+ palette:{grassColor:"#E0F8FF", mowedColor:"#F8FFF8", skyColor:"#B0E0E6", texture:"winter"}},
+{n:"Golden Grass Champion",  d:"Perfect pass, perfect blow, perfect edge.",
+ palette:{grassColor:"#E0F8FF", mowedColor:"#F8FFF8", skyColor:"#B0E0E6", texture:"winter"}}
+];
+const L=idx=>levels[Math.min(idx-1,levels.length-1)];
 
-/* -------------------- Data -------------------- */
-const levels = [
-{n:"Barefoot Boulevard", d:"Toes out, dew cold, bottle caps everywhere.", palette:{grassColor:"#7CFC00", mowedColor:"#90EE90", skyColor:"#87CEEB", texture:"spring"}},
-{n:"RAM Yard Test Track", d:"The Dodge RAM is blocking your line. Work around it.", palette:{grassColor:"#7CFC00", mowedColor:"#90EE90", skyColor:"#87CEEB", texture:"spring"}},
-{n:"Golf Cart Grand Prix", d:"Shortcuts allowed. Avoid the welcome mat pothole.", palette:{grassColor:"#7CFC00", mowedColor:"#90EE90", skyColor:"#87CEEB", texture:"spring"}},
-{n:"Trampoline Tangle", d:"Orbit the trampoline legs. No flips, all stripes.", palette:{grassColor:"#7CFC00", mowedColor:"#90EE90", skyColor:"#87CEEB", texture:"spring"}},
-{n:"Edging Invitational", d:"Driveway, beds, sidewalk. Sharp lines only.", palette:{grassColor:"#C2B280", mowedColor:"#DEB887", skyColor:"#FFDAB9", texture:"autumn"}},
-{n:"Blower Showdown", d:"Blast corners clean. Leave no crumb behind.", palette:{grassColor:"#C2B280", mowedColor:"#DEB887", skyColor:"#FFDAB9", texture:"autumn"}},
-{n:"EGO vs Husky Derby", d:"Talks smack about electric, borrows EGO anyway.", palette:{grassColor:"#C2B280", mowedColor:"#DEB887", skyColor:"#FFDAB9", texture:"autumn"}},
-{n:"Budweiser Yard Party", d:"Mow around the coolers. Cans are not power ups.", palette:{grassColor:"#C2B280", mowedColor:"#DEB887", skyColor:"#FFDAB9", texture:"autumn"}},
-{n:"Cainhoy Dollar Tree HOA Finals", d:"Every neighbor is judging the stripes.", palette:{grassColor:"#E0F8FF", mowedColor:"#F8FFF8", skyColor:"#B0E0E6", texture:"winter"}},
-{n:"Lowcountry Crosswind", d:"Cainhoy gusts push your deck. Hold the line.", palette:{grassColor:"#E0F8FF", mowedColor:"#F8FFF8", skyColor:"#B0E0E6", texture:"winter"}},
-{n:"Overtime Overgrowth", d:"Bonus jungle. The clippings will tell your story.", palette:{grassColor:"#E0F8FF", mowedColor:"#F8FFF8", skyColor:"#B0E0E6", texture:"winter"}},
-{n:"Golden Grass Champion", d:"Perfect pass, perfect blow, perfect edge.", palette:{grassColor:"#E0F8FF", mowedColor:"#F8FFF8", skyColor:"#B0E0E6", texture:"winter"}}
+const introsByLevel=[
+  ["Charlie kicks off his sandals and tells the lawn behave. The lawn refuses. You accept.",
+   "Barefoot mode engaged. Stub a toe, gain +5 focus and a new swear word.",
+   "You whisper to the EGO we are just friends. Husqvarna looks jealous."],
+  ["The RAM is parked like a shrine. Mow around it without carving a logo.",
+   "Rub the RAM for +1 horsepower and -10 dignity.",
+   "Neighbors say parallel park. You say parallel stripe."],
+  ["Golf cart is NASCAR ready. Keep straighter lines than your weekend alibi.",
+   "Pit stop in five laps. Bud is for morale, not hydration. Probably.",
+   "Wave to the gallery. It is Charlie's cousin. He claps loud."],
+  ["Orbit the trampoline legs. Touch one and kids boo in surround sound.",
+   "No flips, all stripes. The trampoline squeaks in fear.",
+   "Remember: trampoline is lava, grass is glory."],
+  ["Edge so crisp it slices gossip. The HOA writes poetry.",
+   "If the line wobbles, call it modern art. Then fix it.",
+   "Chase a stray blade like it owes you money."],
+  ["Time to blow. The leaves, obviously. Mind out of gutter.",
+   "Corners hide confetti. Blast like 3 a.m. party cleanup.",
+   "One good puff and the driveway applauds."],
+  ["Husqvarna shirt, EGO in hand. It is a safe space for contradictions.",
+   "You talk smack about batteries then whisper wow that torque.",
+   "Borrowed gear is faster. That is just physics."],
+  ["Bud pyramid by the porch. Hydrate with your eyes only.",
+   "The cooler calls your name. You say later, champ.",
+   "BBQ smoke gives +2 swagger and -1 visibility."],
+  ["Smile and wave. The HOA is timing your turns.",
+   "Perfect lines earn a slow clap from Mr. Dickson.",
+   "Stripe like a barber for grass."],
+  ["Lowcountry wind steals hats and secrets. Keep both.",
+   "If a gust moves you, call it tactical drifting.",
+   "Bend like grass, mow like steel."],
+  ["The yard grew like it had a coupon. Time to void it.",
+   "It is a jungle. You are the polite machete.",
+   "Clip first, questions later."],
+  ["Final lap. The lawn wants a photo finish.",
+   "Smile. This is the one for the fridge.",
+   "Legend mode on. Husky and EGO both wink."]
 ];
 
-const L = idx => levels[Math.min(idx-1, levels.length-1)];
-
-const introsByLevel = [
-  ["Charlie kicks off his sandals and tells the lawn behave. The lawn refuses. You accept.", "Barefoot mode engaged. Stub a toe, gain +5 focus and a new swear word.", "You whisper to the EGO we are just friends. Husqvarna looks jealous."],
-  ["The RAM is parked like a shrine. Mow around it without carving a logo.", "Rub the RAM for +1 horsepower and -10 dignity.", "Neighbors say parallel park. You say parallel stripe."],
-  ["Golf cart is NASCAR ready. Keep straighter lines than your weekend alibi.", "Pit stop in five laps. Bud is for morale, not hydration. Probably.", "Wave to the gallery. It is Charlie's cousin. He claps loud."],
-  ["Orbit the trampoline legs. Touch one and kids boo in surround sound.", "No flips, all stripes. The trampoline squeaks in fear.", "Remember: trampoline is lava, grass is glory."],
-  ["Edge so crisp it slices gossip. The HOA writes poetry.", "If the line wobbles, call it modern art. Then fix it.", "Chase a stray blade like it owes you money."],
-  ["Time to blow. The leaves, obviously. Mind out of gutter.", "Corners hide confetti. Blast like 3 a.m. party cleanup.", "One good puff and the driveway applauds."],
-  ["Husqvarna shirt, EGO in hand. It is a safe space for contradictions.", "You talk smack about batteries then whisper wow that torque.", "Borrowed gear is faster. That is just physics."],
-  ["Bud pyramid by the porch. Hydrate with your eyes only.", "The cooler calls your name. You say later, champ.", "BBQ smoke gives +2 swagger and -1 visibility."],
-  ["Smile and wave. The HOA is timing your turns.", "Perfect lines earn a slow clap from Mr. Dickson.", "Stripe like a barber for grass."],
-  ["Lowcountry wind steals hats and secrets. Keep both.", "If a gust moves you, call it tactical drifting.", "Bend like grass, mow like steel."],
-  ["The yard grew like it had a coupon. Time to void it.", "It is a jungle. You are the polite machete.", "Clip first, questions later."],
-  ["Final lap. The lawn wants a photo finish.", "Smile. This is the one for the fridge.", "Legend mode on. Husky and EGO both wink."]
-];
-
-const congratsByLevel = [
-  ["{n}, Mr. Dickson saluted with her garden glove. That never happens.", "{n}, barefoot prints and perfect stripes. Museum worthy.", "{n}, the lawn said thank you and learned manners."],
-  ["{n}, the RAM's reflection on those lines is illegal in three counties.", "{n}, you parked the stripes better than the truck.", "{n}, zero bumper kisses, maximum bragging rights."],
-  ["{n}, the golf cart asked for your autograph. Twice.", "{n}, pit crew said you are the reason for the season.", "{n}, your turns were so clean the cooler chilled faster."],
-  ["{n}, even the trampoline stopped squeaking to admire you.", "{n}, you orbited those legs like a satellite with swag.", "{n}, trampoline kids booed then begged for lessons."],
-  ["{n}, the edger winked. The sidewalk took notes.", "{n}, those borders have their own zip code now.", "{n}, crisp enough to slice rumors into confetti."],
-  ["{n}, that blower finale had neighbors clapping like fireworks.", "{n}, you evacuated a leaf colony and they left a thank you note.", "{n}, driveway said it feels ten pounds lighter."],
-  ["{n}, Husqvarna and EGO both claim you now. Peace talks scheduled.", "{n}, battery and gas shook hands after that run.", "{n}, the EGO blushed. The Husky pretended not to notice."],
-  ["{n}, Bud pyramid remains untouched. That is self control.", "{n}, you mowed around the party like a secret service agent.", "{n}, cooler called. It says you earned a victory lap."],
-  ["{n}, the HOA framed your pattern by the pool.", "{n}, Mr. Dickson upgraded your wave to a nod.", "{n}, your stripes passed inspection before you finished."],
-  ["{n}, Cainhoy winds took a day off out of respect.", "{n}, tactical drift achieved. Style points awarded.", "{n}, even the breeze followed your lines."],
-  ["{n}, the jungle cried uncle and paid taxes.", "{n}, clippings spelled hero by accident.", "{n}, you just invented polite deforestation."],
-  ["{n}, crown secured. The lawn genuflected.", "{n}, the golf cart started playing anthem music.", "{n}, Cainhoy Dollar Tree submitted your lines to the Library of Congress."]
+const congratsByLevel=[
+  ["{n}, Mr. Dickson saluted with her garden glove. That never happens.",
+   "{n}, barefoot prints and perfect stripes. Museum worthy.",
+   "{n}, the lawn said thank you and learned manners."],
+  ["{n}, the RAM's reflection on those lines is illegal in three counties.",
+   "{n}, you parked the stripes better than the truck.",
+   "{n}, zero bumper kisses, maximum bragging rights."],
+  ["{n}, the golf cart asked for your autograph. Twice.",
+   "{n}, pit crew said you are the reason for the season.",
+   "{n}, your turns were so clean the cooler chilled faster."],
+  ["{n}, even the trampoline stopped squeaking to admire you.",
+   "{n}, you orbited those legs like a satellite with swag.",
+   "{n}, trampoline kids booed then begged for lessons."],
+  ["{n}, the edger winked. The sidewalk took notes.",
+   "{n}, those borders have their own zip code now.",
+   "{n}, crisp enough to slice rumors into confetti."],
+  ["{n}, that blower finale had neighbors clapping like fireworks.",
+   "{n}, you evacuated a leaf colony and they left a thank you note.",
+   "{n}, driveway said it feels ten pounds lighter."],
+  ["{n}, Husqvarna and EGO both claim you now. Peace talks scheduled.",
+   "{n}, battery and gas shook hands after that run.",
+   "{n}, the EGO blushed. The Husky pretended not to notice."],
+  ["{n}, Bud pyramid remains untouched. That is self control.",
+   "{n}, you mowed around the party like a secret service agent.",
+   "{n}, cooler called. It says you earned a victory lap."],
+  ["{n}, the HOA framed your pattern by the pool.",
+   "{n}, Mr. Dickson upgraded your wave to a nod.",
+   "{n}, your stripes passed inspection before you finished."],
+  ["{n}, Cainhoy winds took a day off out of respect.",
+   "{n}, tactical drift achieved. Style points awarded.",
+   "{n}, even the breeze followed your lines."],
+  ["{n}, the jungle cried uncle and paid taxes.",
+   "{n}, clippings spelled hero by accident.",
+   "{n}, you just invented polite deforestation."],
+  ["{n}, crown secured. The lawn genuflected.",
+   "{n}, the golf cart started playing anthem music.",
+   "{n}, Cainhoy Dollar Tree submitted your lines to the Library of Congress."]
 ];
 
 /* -------------------- State -------------------- */
-let running = false, paused = false, lvl = 1, score = 0, total = 0, lvlStart = 0;
-let mower = {x:50, y:50, px:50, py:50, w:16, h:16, spd:120, acc:350, vx:0, vy:0, boost:false, inv:false};
-let tiles = [], powerUps = [], obs = [], particles = [], particlePool = [], weather = {type:"sun", t:0};
-let name = "", loop = 0, last = 0;
-const keys = {}, counts = {bud:0, golf:0, leaf:0};
-let introShown = false, budTimer = null, budBoostTimeout = null, golfInvTimeout = null;
-
-/* -------------------- Canvas -------------------- */
-const BASE_W = 400, BASE_H = 300;
-const cvs = document.getElementById('gameCanvas'), ctx = cvs.getContext('2d');
+let running=false, paused=false, lvl=1, score=0, total=0, lvlStart=0;
+let mower={x:50,y:50,px:50,py:50,w:16,h:16,spd:120,acc:350,vx:0,vy:0,boost:false,inv:false};
+let tiles=[], powerUps=[], obs=[], particles=[], particlePool=[], weather={type:"sun",t:0};
+let name=""; let loop=0, last=0;
+const keys={}; const counts={bud:0,golf:0,leaf:0};
+let introShown=false;
+let budTimer=null;
+let budBoostTimeout=null, golfInvTimeout=null;
+  /* -------------------- Canvas (DPR + responsive scaling) -------------------- */
+const BASE_W=400, BASE_H=300;
+const cvs=document.getElementById('gameCanvas'), ctx=cvs.getContext('2d');
+const staticCvs=document.createElement('canvas'), staticCtx=staticCvs.getContext('2d');
+staticCvs.width=BASE_W; staticCvs.height=BASE_H;
+const farCvs=document.createElement('canvas'), farCtx=farCvs.getContext('2d');
+farCvs.width=BASE_W*2; farCvs.height=BASE_H*2;
+const midCvs=document.createElement('canvas'), midCtx=midCvs.getContext('2d');
+midCvs.width=BASE_W*2; midCvs.height=BASE_H*2;
+const FAR_PAR=0.05, MID_PAR=0.15;
+const tileShadeGrad=ctx.createLinearGradient(0,0,0,20);
+tileShadeGrad.addColorStop(0,'rgba(0,0,0,0)');
+tileShadeGrad.addColorStop(1,'rgba(0,0,0,0.15)');
 let pal, grassPattern;
 
-function makeGrassTexture(type, color) {
-  const cn = document.createElement('canvas');
-  cn.width = 20; cn.height = 20;
-  const g = cn.getContext('2d');
-  g.fillStyle = color; g.fillRect(0, 0, 20, 20);
-  if(type === 'autumn') {
-    g.fillStyle = 'rgba(139,69,19,0.3)';
-    g.fillRect(0, 0, 20, 10); g.fillRect(10, 10, 20, 10);
-  } else if(type === 'winter') {
-    g.fillStyle = 'rgba(255,255,255,0.6)';
-    for(let i = 0; i < 20; i += 5) { g.fillRect(i, i, 2, 2); }
-  } else {
-    g.fillStyle = 'rgba(0,100,0,0.2)';
-    g.fillRect(0, 0, 20, 10); g.fillRect(10, 10, 20, 10);
+function makeGrassTexture(type,color){
+  const cn=document.createElement('canvas'); cn.width=20; cn.height=20;
+  const g=cn.getContext('2d');
+  g.fillStyle=color; g.fillRect(0,0,20,20);
+  if(type==='autumn'){
+    g.fillStyle='rgba(139,69,19,0.3)';
+    g.fillRect(0,0,20,10); g.fillRect(10,10,20,10);
+  }else if(type==='winter'){
+    g.fillStyle='rgba(255,255,255,0.6)';
+    for(let i=0;i<20;i+=5){ g.fillRect(i,i,2,2); }
+  }else{
+    g.fillStyle='rgba(0,100,0,0.2)';
+    g.fillRect(0,0,20,10); g.fillRect(10,10,20,10);
   }
-  return ctx.createPattern(cn, 'repeat');
+  return ctx.createPattern(cn,'repeat');
 }
+function fitCanvas(){
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  const app=document.getElementById('app');
+  const maxCSS=Math.min(app.clientWidth-40, 860);
+  const cssW=Math.max(320, Math.min(maxCSS, window.innerWidth * 0.95));
+  const scale=Math.max(0.5, cssW / BASE_W);
+  const cssH=BASE_H * scale;
 
-function fitCanvas() {
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  const app = document.getElementById('app');
-  const maxCSS = Math.min(app.clientWidth - 40, 860);
-  const cssW = Math.max(320, Math.min(maxCSS, window.innerWidth * 0.95));
-  const scale = Math.max(0.5, cssW / BASE_W);
-  const cssH = BASE_H * scale;
-
-  cvs.style.width = cssW + "px"; 
-  cvs.style.height = cssH + "px";
-  cvs.width = Math.round(BASE_W * scale * dpr);
-  cvs.height = Math.round(BASE_H * scale * dpr);
-  ctx.setTransform(scale * dpr, 0, 0, scale * dpr, 0, 0);
+  cvs.style.width=cssW+"px"; cvs.style.height=cssH+"px";
+  cvs.width=Math.round(BASE_W*scale*dpr);
+  cvs.height=Math.round(BASE_H*scale*dpr);
+  ctx.setTransform(scale*dpr,0,0,scale*dpr,0,0);
   draw();
 }
-
-addEventListener('resize', fitCanvas);
+addEventListener('resize',fitCanvas); fitCanvas();
 
 /* -------------------- Utils -------------------- */
-const ri = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;
-const rc = a => a[Math.floor(Math.random() * a.length)];
-const fmt = s => {const m = Math.floor(s/60), sec = Math.floor(s%60); return `${m}:${sec<10?"0":""}${sec}`;};
-const hit = (a, b) => !(a.x + a.w < b.x || a.x > b.x + b.w || a.y + a.h < b.y || a.y > b.y + b.h);
+const ri=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const rc=a=>a[Math.floor(Math.random()*a.length)];
+const fmt=s=>{const m=Math.floor(s/60),sec=Math.floor(s%60);return `${m}:${sec<10?"0":""}${sec}`};
+const hit=(a,b)=>!(a.x+a.w<b.x||a.x>b.x+b.w||a.y+a.h<b.y||a.y>b.y+b.h);
 
 /* -------------------- Input -------------------- */
-addEventListener('keydown', e => {
-  const block = ['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','KeyW','KeyA','KeyS','KeyD','Space'];
+addEventListener('keydown',e=>{
+  const block=['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','KeyW','KeyA','KeyS','KeyD','Space'];
   if(block.includes(e.code)) e.preventDefault();
-  keys[e.key] = keys[e.code] = true;
-  if(e.key === 'p' || e.key === 'P' || e.code === 'Space') togglePause();
-  if(e.key === 'Enter' && !running) {
-    if(landing.style.display !== 'none') {
+  keys[e.key]=keys[e.code]=true;
+  if(e.key==='p'||e.key==='P'||e.code==='Space') togglePause();
+  if(e.key==='Enter'&&!running){
+    if(landing.style.display!=='none'){
       if(!startForm.contains(document.activeElement)) startGame();
-    } else if(document.activeElement !== playerName) {
+    }else if(document.activeElement!==playerName){
       handleStartLevelClick();
     }
   }
 });
-
-addEventListener('keyup', e => {
-  const block = ['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','KeyW','KeyA','KeyS','KeyD'];
+addEventListener('keyup',e=>{
+  const block=['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','KeyW','KeyA','KeyS','KeyD'];
   if(block.includes(e.code)) e.preventDefault();
-  keys[e.key] = keys[e.code] = false;
+  keys[e.key]=keys[e.code]=false;
 });
 
 /* On-screen D-pad */
-const pad = document.getElementById('pad');
-if(pad) {
-  [['padUp','ArrowUp'],['padDown','ArrowDown'],['padLeft','ArrowLeft'],['padRight','ArrowRight']].forEach(([id,k]) => {
-    const el = document.getElementById(id);
-    if(el) {
-      el.addEventListener('pointerdown', e => {e.preventDefault(); keys[k] = true; el.setPointerCapture(e.pointerId);});
-      ['pointerup','pointercancel','pointerleave'].forEach(t => el.addEventListener(t, () => {keys[k] = false;}));
-    }
-  });
-}
+const pad=document.getElementById('pad');
+pad.addEventListener('selectstart',e=>e.preventDefault());
+pad.addEventListener('contextmenu',e=>e.preventDefault());
+[['padUp','ArrowUp'],['padDown','ArrowDown'],['padLeft','ArrowLeft'],['padRight','ArrowRight']].forEach(([id,k])=>{
+  const el=document.getElementById(id);
+  el.addEventListener('pointerdown',e=>{e.preventDefault();keys[k]=true; el.setPointerCapture(e.pointerId)});
+  ['pointerup','pointercancel','pointerleave'].forEach(t=>el.addEventListener(t,()=>{keys[k]=false;}));
+});
 
 /* Canvas virtual joystick */
-if(cvs) {
-  let canvasPad = {active:false, id:null, startX:0, startY:0};
-  const DEAD = 10, BIAS = 6;
-  
-  function setDirFromDelta(dx, dy) {
-    const ax = Math.abs(dx), ay = Math.abs(dy);
-    const up = ay > DEAD && dy < 0 && ay >= ax - BIAS;
-    const down = ay > DEAD && dy > 0 && ay >= ax - BIAS;
-    const left = ax > DEAD && dx < 0 && ax >= ay - BIAS;
-    const right = ax > DEAD && dx > 0 && ax >= ay - BIAS;
-    keys.ArrowUp = up; keys.ArrowDown = down; keys.ArrowLeft = left; keys.ArrowRight = right;
-  }
-  
-  cvs.addEventListener('pointerdown', e => {
-    e.preventDefault();
-    canvasPad.active = true; canvasPad.id = e.pointerId;
-    canvasPad.startX = e.clientX; canvasPad.startY = e.clientY;
-    cvs.setPointerCapture(e.pointerId);
-    setDirFromDelta(0, 0);
-  });
-  
-  cvs.addEventListener('pointermove', e => {
-    if(!canvasPad.active || e.pointerId !== canvasPad.id) return;
-    e.preventDefault();
-    setDirFromDelta(e.clientX - canvasPad.startX, e.clientY - canvasPad.startY);
-  });
-  
-  ['pointerup','pointercancel','pointerleave'].forEach(t => {
-    cvs.addEventListener(t, e => {
-      if(e.pointerId !== canvasPad.id) return;
-      e.preventDefault();
-      canvasPad.active = false; canvasPad.id = null;
-      keys.ArrowUp = keys.ArrowDown = keys.ArrowLeft = keys.ArrowRight = false;
-    });
-  });
+cvs.addEventListener('selectstart',e=>e.preventDefault());
+cvs.addEventListener('contextmenu',e=>e.preventDefault());
+cvs.addEventListener('gesturestart',e=>e.preventDefault());
+cvs.addEventListener('touchstart',e=>e.preventDefault(), {passive:false});
+cvs.addEventListener('touchmove',e=>e.preventDefault(), {passive:false});
+let canvasPad={active:false,id:null,startX:0,startY:0};
+const DEAD=10, BIAS=6;
+function setDirFromDelta(dx,dy){
+  const ax=Math.abs(dx), ay=Math.abs(dy);
+  const up= ay>DEAD && dy<0 && ay>=ax-BIAS;
+  const down= ay>DEAD && dy>0 && ay>=ax-BIAS;
+  const left= ax>DEAD && dx<0 && ax>=ay-BIAS;
+  const right= ax>DEAD && dx>0 && ax>=ay-BIAS;
+  keys.ArrowUp=up; keys.ArrowDown=down; keys.ArrowLeft=left; keys.ArrowRight=right;
 }
+cvs.addEventListener('pointerdown',e=>{
+  e.preventDefault();
+  canvasPad.active=true; canvasPad.id=e.pointerId;
+  canvasPad.startX=e.clientX; canvasPad.startY=e.clientY;
+  cvs.setPointerCapture(e.pointerId);
+  setDirFromDelta(0,0);
+});
+cvs.addEventListener('pointermove',e=>{
+  if(!canvasPad.active || e.pointerId!==canvasPad.id) return;
+  e.preventDefault();
+  setDirFromDelta(e.clientX-canvasPad.startX, e.clientY-canvasPad.startY);
+});
+['pointerup','pointercancel','pointerleave'].forEach(t=>{
+  cvs.addEventListener(t, e=>{
+    if(e.pointerId!==canvasPad.id) return;
+    e.preventDefault();
+    canvasPad.active=false; canvasPad.id=null;
+    keys.ArrowUp=keys.ArrowDown=keys.ArrowLeft=keys.ArrowRight=false;
+  });
+});
 
 /* -------------------- Audio -------------------- */
-let snd = true, music = true, actx = null;
-function audio() { if(!actx) { try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch{} } }
-function beep(f = 880, d = 0.05, v = 0.15) { 
-  if(!snd) return; 
-  audio(); 
-  if(!actx) return; 
-  try {
-    const o = actx.createOscillator(), g = actx.createGain(); 
-    o.type = 'square'; o.frequency.value = f; g.gain.value = v; 
-    o.connect(g).connect(actx.destination); 
-    o.start(); o.stop(actx.currentTime + d);
-  } catch(e) {}
+let snd=true, music=true, actx=null;
+function audio(){ if(!actx){ try{ actx=new (window.AudioContext||window.webkitAudioContext)(); }catch{} } }
+function beep(f=880,d=.05,v=.15){ if(!snd) return; audio(); if(!actx) return; const o=actx.createOscillator(), g=actx.createGain(); o.type='square'; o.frequency.value=f; g.gain.value=v; o.connect(g).connect(actx.destination); o.start(); o.stop(actx.currentTime+d); }
+function chime(){ beep(660,.07,.18); setTimeout(()=>beep(990,.07,.18),65); }
+function thud(){ beep(130,.07,.2); }
+const vibr=ms=>(navigator.vibrate&&navigator.vibrate(ms));
+
+function explode(x,y){
+  const rect=cvs.getBoundingClientRect();
+  const sx=rect.width/BASE_W, sy=rect.height/BASE_H;
+  const boom=document.createElement('div');
+  boom.textContent='💥';
+  boom.style.position='fixed';
+  boom.style.left=(rect.left+x*sx-18)+"px";
+  boom.style.top=(rect.top+y*sy-18)+"px";
+  boom.style.fontSize='36px';
+  boom.style.pointerEvents='none';
+  boom.style.transition='transform .3s, opacity .3s';
+  boom.style.transform='scale(.5)';
+  boom.style.zIndex='99';
+  document.body.appendChild(boom);
+  requestAnimationFrame(()=>{ boom.style.transform='scale(1.6)'; boom.style.opacity='0'; });
+  setTimeout(()=>boom.remove(),300);
+  beep(80,.25,.3); setTimeout(()=>beep(40,.25,.2),80);
 }
-function chime() { beep(660, 0.07, 0.18); setTimeout(() => beep(990, 0.07, 0.18), 65); }
-function thud() { beep(130, 0.07, 0.2); }
-const vibr = ms => (navigator.vibrate && navigator.vibrate(ms));
 
 /* -------------------- Toast -------------------- */
-const toastEl = document.getElementById('toast');
-let toastTimer = null;
-function showToast(msg, ms = 1800) {
-  if(toastEl) {
-    toastEl.textContent = msg;
-    toastEl.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => toastEl.classList.remove('show'), ms);
-  }
+const toastEl=document.getElementById('toast');
+let toastTimer=null;
+function showToast(msg,ms=1800){
+  toastEl.textContent=msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>toastEl.classList.remove('show'),ms);
 }
 
 /* -------------------- Game Loop -------------------- */
-function frame(ts) {
-  if(!running || paused) return;
-  const dt = Math.min((ts - last) / 1000, 0.1); 
-  last = ts;
-  step(dt); 
-  draw(); 
-  loop = requestAnimationFrame(frame);
+function frame(ts){
+  if(!running||paused) return;
+  const dt=Math.min((ts-last)/1000,.1); last=ts;
+  step(dt); draw(); loop=requestAnimationFrame(frame);
 }
-
-function step(d) {
+function step(d){
   mower.px = mower.x; mower.py = mower.y;
   handle(d); move(d); eatGrass(); pickPower(); collide();
   if(!running) return;
-  tickParticles(d); tickPowers(d); tickObs(d); tickWeather(d); 
-  total += d; ui(); winCheck(); timeCheck();
+  tickParticles(d); tickPowers(d); tickObs(d); tickWeather(d); total+=d; ui(); winCheck(); timeCheck();
 }
-
-function handle(d) {
-  let tx = 0, ty = 0;
-  if(keys.ArrowUp || keys.KeyW || keys.w) ty = -mower.spd;
-  if(keys.ArrowDown || keys.KeyS || keys.s) ty = mower.spd;
-  if(keys.ArrowLeft || keys.KeyA || keys.a) tx = -mower.spd;
-  if(keys.ArrowRight || keys.KeyD || keys.d) tx = mower.spd;
-  const a = Math.min(1, mower.acc * d / mower.spd);
-  mower.vx += (tx - mower.vx) * a; mower.vy += (ty - mower.vy) * a;
-  if(tx === 0) mower.vx *= 0.92; if(ty === 0) mower.vy *= 0.92;
+function handle(d){
+  let tx=0,ty=0;
+  if(keys.ArrowUp||keys.KeyW||keys.w) ty=-mower.spd;
+  if(keys.ArrowDown||keys.KeyS||keys.s) ty= mower.spd;
+  if(keys.ArrowLeft||keys.KeyA||keys.a) tx=-mower.spd;
+  if(keys.ArrowRight||keys.KeyD||keys.d) tx= mower.spd;
+  const a=Math.min(1,mower.acc*d/mower.spd);
+  mower.vx+=(tx-mower.vx)*a; mower.vy+=(ty-mower.vy)*a;
+  if(tx===0) mower.vx*=0.92; if(ty===0) mower.vy*=0.92;
 }
-
-function move(d) {
-  let fx = 1; 
-  if(weather.type === 'rain') fx = 0.9; 
-  if(weather.type === 'wind') mower.x += Math.sin(Date.now() / 330) * 8 * d;
-  mower.x += mower.vx * d * fx; mower.y += mower.vy * d * fx;
-  mower.x = Math.max(0, Math.min(BASE_W - mower.w, mower.x));
-  mower.y = Math.max(0, Math.min(BASE_H - mower.h, mower.y));
+function move(d){
+  let fx=1; if(weather.type==='rain') fx=.9; if(weather.type==='wind') mower.x+=Math.sin(Date.now()/330)*8*d;
+  mower.x+=mower.vx*d*fx; mower.y+=mower.vy*d*fx;
+  mower.x=Math.max(0,Math.min(BASE_W-mower.w,mower.x));
+  mower.y=Math.max(0,Math.min(BASE_H-mower.h,mower.y));
 }
-
-function eatGrass() {
-  for(const t of tiles) { 
-    if(!t.m && hit(mower, t)) { 
-      t.m = true; score += 10; 
-      if((t.x + t.y) % 40 === 0) beep(520, 0.02, 0.08); 
-    } 
-  }
+function eatGrass(){
+  for(const t of tiles){ if(!t.m && hit(mower,t)){ t.m=true; score+=10; if((t.x+t.y)%40===0) beep(520,.02,.08); } }
 }
-
-function collide() {
+function collide(){
   if(mower.inv) return;
-  for(const o of obs) {
-    if(o.a && hit(mower, o)) {
+  for(const o of obs){
+    if (o.a && hit(mower, o)) {
+      explode(o.x + o.w / 2, o.y + o.h / 2);
       o.a = false;
+
       mower.vx = mower.vy = 0;
       mower.x = mower.px; mower.y = mower.py;
-      
+
       const cx = mower.x + mower.w / 2, cy = mower.y + mower.h / 2;
       const ox = o.x + o.w / 2, oy = o.y + o.h / 2;
       let dx = cx - ox, dy = cy - oy, mag = Math.hypot(dx, dy) || 1;
       dx /= mag; dy /= mag;
       const push = 4;
-      
+
       mower.x += dx * push;
       mower.y += dy * push;
       mower.x = Math.max(0, Math.min(BASE_W - mower.w, mower.x));
       mower.y = Math.max(0, Math.min(BASE_H - mower.h, mower.y));
-      
+
       setComment(`Easy there. Go around the ${o.t}.`);
       vibr(25);
       gameOver('obstacle');
@@ -525,463 +584,529 @@ function collide() {
     }
   }
 }
-
-function pickPower() { 
-  for(const p of powerUps) { 
-    if(p.a && hit(mower, p)) { 
-      p.a = false; power(p.t); 
-    } 
-  } 
-}
-
-function tickParticles(d) {
-  if(mower.vx || mower.vy) {
-    const p = particlePool.pop() || {};
-    p.x = mower.x + mower.w / 2;
-    p.y = mower.y + mower.h / 2;
-    p.dx = (Math.random() - 0.5) * 20;
-    p.dy = (Math.random() - 0.5) * 20;
-    p.life = 1;
+function pickPower(){ for(const p of powerUps){ if(p.a&&hit(mower,p)){ p.a=false; power(p.t); } } }
+function tickParticles(d){
+  if(mower.vx||mower.vy){
+    const p=particlePool.pop()||{};
+    p.x=mower.x+mower.w/2;
+    p.y=mower.y+mower.h/2;
+    p.dx=(Math.random()-.5)*20;
+    p.dy=(Math.random()-.5)*20;
+    p.life=1;
     particles.push(p);
   }
-  for(let i = particles.length - 1; i >= 0; i--) {
-    const p = particles[i];
-    p.x += p.dx * d;
-    p.y += p.dy * d;
-    p.life -= d * 2;
-    if(p.life <= 0) { particles.splice(i, 1); particlePool.push(p); }
+  for(let i=particles.length-1;i>=0;i--){
+    const p=particles[i];
+    p.x+=p.dx*d;
+    p.y+=p.dy*d;
+    p.life-=d*2;
+    if(p.life<=0){ particles.splice(i,1); particlePool.push(p); }
   }
 }
-
-function tickPowers(d) { 
-  for(const p of powerUps) { 
-    if(p.a) { 
-      p.tt -= d; 
-      if(p.tt <= 0) p.a = false; 
-    } 
-  } 
-}
-
-function tickObs(d) {
-  for(let i = 0; i < obs.length; i++) {
-    const o = obs[i];
+function tickPowers(d){ for(const p of powerUps){ if(p.a){ p.tt-=d; if(p.tt<=0) p.a=false; } } }
+function tickObs(d){
+  for(let i=0;i<obs.length;i++){
+    const o=obs[i];
     if(!o.a) continue;
-    const anim = {};
-    if(o.t === 'tree') {
-      const s = (o.s || 0) + d;
-      anim.s = s;
-      anim.off = Math.sin(s) * 2;
+    const anim={};
+    if(o.t==='tree'){
+      const s=(o.s||0)+d;
+      anim.s=s;
+      anim.off=Math.sin(s)*2;
     }
-    if(o.t === 'sprinkler') {
-      anim.r = (o.r || 0) + 3 * d;
+    if(o.t==='sprinkler'){
+      anim.r=(o.r||0)+3*d;
     }
-    if(Object.keys(anim).length) obs[i] = {...o, ...anim};
+    if(Object.keys(anim).length) obs[i]={...o, ...anim};
   }
 }
-
-function tickWeather(d) { 
-  weather.t -= d; 
-  if(weather.t <= 0) { 
-    weather.type = rc(['sun','rain','wind']); 
-    weather.t = ri(12, 22); 
-    weath(); 
-  } 
+function tickWeather(d){ weather.t-=d; if(weather.t<=0){ weather.type=rc(['sun','rain','wind']); weather.t=ri(12,22); weath(); } }
+function winCheck(){
+  const totalTiles=tiles.length, mowed=tiles.reduce((n,t)=>n+(t.m?1:0),0);
+  const prog=Math.floor((mowed/Math.max(1,totalTiles))*100);
+  if(winCheck.last!==prog){ winCheck.last=prog; bar.style.width=prog+"%"; bar.textContent=prog+"% Mowed"; }
+  if(mowed===totalTiles) levelComplete();
+}
+function timeCheck(){
+  const elapsed=total-lvlStart, left=Math.max(0, limit - elapsed);
+  countdown.textContent=fmt(left);
+  if(left<=10 && (Math.floor(left*10)%5===0)) beep(900,.02,.06);
+  if(elapsed>=limit) gameOver();
 }
 
-function winCheck() {
-  const totalTiles = tiles.length, mowed = tiles.reduce((n, t) => n + (t.m ? 1 : 0), 0);
-  const prog = Math.floor((mowed / Math.max(1, totalTiles)) * 100);
-  if(winCheck.last !== prog) { 
-    winCheck.last = prog; 
-    const bar = document.getElementById('bar');
-    if(bar) {
-      bar.style.width = prog + "%"; 
-      bar.textContent = prog + "% Mowed"; 
-    }
+/* -------------------- World Gen + Bud spawner -------------------- */
+let limit=60;
+function clearBudTimer(){ if(budTimer){ clearInterval(budTimer); budTimer=null; } }
+function spawnBud(){
+  const start={x:0,y:0,w:100,h:100};
+  for(let tries=0; tries<40; tries++){
+    const p={x:ri(20,BASE_W-44), y:ri(20,BASE_H-44), w:24, h:24};
+    const overlapsObs = obs.some(o=>o.a && hit(p,o)) || hit(p,start);
+    if(!overlapsObs){ powerUps.push({t:'bud',x:p.x,y:p.y,w:24,h:24,a:true,tt:18}); return; }
   }
-  if(mowed === totalTiles) levelComplete();
+  powerUps.push({t:'bud',x:ri(20,BASE_W-40),y:ri(20,BASE_H-40),w:24,h:24,a:true,tt:18});
 }
+function setup(level){
+  tiles=[]; powerUps=[]; obs=[]; particles=[]; particlePool=[];
+  mower={x:50,y:50,px:50,py:50,w:16,h:16,spd:120,acc:350,vx:0,vy:0,boost:false,inv:false};
+  introShown=false; clearBudTimer();
+  pal=L(level).palette;
+  grassPattern=makeGrassTexture(pal.texture, pal.grassColor);
 
-function timeCheck() {
-  const elapsed = total - lvlStart, left = Math.max(0, limit - elapsed);
-  const countdown = document.getElementById('countdown');
-  if(countdown) countdown.textContent = fmt(left);
-  if(left <= 10 && (Math.floor(left * 10) % 5 === 0)) beep(900, 0.02, 0.06);
-  if(elapsed >= limit) gameOver();
-}
-
-/* -------------------- World Gen -------------------- */
-let limit = 60;
-
-function clearBudTimer() { 
-  if(budTimer) { 
-    clearInterval(budTimer); 
-    budTimer = null; 
-  } 
-}
-
-function spawnBud() {
-  const start = {x:0, y:0, w:100, h:100};
-  for(let tries = 0; tries < 40; tries++) {
-    const p = {x:ri(20, BASE_W - 44), y:ri(20, BASE_H - 44), w:24, h:24};
-    const overlapsObs = obs.some(o => o.a && hit(p, o)) || hit(p, start);
-    if(!overlapsObs) { 
-      powerUps.push({t:'bud', x:p.x, y:p.y, w:24, h:24, a:true, tt:18}); 
-      return; 
-    }
-  }
-  powerUps.push({t:'bud', x:ri(20, BASE_W - 40), y:ri(20, BASE_H - 40), w:24, h:24, a:true, tt:18});
-}
-
-function setup(level) {
-  tiles = []; powerUps = []; obs = []; particles = []; particlePool = [];
-  mower = {x:50, y:50, px:50, py:50, w:16, h:16, spd:120, acc:350, vx:0, vy:0, boost:false, inv:false};
-  introShown = false; clearBudTimer();
-  pal = L(level).palette;
-  grassPattern = makeGrassTexture(pal.texture, pal.grassColor);
-
-  const house = {t:'house', a:true, x:260, y:20, w:110, h:90};
+  const house={t:'house',i:'🏠',a:true,x:260,y:20,w:110,h:90};
   obs.push(house);
 
-  const ts = 20, cols = Math.floor(BASE_W / ts), rows = Math.floor(BASE_H / ts);
-  for(let r = 0; r < rows; r++) {
-    for(let c = 0; c < cols; c++) {
-      const x = c * ts, y = r * ts; 
-      if(r < 3 && c < 3) continue;
-      const tile = {x, y, w:ts, h:ts, m:false};
-      if(hit(tile, house)) continue;
-      tiles.push(tile);
-    }
+  const ts=20, cols=Math.floor(BASE_W/ts), rows=Math.floor(BASE_H/ts);
+  for(let r=0;r<rows;r++) for(let c=0;c<cols;c++){
+    const x=c*ts,y=r*ts; if(r<3&&c<3) continue;
+    const tile={x,y,w:ts,h:ts,m:false};
+    if(hit(tile,house)) continue;
+    tiles.push(tile);
   }
 
-  const kinds = [
-    ['rock', '#8B4513', 26, 26],
-    ['tree', '#228B22', 30, 30],
-    ['sprinkler', '#4169E1', 26, 26],
-    ['gnome', '#FF6347', 26, 26],
-    ['flamingo', '#FF69B4', 28, 28],
-    ['grill', '#696969', 26, 26],
-    ['chair', '#8B4513', 26, 26],
-    ['bucket', '#708090', 26, 26],
-    ['bike', '#FF4500', 32, 24],
-    ['barrel', '#A0522D', 26, 26],
-    ['shed', '#CD853F', 34, 28],
-    ['fountain', '#4682B4', 28, 28]
+  const kinds=[
+    ['rock','🪨',26,26],
+    ['tree','🌳',30,30],
+    ['sprinkler','💦',26,26],
+    ['gnome','🧚',26,26],
+    ['flamingo','🦩',28,28],
+    ['grill','🔥',26,26],
+    ['chair','🪑',26,26],
+    ['bucket','🪣',26,26],
+    ['bike','🚲',32,24],
+    ['barrel','🛢️',26,26],
+    ['shed','🏚️',34,28],
+    ['fountain','⛲',28,28]
   ];
-  
-  const n = 6 + Math.min(level, 4);
-  for(let i = 0; i < n; i++) {
-    const k = rc(kinds); 
-    let tries = 0, placed = false;
-    while(!placed && tries < 28) {
-      const x = ri(40, BASE_W - 60), y = ri(50, BASE_H - 60);
-      const cand = {x, y, w:k[2], h:k[3]}; 
-      const start = {x:0, y:0, w:100, h:100};
-      if(hit(cand, start) || hit(cand, house)) {tries++; continue;}
-      obs.push({t:k[0], color:k[1], a:true, x, y, w:cand.w, h:cand.h});
-      tiles = tiles.filter(t => !hit(t, cand));
-      placed = true;
+  const n=6+Math.min(level,4);
+  for(let i=0;i<n;i++){
+    const k=rc(kinds); let tries=0, placed=false;
+    while(!placed && tries<28){
+      const x=ri(40,BASE_W-60), y=ri(50,BASE_H-60);
+      const cand={x,y,w:k[2],h:k[3]}; const start={x:0,y:0,w:100,h:100};
+      if(hit(cand,start) || hit(cand,house)) {tries++; continue;}
+      obs.push({t:k[0],emoji:k[1],a:true,x,y,w:cand.w,h:cand.h});
+      tiles=tiles.filter(t=>!hit(t,cand));
+      placed=true;
     }
   }
 
-  // Other powerups
-  const rnd = () => ({x:ri(60, BASE_W - 60), y:ri(70, BASE_H - 80)});
-  if(Math.random() < 0.5) {
-    const p = rnd(); 
-    powerUps.push({t:'golf', x:p.x, y:p.y, w:24, h:24, a:true, tt:18});
-  }
-  if(Math.random() < 0.4) {
-    const p = rnd(); 
-    powerUps.push({t:'leaf', x:p.x, y:p.y, w:24, h:24, a:true, tt:18});
-  }
+  const rnd=()=>({x:ri(60,BASE_W-60),y:ri(70,BASE_H-80)});
+  if(Math.random()<.5){const p=rnd(); powerUps.push({t:'golf',x:p.x,y:p.y,w:24,h:24,a:true,tt:18});}
+  if(Math.random()<.4){const p=rnd(); powerUps.push({t:'leaf',x:p.x,y:p.y,w:24,h:24,a:true,tt:18});}
 
-  // Budweiser booster every 10s
-  spawnBud(); 
-  budTimer = setInterval(spawnBud, 10000);
+  spawnBud(); budTimer=setInterval(spawnBud, 10000);
 
-  limit = Math.round(70 + 25 / Math.sqrt(level));
+  buildStatic();
+  buildFar();
+  buildMid();
 
-  const levelName = document.getElementById('levelName');
-  const levelDesc = document.getElementById('levelDesc');
-  if(levelName) levelName.textContent = L(level).n;
-  if(levelDesc) levelDesc.textContent = L(level).d;
+  limit = Math.round(70 + 25/Math.sqrt(level));
+
+  levelName.textContent=L(level).n;
+  levelDesc.textContent=L(level).d;
   weath();
-  
-  const bar = document.getElementById('bar');
-  if(bar) {
-    bar.style.width = '0%'; 
-    bar.textContent = '0% Mowed';
-  }
-  
-  const startLevelBtn = document.getElementById('startLevelBtn');
-  const pauseBtn = document.getElementById('pauseBtn');
-  const shareShot = document.getElementById('shareShot');
-  if(startLevelBtn) {
-    startLevelBtn.textContent = 'Start: ' + L(level).n; 
-    startLevelBtn.disabled = false;
-  }
-  if(pauseBtn) pauseBtn.disabled = true; 
-  if(shareShot) shareShot.style.display = 'none';
+  bar.style.width='0%'; bar.textContent='0% Mowed';
+  startLevelBtn.textContent='Start: '+L(level).n; startLevelBtn.disabled=false;
+  pauseBtn.disabled=true; shareShot.style.display='none';
   draw();
 }
-
-function weath() { 
-  const weatherEl = document.getElementById('weather');
-  if(weatherEl) {
-    weatherEl.textContent = weather.type === 'sun' ? '☀️ Perfect' : 
-                           weather.type === 'rain' ? '🌧️ Rainy' : '💨 Windy'; 
-  }
-}
+function weath(){ weatherEl.textContent = weather.type==='sun'?'☀️ Perfect':weather.type==='rain'?'🌧️ Rainy':'💨 Windy'; }
 
 /* -------------------- Drawing -------------------- */
-function draw() {
-  if(!ctx || !pal) return;
-  
-  cvs.style.backgroundColor = pal.grassColor;
-  ctx.clearRect(0, 0, BASE_W, BASE_H);
-  
-  // Draw tiles
-  for(const t of tiles) {
-    if(t.m) {
-      ctx.fillStyle = pal.mowedColor; 
-      ctx.fillRect(t.x, t.y, t.w, t.h);
-    } else {
-      ctx.fillStyle = grassPattern || pal.grassColor;
-      ctx.fillRect(t.x, t.y, t.w, t.h);
+function drawTileStatic(t){
+  staticCtx.fillStyle=grassPattern;
+  staticCtx.fillRect(t.x,t.y,t.w,t.h);
+  staticCtx.fillStyle=tileShadeGrad; staticCtx.fillRect(t.x,t.y,t.w,t.h);
+}
+function buildStatic(){
+  staticCtx.clearRect(0,0,BASE_W,BASE_H);
+  for(const t of tiles){ drawTileStatic(t); }
+}
+function buildFar(){
+  farCtx.clearRect(0,0,farCvs.width,farCvs.height);
+  farCtx.fillStyle=pal.skyColor;
+  farCtx.fillRect(0,0,farCvs.width,farCvs.height);
+  const h=farCvs.height;
+  farCtx.fillStyle=pal.grassColor;
+  farCtx.beginPath();
+  farCtx.arc(farCvs.width*0.3,h-40,180,Math.PI,Math.PI*2);
+  farCtx.fill();
+  farCtx.beginPath();
+  farCtx.arc(farCvs.width*0.7,h-60,220,Math.PI,Math.PI*2);
+  farCtx.fill();
+}
+function buildMid(){
+  midCtx.clearRect(0,0,midCvs.width,midCvs.height);
+  midCtx.fillStyle='#DEB887';
+  for(let x=0;x<midCvs.width;x+=40){
+    midCtx.fillRect(x,midCvs.height-110,10,80);
+    midCtx.fillRect(x,midCvs.height-110,40,10);
+    midCtx.fillRect(x,midCvs.height-60,40,10);
+  }
+  midCtx.fillStyle='#228B22';
+  for(let x=0;x<midCvs.width;x+=60){
+    midCtx.beginPath();
+    midCtx.arc(x+30,midCvs.height-30,20,0,Math.PI*2);
+    midCtx.fill();
+  }
+}
+function draw(){
+  cvs.style.backgroundColor=pal.grassColor;
+  ctx.clearRect(0,0,BASE_W,BASE_H);
+  const fx=-BASE_W/2 - mower.x*FAR_PAR;
+  const fy=-BASE_H/2 - mower.y*FAR_PAR;
+  ctx.drawImage(farCvs,fx,fy);
+  const mx=-BASE_W/2 - mower.x*MID_PAR;
+  const my=-BASE_H/2 - mower.y*MID_PAR;
+  ctx.drawImage(midCvs,mx,my);
+  ctx.drawImage(staticCvs,0,0);
+
+  for(const t of tiles){
+    if(t.m){
+      ctx.fillStyle=pal.mowedColor; ctx.fillRect(t.x,t.y,t.w,t.h);
+      ctx.save(); ctx.translate(t.x,t.y); ctx.fillStyle=tileShadeGrad; ctx.fillRect(0,0,t.w,t.h); ctx.restore();
     }
   }
 
-  // Draw obstacles
-  for(const o of obs) {
+  for(const o of obs){
     if(!o.a) continue;
     ctx.save();
-    ctx.shadowColor = "rgba(0,0,0,0.25)";
-    ctx.shadowBlur = 6;
-    ctx.shadowOffsetY = 2;
-    
-    if(o.t === 'house') {
-      ctx.font = '60px Arial';
-      ctx.fillText('🏠', o.x, o.y + 60);
-    } else {
-      ctx.fillStyle = o.color || '#888';
-      if(o.t === 'sprinkler') {
-        ctx.translate(o.x + o.w / 2, o.y + o.h / 2); 
-        ctx.rotate(o.r || 0);
-        ctx.fillRect(-o.w / 2, -o.h / 2, o.w, o.h);
-      } else {
-        ctx.fillRect(o.x + (o.off || 0), o.y, o.w, o.h);
-      }
+    ctx.shadowColor="rgba(0,0,0,0.25)";
+    ctx.shadowBlur=6;
+    ctx.shadowOffsetY=2;
+    if(o.t==='sprinkler'){
+      ctx.translate(o.x+o.w/2,o.y+o.h/2); ctx.rotate(o.r||0);
+      ctx.font='24px serif'; ctx.textAlign='center';
+      ctx.fillText(o.emoji||'💦',-o.w/4,-o.h/4);
+    }else{
+      ctx.font='24px serif'; ctx.textAlign='center';
+      ctx.fillText(o.emoji||'🪨',o.x+o.w/2+(o.off||0),o.y+o.h/2);
     }
     ctx.restore();
   }
 
-  // Draw powerups
-  for(const p of powerUps) {
-    if(p.a) {
+  for(const p of powerUps){
+    if(p.a){
       ctx.save();
-      ctx.translate(p.x + p.w / 2, p.y + p.h / 2);
-      ctx.rotate((Date.now() / 500) % (Math.PI * 2));
-      
-      // Draw powerup icons
-      if(p.t === 'bud') {
-        ctx.font = '20px Arial';
-        ctx.fillText('🍺', -10, 6);
-      } else if(p.t === 'golf') {
-        ctx.font = '20px Arial';
-        ctx.fillText('🏌️', -10, 6);
-      } else if(p.t === 'leaf') {
-        ctx.font = '20px Arial';
-        ctx.fillText('🍃', -10, 6);
-      } else {
-        ctx.fillStyle = '#FFD700';
-        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
-      }
+      ctx.translate(p.x+p.w/2,p.y+p.h/2);
+      ctx.rotate((Date.now()/500)%(Math.PI*2));
+      ctx.font='20px serif'; ctx.textAlign='center';
+      const emoji = p.t==='bud'?'🍺':p.t==='golf'?'🚗':'🍃';
+      ctx.fillText(emoji,0,6);
       ctx.restore();
     }
   }
 
-  // Draw particles
-  for(const p of particles) {
-    const size = 3 * p.life;
-    ctx.fillStyle = `rgba(0,128,0,${p.life})`;
-    ctx.fillRect(p.x, p.y, size, size);
+  for(const p of particles){
+    const size=3*p.life;
+    ctx.fillStyle=`rgba(0,128,0,${p.life})`;
+    ctx.fillRect(p.x,p.y,size,size);
   }
 
   drawMower();
 
-  // Weather effects
-  if(weather.type === "rain") {
-    ctx.fillStyle = "rgba(0,0,255,.08)"; 
-    ctx.fillRect(0, 0, BASE_W, BASE_H);
-    for(let i = 0; i < 14; i++) { 
-      const x = (Date.now() / 10 + i * 50) % BASE_W, y = (Date.now() / 5 + i * 30) % BASE_H; 
-      ctx.fillStyle = "rgba(173,216,230,.7)"; 
-      ctx.fillRect(x, y, 2, 8);
-    }
-  } else if(weather.type === "wind") { 
-    ctx.fillStyle = "rgba(200,200,200,.08)"; 
-    ctx.fillRect(0, 0, BASE_W, BASE_H); 
-  }
+  if(weather.type==="rain"){
+    ctx.fillStyle="rgba(0,0,255,.08)"; ctx.fillRect(0,0,BASE_W,BASE_H);
+    for(let i=0;i<14;i++){ const x=(Date.now()/10+i*50)%BASE_W, y=(Date.now()/5+i*30)%BASE_H; ctx.fillStyle="rgba(173,216,230,.7)"; ctx.fillRect(x,y,2,8) }
+  }else if(weather.type==="wind"){ ctx.fillStyle="rgba(200,200,200,.08)"; ctx.fillRect(0,0,BASE_W,BASE_H); }
 }
-
-function drawMower() {
-  const m = mower;
+function drawMower(){
+  const m=mower;
   ctx.save();
-  ctx.shadowColor = "rgba(0,0,0,0.25)";
-  ctx.shadowBlur = 6;
-  ctx.shadowOffsetY = 2;
+  ctx.shadowColor="rgba(0,0,0,0.25)";
+  ctx.shadowBlur=6;
+  ctx.shadowOffsetY=2;
   const base = m.boost ? "#78BE20" : "#FF6A13";
   const dark = m.boost ? "#5FA61A" : "#C84E00";
-  ctx.fillStyle = dark; ctx.fillRect(m.x - 2, m.y - 2, m.w + 4, m.h + 4);
-  ctx.fillStyle = base; ctx.fillRect(m.x, m.y, m.w, m.h);
-  ctx.strokeStyle = "#666"; ctx.lineWidth = 2; 
-  ctx.beginPath(); ctx.moveTo(m.x + m.w / 2, m.y); ctx.lineTo(m.x + m.w / 2, m.y - 8); ctx.stroke();
-  const cx = m.x + m.w / 2, cy = m.y - 15;
-  ctx.fillStyle = "#FFDBAC"; ctx.beginPath(); ctx.arc(cx, cy, 4, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = "#0066CC"; ctx.fillRect(cx - 5, cy - 8, 10, 4);
-  ctx.strokeStyle = "#4169E1"; ctx.lineWidth = 2; 
-  ctx.beginPath(); ctx.moveTo(cx, cy + 4); ctx.lineTo(cx, cy + 12); ctx.stroke(); 
-  ctx.beginPath(); ctx.moveTo(cx - 3, cy + 6); ctx.lineTo(cx + 3, cy + 6); ctx.stroke();
-  ctx.fillStyle = "#333"; 
-  ctx.beginPath(); ctx.arc(m.x + 3, m.y + m.h, 3, 0, Math.PI * 2); ctx.fill(); 
-  ctx.beginPath(); ctx.arc(m.x + m.w - 3, m.y + m.h, 3, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle=dark; ctx.fillRect(m.x-2,m.y-2,m.w+4,m.h+4);
+  ctx.fillStyle=base; ctx.fillRect(m.x,m.y,m.w,m.h);
+  ctx.strokeStyle="#666"; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(m.x+m.w/2,m.y); ctx.lineTo(m.x+m.w/2,m.y-8); ctx.stroke();
+  const cx=m.x+m.w/2, cy=m.y-15;
+  ctx.fillStyle="#FFDBAC"; ctx.beginPath(); ctx.arc(cx,cy,4,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle="#0066CC"; ctx.fillRect(cx-5,cy-8,10,4);
+  ctx.strokeStyle="#4169E1"; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(cx,cy+4); ctx.lineTo(cx,cy+12); ctx.stroke(); ctx.beginPath(); ctx.moveTo(cx-3,cy+6); ctx.lineTo(cx+3,cy+6); ctx.stroke();
+  ctx.fillStyle="#333"; ctx.beginPath(); ctx.arc(m.x+3,m.y+m.h,3,0,Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(m.x+m.w-3,m.y+m.h,3,0,Math.PI*2); ctx.fill();
   ctx.restore();
-  if(m.boost) { 
-    ctx.strokeStyle = "#2E7D32"; ctx.lineWidth = 3; 
-    ctx.strokeRect(m.x - 5, m.y - 20, m.w + 10, m.h + 25); 
-  }
-  if(m.inv) { 
-    ctx.strokeStyle = "#FFD700"; ctx.lineWidth = 2; ctx.setLineDash([5, 5]); 
-    ctx.strokeRect(m.x - 3, m.y - 18, m.w + 6, m.h + 23); ctx.setLineDash([]); 
-  }
+  if(m.boost){ ctx.strokeStyle="#2E7D32"; ctx.lineWidth=3; ctx.strokeRect(m.x-5,m.y-20,m.w+10,m.h+25); }
+  if(m.inv){ ctx.strokeStyle="#FFD700"; ctx.lineWidth=2; ctx.setLineDash([5,5]); ctx.strokeRect(m.x-3,m.y-18,m.w+6,m.h+23); ctx.setLineDash([]); }
 }
 
 /* -------------------- Power ups -------------------- */
-function power(t) {
-  if(t === 'bud') {
-    counts.bud++; mower.spd = Math.min(220, mower.spd * 1.5); mower.boost = true; score += 100;
+function power(t){
+  if(t==='bud'){
+    counts.bud++; mower.spd=Math.min(220,mower.spd*1.5); mower.boost=true; score+=100;
     setComment("Bud boost activated. Hydration and horsepower.");
     showToast("Budweiser booster activated");
-    beep(880, 0.05, 0.15); vibr(30);
+    beep(880,.05,.15); vibr(30);
     clearTimeout(budBoostTimeout);
-    budBoostTimeout = setTimeout(() => {
-      mower.spd = Math.max(120, mower.spd / 1.5); 
-      mower.boost = false; 
-      budBoostTimeout = null;
-    }, 5000);
-  } else if(t === 'golf') {
-    counts.golf++; score += 500; mower.inv = true; 
-    setComment("Golf cart mode. You are untouchable and oddly stylish."); 
-    chime(); vibr(40);
+    budBoostTimeout=setTimeout(()=>{mower.spd=Math.max(120,mower.spd/1.5); mower.boost=false; budBoostTimeout=null;},5000);
+  }else if(t==='golf'){
+    counts.golf++; score+=500; mower.inv=true; setComment("Golf cart mode. You are untouchable and oddly stylish."); chime(); vibr(40);
     clearTimeout(golfInvTimeout);
-    golfInvTimeout = setTimeout(() => {
-      mower.inv = false; 
-      golfInvTimeout = null;
-    }, 3200);
-  } else if(t === 'leaf') {
-    counts.leaf++; score += 200; 
-    obs = obs.filter(o => o.t !== 'rock'); 
-    setComment("Leaf blower engaged. Rocks cleared. Neighbors impressed."); 
-    beep(520, 0.05, 0.12); vibr(20);
+    golfInvTimeout=setTimeout(()=>{mower.inv=false; golfInvTimeout=null;},3200);
+  }else if(t==='leaf'){
+    counts.leaf++; score+=200; obs=obs.filter(o=>o.t!=='rock'); setComment("Leaf blower engaged. Rocks cleared. Neighbors impressed."); beep(520,.05,.12); vibr(20);
   }
   renderCounts();
 }
-
-function renderCounts() {
-  const cBud = document.getElementById('c-bud');
-  const cGolf = document.getElementById('c-golf');
-  const cLeaf = document.getElementById('c-leaf');
-  if(cBud && cBud.nextElementSibling) cBud.nextElementSibling.textContent = counts.bud;
-  if(cGolf && cGolf.nextElementSibling) cGolf.nextElementSibling.textContent = counts.golf;
-  if(cLeaf && cLeaf.nextElementSibling) cLeaf.nextElementSibling.textContent = counts.leaf;
+function renderCounts(){
+  budCount.textContent=counts.bud;
+  golfCount.textContent=counts.golf;
+  leafCount.textContent=counts.leaf;
 }
 
 /* -------------------- Commentary -------------------- */
-let comT = null;
-function setComment(t) {
-  const comment = document.getElementById('comment');
-  if(!comment) return;
-  clearTimeout(comT); 
-  comment.textContent = t;
-  comT = setTimeout(() => { 
-    comment.textContent = rc([
-      "Keep mowing. Barefoot traction is elite.",
-      "Ville wants his EGO back by 5. No pressure.",
-      "Edges so sharp they cut gossip.",
-      "Grab those power ups. The HOA senses weakness.",
-      "Perfect stripes. Golf cart parade later.",
-      "Talk less about electric. Mow more with it."
-    ]); 
-  }, 3000);
+let comT=null;
+function setComment(t){
+  clearTimeout(comT); comment.textContent=t;
+  comT=setTimeout(()=>{ comment.textContent=rc([
+    "Keep mowing. Barefoot traction is elite.",
+    "Ville wants his EGO back by 5. No pressure.",
+    "Edges so sharp they cut gossip.",
+    "Grab those power ups. The HOA senses weakness.",
+    "Perfect stripes. Golf cart parade later.",
+    "Talk less about electric. Mow more with it."
+  ]); },3000);
 }
+  /* -------------------- Intros & Congrats -------------------- */
+const ovIntro=document.getElementById('ovIntro');
+const introTitle=document.getElementById('introTitle');
+const introBody=document.getElementById('introBody');
+const introDesc=document.getElementById('introDesc');
 
-/* -------------------- Intros & Congrats -------------------- */
-function handleStartLevelClick() {
-  if(!introShown) {
-    const ovIntro = document.getElementById('ovIntro');
-    const introTitle = document.getElementById('introTitle');
-    const introBody = document.getElementById('introBody');
-    const introDesc = document.getElementById('introDesc');
-    
-    if(introTitle) introTitle.textContent = `Level ${lvl}: ${L(lvl).n}`;
-    if(introDesc) introDesc.textContent = L(lvl).d;
-    if(introBody) {
-      const jokes = introsByLevel[Math.min(lvl - 1, introsByLevel.length - 1)];
-      introBody.textContent = rc(jokes);
-    }
+function handleStartLevelClick(){
+  if(!introShown){
+    introTitle.textContent=`Level ${lvl}: ${L(lvl).n}`;
+    introDesc.textContent=L(lvl).d;
+    const jokes = introsByLevel[Math.min(lvl-1,introsByLevel.length-1)];
+    introBody.textContent = rc(jokes);
     showOverlay(ovIntro);
-    introShown = true;
+    introShown=true;
     setTimeout(startLevelRun, 1000);
     return;
   }
   startLevelRun();
 }
-
-function startLevelRun() {
+function startLevelRun(){
   if(running) return;
-  const ovIntro = document.getElementById('ovIntro');
-  const ovPause = document.getElementById('ovPause');
   hideOverlay(ovIntro);
-  running = true; paused = false; hideOverlay(ovPause);
-  lvlStart = total; 
-  
-  const startLevelBtn = document.getElementById('startLevelBtn');
-  const pauseBtn = document.getElementById('pauseBtn');
-  if(startLevelBtn) {
-    startLevelBtn.textContent = 'Level in Progress'; 
-    startLevelBtn.disabled = true;
-  }
-  if(pauseBtn) pauseBtn.disabled = false;
-  
-  last = performance.now(); 
-  requestAnimationFrame(frame);
+  running=true; paused=false; hideOverlay(ovPause);
+  lvlStart=total; startLevelBtn.textContent='Level in Progress'; startLevelBtn.disabled=true; pauseBtn.disabled=false;
+  last=performance.now(); requestAnimationFrame(frame);
 }
-
-function genCongrats(player, level) {
-  const pool = congratsByLevel[Math.min(level - 1, congratsByLevel.length - 1)];
+function genCongrats(player,level){
+  const pool=congratsByLevel[Math.min(level-1,congratsByLevel.length-1)];
   return rc(pool).replace('{n}', player);
 }
 
 /* -------------------- Level Flow -------------------- */
-function startGame() {
+async function startGame(){
   if(running) return;
-  const playerName = document.getElementById('playerName');
-  const entered = (playerName.value || "").trim();
-  if(!entered) {
+  const entered=(playerName.value||"").trim();
+  if(!entered){
     showToast('Please enter your name.');
-    if(playerName) playerName.focus();
+    playerName.focus();
     return;
   }
-  
-  name = entered; 
-  try { localStorage.setItem('clmc_name', name); } catch(e) {}
-  score = 0; total = 0; lvl = 1; counts.bud = counts.golf = counts.leaf = 0; 
-  renderCounts();
-  
-  const landing = document.getElementById('landing');
-  const game = document.getElementById('game');
-  const hudName = document.getElementById('hudName');
-  const hudBest = document.getElementById('hudBest');
-  
-  if(landing) landing.style.display = 'none'; 
-  if(game) game.style.display =
+  name=entered; localStorage.setItem('clmc_name',name);
+  score=0; total=0; lvl=1; counts.bud=counts.golf=counts.leaf=0; renderCounts();
+  landing.style.display='none'; game.style.display='block';
+  hudName.textContent=name; hudBest.textContent=localStorage.getItem('clmc_best')||0;
+  setup(lvl); ui(); handleStartLevelClick(); setComment("Welcome to Cainhoy. Let's mow!");
+}
+
+function levelComplete(){
+  running=false; cancelAnimationFrame(loop); clearBudTimer();
+  const lt=total-lvlStart, bonus=Math.round(Math.max(0,(limit-lt)*50)); score=Math.round((score+bonus)/10)*10;
+  ovTime.textContent=fmt(lt); ovScore.textContent=score; ovBonus.textContent=bonus;
+  document.getElementById('ovCongrats').textContent = genCongrats(name,lvl);
+  showOverlay(ovComplete);
+  chime(); vibr(60); record({n:name,s:score,t:total,l:lvl,ts:Date.now()}); previewLB();
+  shareShot.style.display='inline-block';
+}
+function next(){
+  hideOverlay(ovComplete); lvl++; if(lvl>12) finale(); else { setup(lvl); ui(); }
+}
+function gameOver(reason='time'){
+  running=false; cancelAnimationFrame(loop); clearBudTimer();
+  if(reason==='obstacle'){
+    ovGameOverTitle.textContent='Crash! 💥';
+    ovReason.textContent='You hit an obstacle on';
+    ovGameOver.classList.add('crash');
+  }else{
+    ovGameOverTitle.textContent="Time's Up! ⏰";
+    ovReason.textContent='You ran out of time on';
+    ovGameOver.classList.remove('crash');
+  }
+  ovFailed.textContent=lvl; ovFinalScore.textContent=score; showOverlay(ovGameOver);
+  thud(); vibr(80); record({n:name,s:score,t:total,l:lvl,ts:Date.now()}); previewLB();
+}
+function finale(){
+  clearBudTimer();
+  ovWinner.textContent=name; ovTotal.textContent=fmt(total); ovChamp.textContent=score; showOverlay(ovFinalOverlay);
+  const best=Math.max(score, parseInt(localStorage.getItem('clmc_best')||'0',10)); localStorage.setItem('clmc_best',best);
+  chime(); setTimeout(chime,100); record({n:name,s:score,t:total,l:lvl,ts:Date.now()}); previewLB();
+}
+function again(){
+  [ovGameOver,ovFinalOverlay,ovComplete,ovLB,ovPause,ovChallenge,ovIntro].forEach(hideOverlay);
+  running=false; paused=false; cancelAnimationFrame(loop); clearBudTimer();
+  game.style.display='none'; landing.style.display='flex';
+  counts.bud=counts.golf=counts.leaf=0; renderCounts();
+}
+
+/* -------------------- UI -------------------- */
+function ui(){
+  hudLevel.textContent=lvl; hudScore.textContent=score; hudName.textContent=name;
+  timer.textContent=fmt(total); levelTimer.textContent=fmt(total-lvlStart);
+}
+function togglePause(){
+  if(!running) return;
+  paused=!paused; pauseBtn.textContent=paused?'Resume':'Pause';
+  paused?showOverlay(ovPause):hideOverlay(ovPause);
+  if(!paused){ last=performance.now(); requestAnimationFrame(frame); }
+}
+
+/* -------------------- Social & Share -------------------- */
+function challenge(){
+  const msg=`I scored ${score} on level ${lvl} in Charlie's Lawn Mowing Adventure game. Barefoot, Bud powered, EGO borrowed. Play the game and beat me: ${location.href}`;
+  chText.value=msg; showOverlay(ovChallenge);
+}
+async function copyCh(){ try{ await navigator.clipboard.writeText(chText.value); alert('Copied'); }catch{ alert('Copy failed, select and copy'); } }
+function shareGame(){ if(navigator.share){ navigator.share({title:"Charlie's Lawn Mowing Adventure – The Game",text:"Play this hilarious lawn mowing game",url:location.href}); }else alert("Share this game link: "+location.href); }
+async function shareShotImg(){
+  try{
+    const W=BASE_W,H=BASE_H,B=56, out=document.createElement('canvas'); out.width=W; out.height=H+B; const c=out.getContext('2d');
+    c.fillStyle='#fff'; c.fillRect(0,0,W,B); c.fillStyle='#0C2340'; c.font='bold 16px Segoe UI, Arial'; c.fillText("🚜 Charlie's Lawn Mowing Adventure – The Game",12,22);
+    c.font='12px Segoe UI, Arial'; c.fillText(`Player: ${name} • Level: ${lvl}/12 • Score: ${score} • Time: ${fmt(total)}`,12,42);
+    c.drawImage(cvs,0,B,BASE_W,BASE_H);
+    c.fillStyle='rgba(0,0,0,.08)'; c.fillRect(0,out.height-22,W,22); c.fillStyle='#333'; c.font='11px Segoe UI, Arial'; c.fillText('🏆 Cainhoy Champions - Play the game and beat my run!',12,out.height-8);
+    const blob=await new Promise(r=>out.toBlob(r,'image/png',.95)); const file=new File([blob],'charlies-championship.png',{type:'image/png'});
+    if(navigator.canShare?.({files:[file]})){ await navigator.share({title:"Charlie's Lawn Mowing Adventure – The Game screenshot",text:`My score in the game: ${score} — play the game!`,files:[file]}); }
+    else{ const url=URL.createObjectURL(blob); dl.href=url; dl.click(); setTimeout(()=>URL.revokeObjectURL(url),1500); alert('Screenshot saved'); }
+  }catch(e){ console.error(e); alert('Screenshot failed'); }
+}
+function shareChamp(){ if(navigator.share){ navigator.share({title:"I am a Lawn Mowing Champion!",text:`Completed the game with ${score} points — play the game!`,url:location.href}); } else alert(`I completed the lawn mowing game with ${score} points. Play the game: ${location.href}`); }
+
+/* -------------------- Leaderboard (local) -------------------- */
+const KEY='clmc_runs_v1';
+const loadRuns=()=>{ try{ return JSON.parse(localStorage.getItem(KEY)||'[]'); }catch{ return []; } };
+const saveRuns=a=>localStorage.setItem(KEY,JSON.stringify(a.slice(0,200)));
+function record(run){ const a=loadRuns(); a.unshift(run); a.sort((x,y)=>y.s-x.s || x.t-y.t); saveRuns(a); }
+function previewLB(){
+  const a=loadRuns(); leaderboardPreview.innerHTML = a.length? a.slice(0,3).map((r,i)=>`${i+1}. ${escapeHTML(r.n)} — ${r.s} pts — ${fmt(r.t)}`).join('<br/>') : "Be the first champion! 🌱";
+}
+function week(ts){
+  const d=new Date(ts), now=new Date();
+  const day=now.getDay();
+  const monday=new Date(now.getFullYear(),now.getMonth(),now.getDate()-((day+6)%7));
+  const next=new Date(monday);
+  next.setDate(monday.getDate()+7);
+  return d>=monday && d<next;
+}
+function showOverlay(el){
+  el.style.display='block';
+  el.classList.remove('hide');
+  void el.offsetWidth;
+  el.classList.add('show');
+}
+function hideOverlay(el){
+  el.classList.remove('show');
+  el.classList.add('hide');
+  setTimeout(()=>{ el.style.display='none'; el.classList.remove('hide'); },200);
+}
+function showLB(filter='all'){
+  const all=loadRuns(); let list=[];
+  if(filter==='all') list=all; else if(filter==='week') list=all.filter(r=>week(r.ts)); else if(filter==='you') list=all.filter(r=>r.n===name);
+  lbList.innerHTML = list.length? list.slice(0,30).map((r,i)=>`${i+1}. ${escapeHTML(r.n)} - ${r.s} pts - ${fmt(r.t)}`).join('<br/>') : "No entries yet.";
+  showOverlay(ovLB);
+}
+const escapeHTML = s =>
+  s.replace(/[&<>"']/g, m => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }[m]));
+
+/* -------------------- DOM refs -------------------- */
+const landing=document.getElementById('landing');
+const game=document.getElementById('game');
+const playerName=document.getElementById('playerName');
+const startForm=document.getElementById('startForm');
+const startGameBtn=document.getElementById('startGameBtn');
+const startLevelBtn=document.getElementById('startLevelBtn');
+const pauseBtn=document.getElementById('pauseBtn');
+const shareShot=document.getElementById('shareShot');
+const budCount=document.getElementById('budCount'), golfCount=document.getElementById('golfCount'), leafCount=document.getElementById('leafCount');
+const comment=document.getElementById('comment');
+const levelName=document.getElementById('levelName'), levelDesc=document.getElementById('levelDesc');
+const hudName=document.getElementById('hudName'), hudLevel=document.getElementById('hudLevel'), hudScore=document.getElementById('hudScore'), hudBest=document.getElementById('hudBest');
+const timer=document.getElementById('timer'), levelTimer=document.getElementById('levelTimer'), weatherEl=document.getElementById('weather'), countdown=document.getElementById('countdown');
+const bar=document.getElementById('bar'); const dl=document.getElementById('dl');
+const ovComplete=document.getElementById('ovComplete'), ovGameOver=document.getElementById('ovGameOver'), ovFinalOverlay=document.getElementById('ovFinalOverlay'), ovLB=document.getElementById('ovLB'), ovPause=document.getElementById('ovPause'), ovChallenge=document.getElementById('ovChallenge');
+const ovTime=document.getElementById('ovTime'), ovScore=document.getElementById('ovScore'), ovBonus=document.getElementById('ovBonus'); const ovGameOverTitle=document.getElementById('ovGameOverTitle'); const ovReason=document.getElementById('ovReason'); const ovFailed=document.getElementById('ovFailed'); const ovFinalScore=document.getElementById('ovFinalScore');
+const nextLevelBtn=document.getElementById('nextLevel'), shareLevel=document.getElementById('shareLevel'), restart=document.getElementById('restart'), showLBbtn=document.getElementById('showLB');
+const againBtn=document.getElementById('again'), goLB=document.getElementById('goLB'); const resumeBtn=document.getElementById('resume');
+const fAll=document.getElementById('fAll'), fWeek=document.getElementById('fWeek'), fYou=document.getElementById('fYou'); const lbList=document.getElementById('lbList'); const lbBack=document.getElementById('lbBack');
+const leaderboardPreview=document.getElementById('leaderboardPreview');
+const challengeBtn=document.getElementById('challengeBtn'), shareGameBtn=document.getElementById('shareGameBtn'); const chText=document.getElementById('chText'), copyChBtn=document.getElementById('copyCh'), closeCh=document.getElementById('closeCh');
+const soundBtn=document.getElementById('soundBtn'), musicBtn=document.getElementById('musicBtn');
+const introGo=document.getElementById('introGo');
+const ovWinner=document.getElementById('ovWinner'), ovTotal=document.getElementById('ovTotal'), ovChamp=document.getElementById('ovChamp');
+
+/* -------------------- Bindings -------------------- */
+function bind(){
+  if(startForm) startForm.addEventListener('submit', e => { e.preventDefault(); startGame(); });
+  if(startLevelBtn) startLevelBtn.addEventListener('click',e=>{ e.preventDefault(); handleStartLevelClick(); });
+  if(introGo) introGo.addEventListener('click',startLevelRun);
+  if(pauseBtn) pauseBtn.addEventListener('click',togglePause);
+  if(resumeBtn) resumeBtn.addEventListener('click',togglePause);
+  if(shareShot) shareShot.addEventListener('click',shareShotImg);
+  if(nextLevelBtn) nextLevelBtn.addEventListener('click',next);
+  if(shareLevel) shareLevel.addEventListener('click',shareShotImg);
+  if(restart) restart.addEventListener('click',again);
+  if(showLBbtn) showLBbtn.addEventListener('click',()=>{ hideOverlay(ovGameOver); showLB('all'); });
+  if(againBtn) againBtn.addEventListener('click',again);
+  if(goLB) goLB.addEventListener('click',()=>showLB('all'));
+  if(fAll) fAll.addEventListener('click',()=>{ setF(fAll); showLB('all'); });
+  if(fWeek) fWeek.addEventListener('click',()=>{ setF(fWeek); showLB('week'); });
+  if(fYou) fYou.addEventListener('click',()=>{ setF(fYou); showLB('you'); });
+  if(lbBack) lbBack.addEventListener('click',()=>hideOverlay(ovLB));
+  if(challengeBtn) challengeBtn.addEventListener('click',challenge);
+  if(shareGameBtn) shareGameBtn.addEventListener('click',shareGame);
+  if(copyChBtn) copyChBtn.addEventListener('click',copyCh);
+  if(closeCh) closeCh.addEventListener('click',()=>hideOverlay(ovChallenge));
+  if(soundBtn) soundBtn.addEventListener('click',()=>{ snd=!snd; soundBtn.textContent=snd?'🔊':'🔇'; soundBtn.setAttribute('aria-pressed',String(snd)); });
+  if(musicBtn) musicBtn.addEventListener('click',()=>{ music=!music; musicBtn.textContent=music?'🎵':'🔇'; musicBtn.setAttribute('aria-pressed',String(music)); });
+  const shareChampBtn = document.getElementById('shareChamp');
+  if(shareChampBtn) shareChampBtn.addEventListener('click',shareChamp);
+}
+function setF(active){ [fAll,fWeek,fYou].forEach(b=>b.classList.remove('active')); active.classList.add('active'); }
+
+/* -------------------- Safe Init -------------------- */
+function init(){
+  const last=localStorage.getItem('clmc_name'); if(last) playerName.value=last;
+  hudBest.textContent = localStorage.getItem('clmc_best')||0;
+  previewLB();
+  setup(1);
+  fitCanvas();
+  draw();
+  setComment("Press P or Space to pause. Use keys, D-pad, or drag your thumb on the grass.");
+}
+
+/* Run after DOM is ready */
+(function () {
+  function ready(fn){ if (document.readyState !== 'loading') fn(); else document.addEventListener('DOMContentLoaded', fn); }
+  ready(() => {
+    try {
+      bind();
+      init();
+      document.body.focus();
+    } catch (err) { console.error('Init error:', err); }
+  });
+})();
+</script>
+</body>
+</html>
