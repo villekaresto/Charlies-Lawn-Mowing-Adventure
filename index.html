@@ -632,6 +632,15 @@ function checkTiles() {
   for(const t of tiles) {
     if(!t.m && hit(mower, t)) {
       t.m = true;
+      // Spawn light-green clipping particle when a tile is mowed
+      particles.push({
+        x: t.x + t.w/2,
+        y: t.y + t.h/2,
+        dx: (Math.random() - 0.5) * 20,
+        dy: (Math.random() - 0.5) * 20,
+        life: 1,
+        color: '0,128,0'
+      });
       gameState.score += 10;
       if((t.x + t.y) % 40 === 0) beep(520, .02, .08);
     }
@@ -669,7 +678,8 @@ function updateParticles(dt) {
         y: mower.y + mower.h/2,
         dx: (Math.random() - 0.5) * 20,
         dy: (Math.random() - 0.5) * 20,
-        life: 1
+        life: 1,
+        color: '160,160,160'
       });
     }
   }
@@ -923,7 +933,7 @@ function draw() {
   
   // Draw particles
   for(const p of particles) {
-    ctx.fillStyle = `rgba(0,128,0,${p.life})`;
+    ctx.fillStyle = `rgba(${p.color},${p.life})`;
     const size = 3 * p.life;
     ctx.fillRect(p.x, p.y, size, size);
   }
