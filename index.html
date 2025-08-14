@@ -377,11 +377,11 @@ function resetInputState() {
 
 /* -------------------- Input Handling -------------------- */
 document.addEventListener('keydown', e => {
-  const k = e.key.toLowerCase();
-  if(['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d',' ','p'].includes(k)) {
+  const k = e.key;
+  if(['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d',' ','p'].includes(k.toLowerCase())) {
     e.preventDefault();
-    keys[k] = true;
-    if((k === 'p' || k === ' ') && gameState.running) togglePause();
+    keys[k.toLowerCase()] = true;
+    if((k.toLowerCase() === 'p' || k === ' ') && gameState.running) togglePause();
   }
 });
 
