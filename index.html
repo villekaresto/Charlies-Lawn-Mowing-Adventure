@@ -712,7 +712,7 @@ function setup(level) {
   pal = lvlData.palette;
   
   // Add house
-  obs.push({t:'house',a:true,x:260,y:20,w:110,h:90});
+  obs.push({t:'house',a:true,rotation:0,x:260,y:20,w:110,h:90});
   
   // Create tiles
   const ts = 20;
@@ -729,24 +729,35 @@ function setup(level) {
   
   // Add obstacles
   const obstacleTypes = ['rock','tree','sprinkler','gnome','flamingo','grill','chair'];
+  const obstacleSpecs = {
+    rock:{w:26,h:26},
+    tree:{w:32,h:40},
+    sprinkler:{w:24,h:24},
+    gnome:{w:24,h:32},
+    flamingo:{w:28,h:40},
+    grill:{w:36,h:30},
+    chair:{w:28,h:28}
+  };
   const numObs = 4 + Math.min(level, 4);
-  
+
   for(let i = 0; i < numObs; i++) {
     const type = rc(obstacleTypes);
     for(let tries = 0; tries < 20; tries++) {
+      const spec = obstacleSpecs[type];
       const o = {
         t: type,
         a: true,
-        x: ri(40, BASE_W - 60),
-        y: ri(50, BASE_H - 60),
-        w: 26,
-        h: 26
+        rotation: Math.random() * Math.PI * 2,
+        x: ri(40, BASE_W - 40 - spec.w),
+        y: ri(50, BASE_H - 50 - spec.h),
+        w: spec.w,
+        h: spec.h
       };
-      
-      const safe = !hit(o, {x:0,y:0,w:100,h:100}) && 
+
+      const safe = !hit(o, {x:0,y:0,w:100,h:100}) &&
                    !hit(o, {x:260,y:20,w:110,h:90}) &&
                    !obs.some(existing => hit(o, existing));
-      
+
       if(safe) {
         obs.push(o);
         tiles = tiles.filter(t => !hit(t, o));
@@ -787,20 +798,32 @@ function setup(level) {
 }
 
 /* -------------------- Sprites -------------------- */
-const spriteSvgs = {
-  house: `<svg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'><path d='M8 28 L32 8 L56 28 Z' fill='#b5651d'/><rect x='14' y='28' width='36' height='28' rx='3' fill='#d9d9d9' stroke='#555'/><rect x='28' y='40' width='10' height='16' fill='#9ecae1'/></svg>`,
-  rock: `<svg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'><ellipse cx='32' cy='40' rx='22' ry='14' fill='#777'/><ellipse cx='28' cy='34' rx='10' ry='6' fill='#888'/></svg>`,
-  tree: `<svg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'><rect x='28' y='34' width='8' height='18' fill='#8b5a2b'/><circle cx='32' cy='28' r='18' fill='#2e7d32'/></svg>`,
-  sprinkler: `<svg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'><rect x='28' y='44' width='8' height='8' fill='#444'/><path d='M16 40 Q32 24 48 40' stroke='#4fc3f7' stroke-width='4' fill='none'/></svg>`,
-  gnome: `<svg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'><path d='M32 8 L44 24 H20 Z' fill='#e53935'/><circle cx='32' cy='30' r='8' fill='#ffe0b2'/><rect x='20' y='38' width='24' height='16' fill='#1976d2'/></svg>`,
-  flamingo: `<svg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'><circle cx='24' cy='28' r='10' fill='#ff6ea2'/><rect x='22' y='38' width='4' height='16' fill='#ff6ea2'/><rect x='34' y='24' width='16' height='8' rx='4' fill='#ff6ea2'/></svg>`,
-  grill: `<svg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'><ellipse cx='32' cy='28' rx='18' ry='12' fill='#222'/><rect x='14' y='28' width='36' height='6' fill='#333'/><rect x='30' y='34' width='4' height='16' fill='#222'/></svg>`,
-  chair: `<svg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'><rect x='18' y='22' width='28' height='8' fill='#90caf9'/><rect x='18' y='30' width='28' height='12' fill='#e3f2fd'/><rect x='20' y='42' width='4' height='12' fill='#90caf9'/><rect x='42' y='42' width='4' height='12' fill='#90caf9'/></svg>`
+const spritePaths = {
+  house:'assets/obstacles/shed.svg',
+  rock:'assets/obstacles/rock.svg',
+  tree:'assets/obstacles/tree.svg',
+  sprinkler:'assets/obstacles/sprinkler.svg',
+  gnome:'assets/obstacles/gnome.svg',
+  flamingo:'assets/obstacles/flamingo.svg',
+  grill:'assets/obstacles/grill.svg',
+  chair:'assets/obstacles/chair.svg'
 };
 const sprites = {};
-function makeImage(svg){ const img = new Image(); img.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(svg); return img; }
-function buildSprites(){ for(const [k,svg] of Object.entries(spriteSvgs)){ sprites[k] = makeImage(svg); } }
-function drawSprite(type,x,y,w,h){ const img = sprites[type]; if(img && img.complete){ ctx.drawImage(img,x,y,w,h); return true; } return false; }
+function buildSprites(){
+  for(const [k,path] of Object.entries(spritePaths)){
+    const img = new Image();
+    img.src = path;
+    sprites[k] = img;
+  }
+}
+function drawSprite(type,x,y,w,h){
+  const img = sprites[type];
+  if(img && img.complete){
+    ctx.drawImage(img,x,y,w,h);
+    return true;
+  }
+  return false;
+}
 
 /* -------------------- Drawing -------------------- */
 function draw() {
@@ -823,17 +846,21 @@ function draw() {
   // Draw obstacles
   for(const o of obs) {
     if(!o.a) continue;
-    const drew = drawSprite(o.t, o.x, o.y, o.w, o.h);
+    ctx.save();
+    ctx.translate(o.x + o.w/2, o.y + o.h/2);
+    ctx.rotate(o.rotation || 0);
+    const drew = drawSprite(o.t, -o.w/2, -o.h/2, o.w, o.h);
     if(!drew){
       ctx.fillStyle = '#666';
-      ctx.fillRect(o.x, o.y, o.w, o.h);
+      ctx.fillRect(-o.w/2, -o.h/2, o.w, o.h);
       ctx.fillStyle = '#fff';
       ctx.font = '12px Arial';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       const labels = { house:'H', rock:'R', tree:'T', sprinkler:'S', gnome:'G', flamingo:'F', grill:'B', chair:'C' };
-      ctx.fillText(labels[o.t] || '?', o.x + o.w/2, o.y + o.h/2);
+      ctx.fillText(labels[o.t] || '?', 0, 0);
     }
+    ctx.restore();
   }
   
   // Draw power-ups
