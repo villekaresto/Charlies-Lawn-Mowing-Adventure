@@ -707,29 +707,25 @@ function checkTiles() {
   for(const t of tiles) {
     if(!t.m && hit(mower, t)) {
       t.m = true;
-      // Spawn light-green clipping particle when a tile is mowed
-      particles.push({
-        x: t.x + t.w/2,
-        y: t.y + t.h/2,
-        dx: (Math.random() - 0.5) * 20,
-        dy: (Math.random() - 0.5) * 20,
-        life: 1,
-        color: '0,128,0'
-      });
-      gameState.score += 10;
-      if((t.x + t.y) % 40 === 0) beep(520, .02, .08);
-
+      // Spawn grass clipping particles when a tile is mowed
       const cx = t.x + t.w / 2;
       const cy = t.y + t.h / 2;
-      for(let i = 0; i < 5; i++) {
+      for(let i = 0; i < 6; i++) {
+        const rgb = hexToRgb(adjustColor(pal.grassColor, (Math.random() - 0.5) * 0.2));
         particles.push({
           x: cx,
           y: cy,
           dx: (Math.random() - 0.5) * 20,
           dy: (Math.random() - 0.5) * 20,
-          life: 1
+          life: 1,
+          color: `${rgb.r},${rgb.g},${rgb.b}`,
+          rot: Math.random() * Math.PI * 2,
+          rotVel: (Math.random() - 0.5) * 2,
+          type: Math.random() < 0.3 ? 'leaf' : 'rect'
         });
       }
+      gameState.score += 10;
+      if((t.x + t.y) % 40 === 0) beep(520, .02, .08);
     }
   }
 }
@@ -775,7 +771,9 @@ function updateParticles(dt) {
     const p = particles[i];
     p.x += p.dx * dt;
     p.y += p.dy * dt;
-    p.life -= dt * 2;
+    p.dy += 10 * dt;
+    if(p.rotVel) p.rot = (p.rot || 0) + p.rotVel * dt;
+    p.life -= dt;
     if(p.life <= 0) particles.splice(i, 1);
   }
   
@@ -1020,9 +1018,21 @@ function draw() {
   
   // Draw particles
   for(const p of particles) {
-    ctx.fillStyle = `rgba(${p.color},${p.life})`;
     const size = 3 * p.life;
-    ctx.fillRect(p.x, p.y, size, size);
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    if(p.rot) ctx.rotate(p.rot);
+    ctx.globalAlpha = p.life;
+    if(p.type === 'leaf') {
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = `${size * 3}px serif`;
+      ctx.fillText('🍃', 0, 0);
+    } else {
+      ctx.fillStyle = `rgb(${p.color})`;
+      ctx.fillRect(-size/2, -size/4, size, size/2);
+    }
+    ctx.restore();
   }
   
   // Draw mower
