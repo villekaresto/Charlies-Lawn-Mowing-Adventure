@@ -429,22 +429,26 @@ padButtons.forEach(({id,key}) => {
     btn.classList.remove('active');
   };
   
-  btn.addEventListener('touchstart', e => {
+  const onPointerDown = e => {
+    if(e.pointerType === 'mouse' && e.button !== 0) return;
     e.preventDefault();
     activate();
+  };
+
+  const onPointerUp = () => deactivate();
+
+  btn.addEventListener('pointerdown', onPointerDown);
+  btn.addEventListener('pointermove', e => {
+    if(!e.isPrimary) return;
+    // Prevent scrolling when dragging on touch devices
+    if(e.pointerType !== 'mouse') e.preventDefault();
   });
-  
-  btn.addEventListener('mousedown', e => {
-    e.preventDefault();
-    activate();
-  });
-  
-  ['touchend','touchcancel','mouseup','mouseleave'].forEach(event => {
-    btn.addEventListener(event, deactivate);
+  ['pointerup','pointercancel','pointerleave','pointerout'].forEach(event => {
+    btn.addEventListener(event, onPointerUp);
   });
 });
 
-// Canvas touch/mouse controls
+// Canvas touch/mouse/stylus controls
 const DEAD_ZONE = 20;
 
 function handleCanvasInput(clientX, clientY, isStart) {
@@ -465,40 +469,22 @@ function handleCanvasInput(clientX, clientY, isStart) {
   }
 }
 
-cvs.addEventListener('touchstart', e => {
-  e.preventDefault();
-  const touch = e.touches[0];
-  handleCanvasInput(touch.clientX, touch.clientY, true);
-});
-
-cvs.addEventListener('touchmove', e => {
-  e.preventDefault();
-  if(inputState.active && e.touches[0]) {
-    handleCanvasInput(e.touches[0].clientX, e.touches[0].clientY, false);
-  }
-});
-
-['touchend','touchcancel'].forEach(event => {
-  cvs.addEventListener(event, e => {
-    e.preventDefault();
-    inputState.active = false;
-    keys.arrowup = keys.arrowdown = keys.arrowleft = keys.arrowright = false;
-  });
-});
-
-cvs.addEventListener('mousedown', e => {
+cvs.addEventListener('pointerdown', e => {
+  if(e.pointerType === 'mouse' && e.button !== 0) return;
   e.preventDefault();
   handleCanvasInput(e.clientX, e.clientY, true);
 });
 
-cvs.addEventListener('mousemove', e => {
-  if(inputState.active) {
-    handleCanvasInput(e.clientX, e.clientY, false);
-  }
+cvs.addEventListener('pointermove', e => {
+  if(!inputState.active) return;
+  if(e.pointerType === 'mouse' && e.buttons !== 1) return;
+  e.preventDefault();
+  handleCanvasInput(e.clientX, e.clientY, false);
 });
 
-['mouseup','mouseleave'].forEach(event => {
-  cvs.addEventListener(event, () => {
+['pointerup','pointercancel','pointerleave','pointerout'].forEach(event => {
+  cvs.addEventListener(event, e => {
+    if(e.pointerType === 'mouse' && e.button !== 0) return;
     inputState.active = false;
     keys.arrowup = keys.arrowdown = keys.arrowleft = keys.arrowright = false;
   });
