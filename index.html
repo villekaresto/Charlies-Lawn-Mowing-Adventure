@@ -615,6 +615,15 @@ function moveMower(dt) {
   mower.y += mower.vy * dt * fx;
   mower.x = Math.max(0, Math.min(BASE_W - mower.w, mower.x));
   mower.y = Math.max(0, Math.min(BASE_H - mower.h, mower.y));
+
+  // Fresh grass adds resistance; apply light friction on unmowed tiles
+  for(const t of tiles) {
+    if(!t.m && hit(mower, t)) {
+      mower.vx *= 0.95;
+      mower.vy *= 0.95;
+      break;
+    }
+  }
 }
 
 function checkTiles() {
