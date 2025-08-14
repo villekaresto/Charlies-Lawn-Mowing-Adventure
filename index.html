@@ -7,8 +7,8 @@
 <meta name="description" content="Help Charlie mow lawns in this mobile-friendly comedy game. 12 levels, power ups, obstacles, and a local leaderboard." />
 <style>
   :root{
-    --bg1:#0C2340; --bg2:#1F3B73; --bg3:#B9975B; --sky:#87CEEB;
-    --brand:#0C2340; --accent:#B9975B; --accent2:#E0CFA9; --accent-dark:#8A6D2A;
+    --bg1:#1e293b; --bg2:#3b82f6; --bg3:#9333ea; --sky:#f472b6;
+    --brand:#1e293b; --accent:#3b82f6; --accent2:#60a5fa; --accent-dark:#1e40af;
     --card:rgba(255,255,255,.95); --glass:rgba(255,255,255,.85);
     --sat:env(safe-area-inset-top); --sar:env(safe-area-inset-right);
     --sab:env(safe-area-inset-bottom); --sal:env(safe-area-inset-left);
@@ -144,10 +144,10 @@
   <!-- Game -->
   <div id="game" style="display:none">
     <div class="hud">
-      <div>Player: <span id="hudName"></span></div>
-      <div>Level: <span id="hudLevel">1</span>/12</div>
-      <div>Score: <span id="hudScore">0</span></div>
-      <div>Best: <span id="hudBest">0</span></div>
+      <div>👤 Player: <span id="hudName"></span></div>
+      <div>🏁 Level: <span id="hudLevel">1</span>/12</div>
+      <div>💯 Score: <span id="hudScore">0</span></div>
+      <div>🏆 Best: <span id="hudBest">0</span></div>
     </div>
 
     <div class="row">
@@ -162,7 +162,7 @@
       <div>Left: <span id="countdown">0:00</span></div>
     </div>
 
-    <div class="progress"><div id="bar" class="bar" style="width:0%">0% Mowed</div></div>
+    <div class="progress"><div id="bar" class="bar" style="width:0%">🌿 0% Mowed</div></div>
 
     <div class="comment" id="comment" aria-live="polite">Welcome to the championship. Time to edge like the HOA is watching.</div>
 
@@ -660,7 +660,7 @@ function checkWin() {
   
   const bar = document.getElementById('bar');
   bar.style.width = prog + "%";
-  bar.textContent = prog + "% Mowed";
+  bar.textContent = `${prog}% Mowed 🌿`;
   
   if(mowed === total && total > 0) levelComplete();
 }
@@ -772,7 +772,7 @@ function setup(level) {
   
   const bar = document.getElementById('bar');
   bar.style.width = '0%';
-  bar.textContent = '0% Mowed';
+  bar.textContent = '🌿 0% Mowed';
   
   const startBtn = document.getElementById('startLevelBtn');
   startBtn.textContent = 'Start: ' + lvlData.n;
@@ -837,22 +837,15 @@ function draw() {
   // Draw power-ups
   for(const p of powerUps) {
     if(!p.a) continue;
-    
+
     ctx.save();
     ctx.translate(p.x + p.w/2, p.y + p.h/2);
     ctx.rotate((Date.now() / 500) % (Math.PI * 2));
-    
-    const colors = {bud:'#FFD700',golf:'#00FF00',leaf:'#FF69B4'};
-    ctx.fillStyle = colors[p.t] || '#FFF';
-    ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
-    
-    ctx.fillStyle = '#000';
-    ctx.font = 'bold 10px Arial';
+    ctx.font = `${p.w}px serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    const symbols = {bud:'B',golf:'G',leaf:'L'};
-    ctx.fillText(symbols[p.t] || '?', 0, 0);
-    
+    const emojis = {bud:'🍺',golf:'🚗',leaf:'🍃'};
+    ctx.fillText(emojis[p.t] || '❓', 0, 0);
     ctx.restore();
   }
   
@@ -885,29 +878,19 @@ function draw() {
 
 function drawMower() {
   const m = mower;
-  
-  // Mower body
-  ctx.fillStyle = m.boost ? '#78BE20' : '#FF6A13';
-  ctx.fillRect(m.x, m.y, m.w, m.h);
-  
-  // Border
-  ctx.strokeStyle = '#000';
-  ctx.lineWidth = 2;
-  ctx.strokeRect(m.x, m.y, m.w, m.h);
-  
-  // Direction indicator
-  ctx.fillStyle = '#FFF';
-  ctx.beginPath();
-  ctx.arc(m.x + m.w/2, m.y + m.h/2, 3, 0, Math.PI * 2);
-  ctx.fill();
-  
+
+  ctx.font = `${m.h}px serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('🚜', m.x + m.w/2, m.y + m.h/2);
+
   // Power-up indicators
   if(m.boost) {
     ctx.strokeStyle = '#2E7D32';
     ctx.lineWidth = 3;
     ctx.strokeRect(m.x - 2, m.y - 2, m.w + 4, m.h + 4);
   }
-  
+
   if(m.inv) {
     ctx.strokeStyle = '#FFD700';
     ctx.lineWidth = 2;
