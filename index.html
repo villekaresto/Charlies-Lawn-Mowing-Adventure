@@ -381,7 +381,56 @@ function fitCanvas() {
 const ri = (a,b) => Math.floor(Math.random()*(b-a+1))+a;
 const rc = a => a[Math.floor(Math.random()*a.length)];
 const fmt = s => {const m=Math.floor(s/60),sec=Math.floor(s%60);return `${m}:${sec<10?"0":""}${sec}`};
-const hit = (a,b) => !(a.x+a.w<b.x||a.x>b.x+b.w||a.y+a.h<b.y||a.y>b.y+b.h);
+const hit = (a, b, ar = 0, br = 0) => {
+  const getPoints = (r, ang) => {
+    const cx = r.x + r.w / 2;
+    const cy = r.y + r.h / 2;
+    const hw = r.w / 2;
+    const hh = r.h / 2;
+    const c = Math.cos(ang);
+    const s = Math.sin(ang);
+    return [
+      { x: cx + (-hw) * c - (-hh) * s, y: cy + (-hw) * s + (-hh) * c },
+      { x: cx + hw * c - (-hh) * s, y: cy + hw * s + (-hh) * c },
+      { x: cx + hw * c - hh * s, y: cy + hw * s + hh * c },
+      { x: cx + (-hw) * c - hh * s, y: cy + (-hw) * s + hh * c }
+    ];
+  };
+
+  const project = (pts, ax) => {
+    let min = Infinity, max = -Infinity;
+    for (const p of pts) {
+      const dot = p.x * ax.x + p.y * ax.y;
+      if (dot < min) min = dot;
+      if (dot > max) max = dot;
+    }
+    return { min, max };
+  };
+
+  const ptsA = getPoints(a, ar);
+  const ptsB = getPoints(b, br);
+  const axes = [];
+
+  const addAxes = pts => {
+    for (let i = 0; i < 4; i++) {
+      const p1 = pts[i], p2 = pts[(i + 1) % 4];
+      const edge = { x: p2.x - p1.x, y: p2.y - p1.y };
+      const axis = { x: -edge.y, y: edge.x };
+      const len = Math.hypot(axis.x, axis.y);
+      axes.push({ x: axis.x / len, y: axis.y / len });
+    }
+  };
+
+  addAxes(ptsA);
+  addAxes(ptsB);
+
+  for (const ax of axes) {
+    const aProj = project(ptsA, ax);
+    const bProj = project(ptsB, ax);
+    if (aProj.max < bProj.min || bProj.max < aProj.min) return false;
+  }
+  return true;
+};
 const clamp = (v,min,max) => Math.max(min, Math.min(max, v));
 const hexToRgb = hex => {
   const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -651,7 +700,7 @@ function checkCollisions() {
   if(mower.inv) return;
   
   for(const o of obs) {
-    if(o.a && hit(mower, o)) {
+    if(o.a && hit(mower, o, 0, o.r || 0)) {
       o.a = false;
       mower.vx = mower.vy = 0;
       setComment(`Easy there. Go around the ${o.t}.`);
@@ -728,7 +777,7 @@ function spawnBud() {
       tt: 18
     };
 
-    const safe = !obs.some(o => o.a && hit(p, o));
+    const safe = !obs.some(o => o.a && hit(p, o, 0, o.r || 0));
     if(safe) {
       powerUps.push(p);
       return;
@@ -791,7 +840,7 @@ function setup(level) {
     for (const p of preset) {
       const o = {...p, a: true};
       obs.push(o);
-      tiles = tiles.filter(t => !hit(t, o));
+      tiles = tiles.filter(t => !hit(t, o, 0, o.r || 0));
     }
   } else {
     const obstacleTypes = ['rock','tree','sprinkler','gnome','flamingo','grill','chair'];
@@ -809,13 +858,13 @@ function setup(level) {
           h: 26
         };
 
-        const safe = !hit(o, {x:0,y:0,w:100,h:100}) &&
-                     !hit(o, {x:260,y:20,w:110,h:90}) &&
-                     !obs.some(existing => hit(o, existing));
+        const safe = !hit(o, {x:0,y:0,w:100,h:100}, o.r || 0, 0) &&
+                     !hit(o, {x:260,y:20,w:110,h:90}, o.r || 0, 0) &&
+                     !obs.some(existing => hit(o, existing, o.r || 0, existing.r || 0));
 
         if(safe) {
           obs.push(o);
-          tiles = tiles.filter(t => !hit(t, o));
+          tiles = tiles.filter(t => !hit(t, o, 0, o.r || 0));
           break;
         }
       }
