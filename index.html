@@ -677,6 +677,32 @@ function checkTime() {
 }
 
 /* -------------------- World Generation -------------------- */
+// boundary zones to exclude from mowing/obstacles (e.g., flowerbeds)
+const boundaryShapes = [
+  {type:'circle', x:120, y:160, r:40},
+  {type:'polygon', pts:[{x:300,y:220},{x:350,y:250},{x:320,y:280},{x:270,y:250}]}
+];
+
+function inBoundary(px, py){
+  for(const b of boundaryShapes){
+    if(b.type === 'circle'){
+      const dx = px - b.x, dy = py - b.y;
+      if(dx*dx + dy*dy <= b.r*b.r) return true;
+    } else if(b.type === 'polygon'){
+      let inside = false;
+      const pts = b.pts;
+      for(let i=0,j=pts.length-1;i<pts.length;j=i++){
+        const xi=pts[i].x, yi=pts[i].y;
+        const xj=pts[j].x, yj=pts[j].y;
+        const intersect = ((yi>py)!=(yj>py)) && (px < (xj-xi)*(py-yi)/(yj-yi)+xi);
+        if(intersect) inside = !inside;
+      }
+      if(inside) return true;
+    }
+  }
+  return false;
+}
+
 function spawnBud() {
   for(let tries = 0; tries < 20; tries++) {
     const p = {
@@ -688,8 +714,9 @@ function spawnBud() {
       a: true,
       tt: 18
     };
-    
-    const safe = !obs.some(o => o.a && hit(p, o));
+
+    const cx = p.x + p.w/2, cy = p.y + p.h/2;
+    const safe = !inBoundary(cx, cy) && !obs.some(o => o.a && hit(p, o));
     if(safe) {
       powerUps.push(p);
       return;
@@ -700,39 +727,13 @@ function spawnBud() {
 function setup(level) {
   cleanupTimers();
   resetInputState();
-  
+
   tiles = [];
   powerUps = [];
   obs = [];
   particles = [];
   mower = {x:50,y:50,w:16,h:16,spd:120,vx:0,vy:0,boost:false,inv:false};
   gameState.introShown = false;
-
-  // boundary zones to exclude from mowing/obstacles (e.g., flowerbeds)
-  const boundaryShapes = [
-    {type:'circle', x:120, y:160, r:40},
-    {type:'polygon', pts:[{x:300,y:220},{x:350,y:250},{x:320,y:280},{x:270,y:250}]}
-  ];
-
-  function inBoundary(px, py){
-    for(const b of boundaryShapes){
-      if(b.type === 'circle'){
-        const dx = px - b.x, dy = py - b.y;
-        if(dx*dx + dy*dy <= b.r*b.r) return true;
-      } else if(b.type === 'polygon'){
-        let inside = false;
-        const pts = b.pts;
-        for(let i=0,j=pts.length-1;i<pts.length;j=i++){
-          const xi=pts[i].x, yi=pts[i].y;
-          const xj=pts[j].x, yj=pts[j].y;
-          const intersect = ((yi>py)!=(yj>py)) && (px < (xj-xi)*(py-yi)/(yj-yi)+xi);
-          if(intersect) inside = !inside;
-        }
-        if(inside) return true;
-      }
-    }
-    return false;
-  }
   
   const lvlData = levels[Math.min(level - 1, levels.length - 1)];
   pal = lvlData.palette;
@@ -786,10 +787,16 @@ function setup(level) {
   
   // Add power-ups
   if(Math.random() < 0.5) {
-    powerUps.push({t:'golf',x:ri(60,BASE_W-60),y:ri(70,BASE_H-80),w:24,h:24,a:true,tt:18});
+    for(let tries=0; tries<20; tries++){
+      const x=ri(60,BASE_W-60), y=ri(70,BASE_H-80);
+      if(!inBoundary(x+12, y+12)) { powerUps.push({t:'golf',x,y,w:24,h:24,a:true,tt:18}); break; }
+    }
   }
   if(Math.random() < 0.4) {
-    powerUps.push({t:'leaf',x:ri(60,BASE_W-60),y:ri(70,BASE_H-80),w:24,h:24,a:true,tt:18});
+    for(let tries=0; tries<20; tries++){
+      const x=ri(60,BASE_W-60), y=ri(70,BASE_H-80);
+      if(!inBoundary(x+12, y+12)) { powerUps.push({t:'leaf',x,y,w:24,h:24,a:true,tt:18}); break; }
+    }
   }
   
   spawnBud();
