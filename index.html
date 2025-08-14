@@ -643,6 +643,18 @@ function checkTiles() {
       });
       gameState.score += 10;
       if((t.x + t.y) % 40 === 0) beep(520, .02, .08);
+
+      const cx = t.x + t.w / 2;
+      const cy = t.y + t.h / 2;
+      for(let i = 0; i < 5; i++) {
+        particles.push({
+          x: cx,
+          y: cy,
+          dx: (Math.random() - 0.5) * 20,
+          dy: (Math.random() - 0.5) * 20,
+          life: 1
+        });
+      }
     }
   }
 }
