@@ -326,7 +326,7 @@ let gameState = {
   }
 };
 
-let mower = {x:50,y:50,w:16,h:16,spd:120,vx:0,vy:0,boost:false,inv:false};
+let mower = {x:50,y:50,w:16,h:16,spd:120,vx:0,vy:0,boost:false,inv:false,dir:'right'};
 let tiles = [];
 let powerUps = [];
 let obs = [];
@@ -723,7 +723,7 @@ function setup(level) {
   powerUps = [];
   obs = [];
   particles = [];
-  mower = {x:50,y:50,w:16,h:16,spd:120,vx:0,vy:0,boost:false,inv:false};
+  mower = {x:50,y:50,w:16,h:16,spd:120,vx:0,vy:0,boost:false,inv:false,dir:'right'};
   gameState.introShown = false;
   
   const lvlData = levels[Math.min(level - 1, levels.length - 1)];
@@ -815,6 +815,7 @@ function setup(level) {
 
 /* -------------------- Sprites -------------------- */
 const spriteSvgs = {
+  mower: `<svg viewBox='0 0 32 16' xmlns='http://www.w3.org/2000/svg'><rect x='1' y='1' width='14' height='14' rx='2' fill='#4caf50'/><rect x='4' y='4' width='8' height='6' fill='#fff'/><circle cx='4' cy='14' r='2' fill='#555'/><circle cx='12' cy='14' r='2' fill='#555'/><rect x='17' y='1' width='14' height='14' rx='2' fill='#4caf50'/><rect x='20' y='4' width='8' height='6' fill='#fff'/><circle cx='20' cy='14' r='2' fill='#555'/><circle cx='28' cy='14' r='2' fill='#555'/></svg>`,
   house: `<svg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'><path d='M8 28 L32 8 L56 28 Z' fill='#b5651d'/><rect x='14' y='28' width='36' height='28' rx='3' fill='#d9d9d9' stroke='#555'/><rect x='28' y='40' width='10' height='16' fill='#9ecae1'/></svg>`,
   rock: `<svg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'><ellipse cx='32' cy='40' rx='22' ry='14' fill='#777'/><ellipse cx='28' cy='34' rx='10' ry='6' fill='#888'/></svg>`,
   tree: `<svg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'><rect x='28' y='34' width='8' height='18' fill='#8b5a2b'/><circle cx='32' cy='28' r='18' fill='#2e7d32'/></svg>`,
@@ -908,10 +909,29 @@ function draw() {
 function drawMower() {
   const m = mower;
 
-  ctx.font = `${m.h}px serif`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('🚜', m.x + m.w/2, m.y + m.h/2);
+  if(Math.abs(m.vx) > 0.1 || Math.abs(m.vy) > 0.1) {
+    if(Math.abs(m.vx) > Math.abs(m.vy)) {
+      m.dir = m.vx > 0 ? 'right' : 'left';
+    } else {
+      m.dir = m.vy > 0 ? 'down' : 'up';
+    }
+  }
+
+  const img = sprites.mower;
+  if(img && img.complete) {
+    ctx.save();
+    ctx.translate(m.x + m.w/2, m.y + m.h/2);
+    let sx = 0;
+    if(m.dir === 'left' || m.dir === 'right') {
+      sx = 16;
+      if(m.dir === 'left') ctx.scale(-1, 1);
+    } else {
+      sx = 0;
+      if(m.dir === 'down') ctx.rotate(Math.PI);
+    }
+    ctx.drawImage(img, sx, 0, 16, 16, -m.w/2, -m.h/2, m.w, m.h);
+    ctx.restore();
+  }
 
   // Power-up indicators
   if(m.boost) {
