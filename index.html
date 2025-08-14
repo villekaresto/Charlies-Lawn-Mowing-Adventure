@@ -10,6 +10,8 @@
     --bg1:#0C2340; --bg2:#1F3B73; --bg3:#B9975B; --sky:#87CEEB;
     --brand:#0C2340; --accent:#B9975B; --accent2:#E0CFA9; --accent-dark:#8A6D2A;
     --card:rgba(255,255,255,.95); --glass:rgba(255,255,255,.85);
+    --sat:env(safe-area-inset-top); --sar:env(safe-area-inset-right);
+    --sab:env(safe-area-inset-bottom); --sal:env(safe-area-inset-left);
   }
   html,body{height:100%;margin:0;padding:0;overflow:hidden}
   *{
@@ -340,18 +342,34 @@ let pal = null;
 
 function fitCanvas() {
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  const app = document.getElementById('app');
-  const maxW = Math.min(app.clientWidth - 40, 860);
-  const cssW = Math.min(maxW, window.innerWidth * 0.9);
-  const scale = cssW / BASE_W;
+  const vv = window.visualViewport || {width: window.innerWidth, height: window.innerHeight};
+  const styles = getComputedStyle(document.documentElement);
+  const insetTop = parseFloat(styles.getPropertyValue('--sat')) || 0;
+  const insetRight = parseFloat(styles.getPropertyValue('--sar')) || 0;
+  const insetBottom = parseFloat(styles.getPropertyValue('--sab')) || 0;
+  const insetLeft = parseFloat(styles.getPropertyValue('--sal')) || 0;
+
+  const availableWidth = vv.width - insetLeft - insetRight;
+  const availableHeight = vv.height - insetTop - insetBottom;
+  const scale = Math.min(availableWidth / BASE_W, availableHeight / BASE_H);
+  const cssW = BASE_W * scale;
   const cssH = BASE_H * scale;
-  
-  cvs.style.width = cssW + "px";
-  cvs.style.height = cssH + "px";
+
+  cvs.style.width = cssW + 'px';
+  cvs.style.height = cssH + 'px';
   cvs.width = BASE_W * dpr;
   cvs.height = BASE_H * dpr;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  
+
+  const hud = document.querySelector('.hud');
+  const pad = document.getElementById('pad');
+  if(hud) hud.style.width = cssW + 'px';
+  if(pad){
+    pad.style.width = cssW + 'px';
+    pad.style.marginLeft = 'auto';
+    pad.style.marginRight = 'auto';
+  }
+
   if(gameState.running) draw();
 }
 
