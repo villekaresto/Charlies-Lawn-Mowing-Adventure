@@ -604,7 +604,12 @@ function handleInput(dt) {
 function moveMower(dt) {
   let fx = 1;
   if(weather.type === 'rain') fx = 0.9;
-  if(weather.type === 'wind') mower.x += Math.sin(Date.now()/330) * 8 * dt;
+  if(weather.type === 'wind') {
+    const gustX = Math.sin(Date.now()/330) * 2;
+    const gustY = Math.cos(Date.now()/330) * 2;
+    mower.vx += gustX * dt;
+    mower.vy += gustY * dt;
+  }
   
   mower.x += mower.vx * dt * fx;
   mower.y += mower.vy * dt * fx;
