@@ -1222,13 +1222,24 @@ function loadLeaderboard() {
   }
 }
 
+function week(ts) {
+  const now = new Date();
+  const start = new Date(now);
+  start.setHours(0, 0, 0, 0);
+  const day = start.getDay();
+  const diff = (day + 6) % 7;
+  start.setDate(start.getDate() - diff);
+  const end = new Date(start);
+  end.setDate(start.getDate() + 7);
+  return ts >= start.getTime() && ts < end.getTime();
+}
+
 function showLeaderboard(filter = 'all') {
   const runs = loadRuns();
   let list = runs;
-  
+
   if(filter === 'week') {
-    const week = Date.now() - 7 * 24 * 60 * 60 * 1000;
-    list = runs.filter(r => r.ts > week);
+    list = runs.filter(r => week(r.ts));
   } else if(filter === 'you') {
     list = runs.filter(r => r.n === gameState.name);
   }
