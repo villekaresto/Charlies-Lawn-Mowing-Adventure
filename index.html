@@ -260,21 +260,21 @@
 <script>
 /* -------------------- Data -------------------- */
 const levels=[
-{n:"Barefoot Boulevard",d:"Toes out, dew cold, bottle caps everywhere.",season:"spring",palette:{grassColor:"#7CFC00",mowedColor:"#90EE90",skyColor:"#87CEEB"}},
-{n:"RAM Yard Test Track",d:"The Dodge RAM is blocking your line. Work around it.",season:"spring",palette:{grassColor:"#7CFC00",mowedColor:"#90EE90",skyColor:"#87CEEB"}},
-{n:"Golf Cart Grand Prix",d:"Shortcuts allowed. Avoid the welcome mat pothole.",season:"spring",palette:{grassColor:"#7CFC00",mowedColor:"#90EE90",skyColor:"#87CEEB"}},
-{n:"Trampoline Tangle",d:"Orbit the trampoline legs. No flips, all stripes.",season:"spring",palette:{grassColor:"#7CFC00",mowedColor:"#90EE90",skyColor:"#87CEEB"}},
-{n:"Edging Invitational",d:"Driveway, beds, sidewalk. Sharp lines only.",season:"summer",palette:{grassColor:"#C2B280",mowedColor:"#DEB887",skyColor:"#FFDAB9"}},
-{n:"Blower Showdown",d:"Blast corners clean. Leave no crumb behind.",season:"summer",palette:{grassColor:"#C2B280",mowedColor:"#DEB887",skyColor:"#FFDAB9"}},
-{n:"EGO vs Husky Derby",d:"Talks smack about electric, borrows EGO anyway.",season:"summer",palette:{grassColor:"#C2B280",mowedColor:"#DEB887",skyColor:"#FFDAB9"}},
-{n:"Budweiser Yard Party",d:"Mow around the coolers. Cans are not power ups.",season:"summer",palette:{grassColor:"#C2B280",mowedColor:"#DEB887",skyColor:"#FFDAB9"}},
-{n:"Cainhoy Dollar Tree HOA Finals",d:"Every neighbor is judging the stripes.",season:"autumn",palette:{grassColor:"#E0F8FF",mowedColor:"#F8FFF8",skyColor:"#B0E0E6"}},
-{n:"Lowcountry Crosswind",d:"Cainhoy gusts push your deck. Hold the line.",season:"autumn",palette:{grassColor:"#E0F8FF",mowedColor:"#F8FFF8",skyColor:"#B0E0E6"}},
-{n:"Overtime Overgrowth",d:"Bonus jungle. The clippings will tell your story.",season:"autumn",palette:{grassColor:"#E0F8FF",mowedColor:"#F8FFF8",skyColor:"#B0E0E6"}},
-{n:"Golden Grass Champion",d:"Perfect pass, perfect blow, perfect edge.",season:"autumn",palette:{grassColor:"#E0F8FF",mowedColor:"#F8FFF8",skyColor:"#B0E0E6"}}
+{n:"Barefoot Boulevard",d:"Toes out, dew cold, bottle caps everywhere.",season:"spring",palette:{grassColor:"#7CFC00",mowedColor:"#228B22",skyColor:"#87CEEB"}},
+{n:"RAM Yard Test Track",d:"The Dodge RAM is blocking your line. Work around it.",season:"spring",palette:{grassColor:"#7CFC00",mowedColor:"#228B22",skyColor:"#87CEEB"}},
+{n:"Golf Cart Grand Prix",d:"Shortcuts allowed. Avoid the welcome mat pothole.",season:"spring",palette:{grassColor:"#7CFC00",mowedColor:"#228B22",skyColor:"#87CEEB"}},
+{n:"Trampoline Tangle",d:"Orbit the trampoline legs. No flips, all stripes.",season:"spring",palette:{grassColor:"#7CFC00",mowedColor:"#228B22",skyColor:"#87CEEB"}},
+{n:"Edging Invitational",d:"Driveway, beds, sidewalk. Sharp lines only.",season:"summer",palette:{grassColor:"#C2B280",mowedColor:"#8B4513",skyColor:"#FFDAB9"}},
+{n:"Blower Showdown",d:"Blast corners clean. Leave no crumb behind.",season:"summer",palette:{grassColor:"#C2B280",mowedColor:"#8B4513",skyColor:"#FFDAB9"}},
+{n:"EGO vs Husky Derby",d:"Talks smack about electric, borrows EGO anyway.",season:"summer",palette:{grassColor:"#C2B280",mowedColor:"#8B4513",skyColor:"#FFDAB9"}},
+{n:"Budweiser Yard Party",d:"Mow around the coolers. Cans are not power ups.",season:"summer",palette:{grassColor:"#C2B280",mowedColor:"#8B4513",skyColor:"#FFDAB9"}},
+{n:"Cainhoy Dollar Tree HOA Finals",d:"Every neighbor is judging the stripes.",season:"autumn",palette:{grassColor:"#E0F8FF",mowedColor:"#2F4F4F",skyColor:"#B0E0E6"}},
+{n:"Lowcountry Crosswind",d:"Cainhoy gusts push your deck. Hold the line.",season:"autumn",palette:{grassColor:"#E0F8FF",mowedColor:"#2F4F4F",skyColor:"#B0E0E6"}},
+{n:"Overtime Overgrowth",d:"Bonus jungle. The clippings will tell your story.",season:"autumn",palette:{grassColor:"#E0F8FF",mowedColor:"#2F4F4F",skyColor:"#B0E0E6"}},
+{n:"Golden Grass Champion",d:"Perfect pass, perfect blow, perfect edge.",season:"autumn",palette:{grassColor:"#E0F8FF",mowedColor:"#2F4F4F",skyColor:"#B0E0E6"}}
 ];
 
-const seasonPalettes={spring:{grassColor:"#7CFC00",mowedColor:"#90EE90"},summer:{grassColor:"#C2B280",mowedColor:"#DEB887"},autumn:{grassColor:"#E0F8FF",mowedColor:"#F8FFF8"}};
+const seasonPalettes={spring:{grassColor:"#7CFC00",mowedColor:"#228B22"},summer:{grassColor:"#C2B280",mowedColor:"#8B4513"},autumn:{grassColor:"#E0F8FF",mowedColor:"#2F4F4F"}};
 
 const introsByLevel=[
   ["Charlie kicks off his sandals and tells the lawn behave. The lawn refuses. You accept."],
@@ -880,7 +880,7 @@ function draw() {
   // Draw grass tiles
   for(const t of tiles) {
     let col = adjustColor(pal.grassColor, t.o || 0);
-    if(t.m) col = blendColors(col, pal.mowedColor, 0.6);
+    if(t.m) col = pal.mowedColor;
     ctx.fillStyle = col;
     ctx.fillRect(t.x, t.y, t.w, t.h);
 
