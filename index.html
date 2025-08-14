@@ -688,7 +688,7 @@ function spawnBud() {
       a: true,
       tt: 18
     };
-    
+
     const safe = !obs.some(o => o.a && hit(p, o));
     if(safe) {
       powerUps.push(p);
@@ -696,6 +696,24 @@ function spawnBud() {
     }
   }
 }
+
+// Hard-coded obstacle layouts for early levels
+const obstacleLayouts = [
+  [
+    {t:'rock',x:150,y:150,w:26,h:26},
+    {t:'tree',x:300,y:200,w:26,h:26}
+  ],
+  [
+    {t:'gnome',x:150,y:170,w:26,h:26},
+    {t:'flamingo',x:230,y:120,w:26,h:26},
+    {t:'sprinkler',x:80,y:220,w:26,h:26}
+  ],
+  [
+    {t:'grill',x:90,y:150,w:26,h:26},
+    {t:'chair',x:250,y:170,w:26,h:26},
+    {t:'tree',x:330,y:140,w:26,h:26}
+  ]
+];
 
 function setup(level) {
   cleanupTimers();
@@ -728,29 +746,38 @@ function setup(level) {
   }
   
   // Add obstacles
-  const obstacleTypes = ['rock','tree','sprinkler','gnome','flamingo','grill','chair'];
-  const numObs = 4 + Math.min(level, 4);
-  
-  for(let i = 0; i < numObs; i++) {
-    const type = rc(obstacleTypes);
-    for(let tries = 0; tries < 20; tries++) {
-      const o = {
-        t: type,
-        a: true,
-        x: ri(40, BASE_W - 60),
-        y: ri(50, BASE_H - 60),
-        w: 26,
-        h: 26
-      };
-      
-      const safe = !hit(o, {x:0,y:0,w:100,h:100}) && 
-                   !hit(o, {x:260,y:20,w:110,h:90}) &&
-                   !obs.some(existing => hit(o, existing));
-      
-      if(safe) {
-        obs.push(o);
-        tiles = tiles.filter(t => !hit(t, o));
-        break;
+  const preset = obstacleLayouts[level - 1];
+  if (preset) {
+    for (const p of preset) {
+      const o = {...p, a: true};
+      obs.push(o);
+      tiles = tiles.filter(t => !hit(t, o));
+    }
+  } else {
+    const obstacleTypes = ['rock','tree','sprinkler','gnome','flamingo','grill','chair'];
+    const numObs = 4 + Math.min(level, 4);
+
+    for(let i = 0; i < numObs; i++) {
+      const type = rc(obstacleTypes);
+      for(let tries = 0; tries < 20; tries++) {
+        const o = {
+          t: type,
+          a: true,
+          x: ri(40, BASE_W - 60),
+          y: ri(50, BASE_H - 60),
+          w: 26,
+          h: 26
+        };
+
+        const safe = !hit(o, {x:0,y:0,w:100,h:100}) &&
+                     !hit(o, {x:260,y:20,w:110,h:90}) &&
+                     !obs.some(existing => hit(o, existing));
+
+        if(safe) {
+          obs.push(o);
+          tiles = tiles.filter(t => !hit(t, o));
+          break;
+        }
       }
     }
   }
