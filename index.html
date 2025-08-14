@@ -70,6 +70,9 @@
   @media (pointer:coarse){
     .controls-wrap{margin-bottom:calc(10px + env(safe-area-inset-bottom,0) + 8vh);}
   }
+  @media (pointer:fine){
+    .controls-wrap{display:none;}
+  }
   .pad-btn{
     width:84px;height:84px;max-width:28vw;max-height:28vw;border-radius:16px;border:2px solid #cbd5e1;
     background:linear-gradient(135deg,#ffffff,#e2e8f0);font-size:1.6rem;font-weight:900;box-shadow:0 4px 10px rgba(0,0,0,.1);
@@ -471,11 +474,15 @@ function resetInputState() {
 
 /* -------------------- Input Handling -------------------- */
 document.addEventListener('keydown', e => {
-  const k = e.key;
-  if(['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d',' ','p'].includes(k.toLowerCase())) {
+  const k = e.key.toLowerCase();
+  if(k === 'm') {
+    toggleSound();
+    return;
+  }
+  if(['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d',' ','p'].includes(k)) {
     e.preventDefault();
-    keys[k.toLowerCase()] = true;
-    if((k.toLowerCase() === 'p' || k === ' ') && gameState.running) togglePause();
+    keys[k] = true;
+    if((k === 'p' || k === ' ') && gameState.running) togglePause();
   }
 });
 
@@ -600,6 +607,16 @@ function beep(f=880,d=.05,v=.15) {
 function chime() {
   beep(660,.07,.18);
   setTimeout(() => beep(990,.07,.18), 65);
+}
+
+function toggleSound() {
+  snd = !snd;
+  if(snd) initAudio();
+  const btn = document.getElementById('soundBtn');
+  if(btn){
+    btn.textContent = snd ? '🔊' : '🔇';
+    btn.setAttribute('aria-pressed', snd ? 'true' : 'false');
+  }
 }
 
 /* -------------------- Toast -------------------- */
@@ -1508,13 +1525,7 @@ document.getElementById('shareShot').addEventListener('click', () => {
 });
 
 // Sound toggle
-document.getElementById('soundBtn').addEventListener('click', () => {
-  snd = !snd;
-  if(snd) initAudio();
-  const btn = document.getElementById('soundBtn');
-  btn.textContent = snd ? '🔊' : '🔇';
-  btn.setAttribute('aria-pressed', snd ? 'true' : 'false');
-});
+document.getElementById('soundBtn').addEventListener('click', toggleSound);
 
 // Window events
 window.addEventListener('resize', fitCanvas);

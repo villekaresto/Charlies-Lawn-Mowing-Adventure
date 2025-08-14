@@ -2,6 +2,13 @@
 
 A tiny browser game where you mow lawns, dodge obstacles and collect power‑ups.
 
+## Controls
+
+- Use arrow keys or WASD to steer the mower.
+- Press **P** or **Space** to pause.
+- Press **M** or tap the speaker icon to mute/unmute.
+- On touch devices a d‑pad appears; it stays hidden on desktop for a cleaner view.
+
 ## Contributing Art
 
 Game art lives under `assets/obstacles/` and `assets/powerups/`.
