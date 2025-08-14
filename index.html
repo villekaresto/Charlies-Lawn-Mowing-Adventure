@@ -701,12 +701,23 @@ function moveMower(dt) {
       break;
     }
   }
+
+  // Track current movement direction so mowed tiles know stripe orientation
+  if(Math.abs(mower.vx) > 0.1 || Math.abs(mower.vy) > 0.1) {
+    if(Math.abs(mower.vx) > Math.abs(mower.vy)) {
+      mower.dir = mower.vx > 0 ? 'right' : 'left';
+    } else {
+      mower.dir = mower.vy > 0 ? 'down' : 'up';
+    }
+  }
 }
 
 function checkTiles() {
   for(const t of tiles) {
     if(!t.m && hit(mower, t)) {
       t.m = true;
+      // Record direction mower was moving for stripe orientation
+      t.dir = mower.dir;
       // Spawn light-green clipping particle when a tile is mowed
       particles.push({
         x: t.x + t.w/2,
@@ -976,8 +987,22 @@ function draw() {
   
   // Draw grass tiles
   for(const t of tiles) {
-    let col = adjustColor(pal.grassColor, t.o || 0);
-    if(t.m) col = pal.mowedColor;
+    let col;
+    if(t.m) {
+      // Determine stripe index based on mowing direction
+      let idx;
+      if(t.dir === 'left' || t.dir === 'right') {
+        idx = Math.floor(t.y / t.h);
+      } else if(t.dir === 'up' || t.dir === 'down') {
+        idx = Math.floor(t.x / t.w);
+      } else {
+        idx = Math.floor(t.y / t.h);
+      }
+      const offset = idx % 2 === 0 ? 0.06 : -0.06;
+      col = adjustColor(pal.mowedColor, offset);
+    } else {
+      col = adjustColor(pal.grassColor, t.o || 0);
+    }
     ctx.fillStyle = col;
     ctx.fillRect(t.x, t.y, t.w, t.h);
 
